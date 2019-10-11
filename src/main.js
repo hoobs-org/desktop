@@ -1,13 +1,15 @@
 import Vue from "vue";
 import App from "./App.vue";
-import router from "./router";
+import Router from "./router";
+import Themes from "./themes/themes";
 
 Vue.config.productionTip = false;
 
 new Vue({
-    router,
+    router: Router,
+    themes: Themes,
     render: h => h(App),
     created() {
-        this.$router.push("/");
+        // this.$router.push("/");
     }
 }).$mount("#app");

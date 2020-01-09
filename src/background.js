@@ -33,8 +33,10 @@ function createWindow() {
     });
 
     win = new BrowserWindow({
+        title: "HOOBS",
         x: state.x,
         y: state.y,
+        frame: false,
         width: state.width,
         height: state.height,
         webPreferences: {

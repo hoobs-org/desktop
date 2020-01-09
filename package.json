@@ -1,5 +1,5 @@
 {
-    "name": "HOOBS",
+    "name": "hoobs",
     "version": "1.0.0-alpha.1",
     "private": true,
     "scripts": {
@@ -10,21 +10,20 @@
         "postuninstall": "electron-builder install-app-deps"
     },
     "main": "background.js",
-    "dependencies": {
-        "core-js": "^2.6.5",
-        "electron-window-state": "^5.0.3",
-        "vue": "^2.6.10",
-        "vue-router": "^3.0.3"
-    },
     "devDependencies": {
-        "@vue/cli-plugin-babel": "^3.11.0",
-        "@vue/cli-plugin-eslint": "^3.11.0",
-        "@vue/cli-service": "^3.11.0",
-        "babel-eslint": "^10.0.1",
-        "electron": "^6.0.0",
-        "eslint": "^5.16.0",
-        "eslint-plugin-vue": "^5.0.0",
-        "vue-cli-plugin-electron-builder": "^1.4.0",
-        "vue-template-compiler": "^2.6.10"
+        "@vue/cli-plugin-babel": "^4.1.2",
+        "@vue/cli-plugin-eslint": "^4.1.2",
+        "@vue/cli-service": "^4.1.2",
+        "babel-eslint": "^10.0.3",
+        "core-js": "^3.6.2",
+        "electron": "^7.1.8",
+        "electron-window-state": "^5.0.3",
+        "eslint": "^6.8.0",
+        "eslint-plugin-vue": "^6.1.2",
+        "network-list": "^1.1.5",
+        "vue": "^2.6.11",
+        "vue-cli-plugin-electron-builder": "^1.4.4",
+        "vue-router": "^3.1.3",
+        "vue-template-compiler": "^2.6.11"
     }
 }

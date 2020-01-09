@@ -39,6 +39,7 @@ function createWindow() {
         frame: false,
         width: state.width,
         height: state.height,
+        backgroundColor: "#262626",
         webPreferences: {
             nodeIntegration: true
         }

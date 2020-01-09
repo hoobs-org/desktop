@@ -116,6 +116,7 @@
         padding: 0;
         height: 100%;
         overflow: hidden;
+        background: #262626;
     }
 
     .icon {

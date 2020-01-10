@@ -16,27 +16,21 @@
         <div class="content">
             <router-view v-if="devices.length > 0" />
             <div v-else class="devices">
-                <div v-if="scanning" class="scanning">Scanning</div>
-                <div class="device" v-for="(device, index) in available" :key="index">
-                    <div class="join">
-                        <div class="button button-primary">Join</div>
-                    </div>
-                    <div class="info">
-                        <div class="title">{{ device.hostname || device.ip }}</div>
-                        <div v-if="device.hostname" class="ip">{{ device.ip }}</div>
-                    </div>
-                    <div class="service">
-                        <div class="version">HOOBS {{ device.version }}</div>
-                    </div>
-                </div>
+                <devices />
             </div>
         </div>
     </div>
 </template>
 
 <script>
+    import Devices from "@/components/devices.vue";
+
     export default {
         name: "app",
+
+        components: {
+            "devices": Devices
+        },
 
         data() {
             return {
@@ -425,5 +419,11 @@
         display: flex;
         flex-direction: column;
         font-size: 12pt;
+    }
+
+    #app .devices {
+        flex: 1;
+        padding: 7px;
+        overflow: auto;
     }
 </style>

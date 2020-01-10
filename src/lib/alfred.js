@@ -13,6 +13,7 @@ export default class Alfred extends EventEmitter {
         this.service = service;
         this.port = port;
         this.timeout = timeout || 500;
+        this.dispose = false;
 
         this.prefix = IP.address();
 
@@ -28,6 +29,10 @@ export default class Alfred extends EventEmitter {
     async scan() {
         for (let i = 1; i < 255; i++) {
             const device = await this.info(`${this.prefix}.${i}`);
+
+            if (this.dispose) {
+                break;
+            }
 
             if (device.alive && await this.alive(this.port, device.ip)) {
                 const response = await this.detect(device.ip);
@@ -47,27 +52,31 @@ export default class Alfred extends EventEmitter {
 
     async alive(port, ip) {
         return new Promise(((resolve) => {
-            const socket = new Net.Socket();
-    
-            socket.setTimeout(10);
+            if (!this.dispose) {
+                const socket = new Net.Socket();
+        
+                socket.setTimeout(10);
 
-            socket.once("error", () => {
-                socket.destroy();
+                socket.once("error", () => {
+                    socket.destroy();
 
+                    resolve(false);
+                });
+
+                socket.once("timeout", () => {
+                    socket.destroy();
+
+                    resolve(false);
+                });
+
+                socket.connect(port, ip, () => {
+                    socket.end();
+
+                    resolve(true);
+                });
+            } else {
                 resolve(false);
-            });
-
-            socket.once("timeout", () => {
-                socket.destroy();
-
-                resolve(false);
-            });
-
-            socket.connect(port, ip, () => {
-                socket.end();
-
-                resolve(true);
-            });
+            }
         }));
     }
 
@@ -75,25 +84,29 @@ export default class Alfred extends EventEmitter {
         return new Promise((resolve) => {
             let results = null;
 
-            switch (this.service) {
-                case "hoobs":
-                    Request({
-                        method: "get",
-                        url: `http://${ip}:${this.port}/api/status`,
-                        timeout: this.timeout
-                    }).then((response) => {
-                        results = ((response || {}).data || {}).hoobs_version;
-                    }).catch(() => {
-                        results = null;
-                    }).finally(() => {
-                        resolve(results);
-                    });
-    
-                    break;
+            if (!this.dispose) {
+                switch (this.service) {
+                    case "hoobs":
+                        Request({
+                            method: "get",
+                            url: `http://${ip}:${this.port}/api/status`,
+                            timeout: this.timeout
+                        }).then((response) => {
+                            results = ((response || {}).data || {}).hoobs_version;
+                        }).catch(() => {
+                            results = null;
+                        }).finally(() => {
+                            resolve(results);
+                        });
 
-                default:
-                    resolve(results);
-                    break;
+                        break;
+
+                    default:
+                        resolve(results);
+                        break;
+                }
+            } else {
+                resolve(null);
             }
         });
     }
@@ -106,21 +119,33 @@ export default class Alfred extends EventEmitter {
                 hostname: null,
             };
     
-            Ping.promise.probe(ip, {
-                timeout: 1,
-            }).then((response) => {
-                if (response.alive) {
-                    results.alive = true;
-    
-                    DNS.reverse(ip, (error, host) => {
-                        if (!error) {
-                            results.hostname = (host && host.length) ? host[0] : null;
-                        }
-                    });
-                }
-            }).finally(() => {
-                resolve(results);
-            });
+            if (!this.dispose) {
+                Ping.promise.probe(ip, {
+                    timeout: 1,
+                }).then((response) => {
+                    if (response.alive) {
+                        results.alive = true;
+        
+                        DNS.reverse(ip, (error, host) => {
+                            if (!error) {
+                                results.hostname = (host && host.length) ? host[0] : null;
+                            }
+                        });
+                    }
+                }).finally(() => {
+                    resolve(results);
+                });
+            } else {
+                resolve({
+                    ip,
+                    alive: false,
+                    hostname: null,
+                });
+            }
         });
+    }
+
+    stop() {
+        this.dispose = true;
     }
 }

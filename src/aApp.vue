@@ -8,13 +8,28 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-on:click="$minimize()" class="title-button minimize"></button>
-            <button v-on:click="$maximize()" class="title-button maximize"></button>
-            <button v-on:click="$close()" class="title-button close"></button>
+            <button v-on:click="minimize()" class="title-button minimize"></button>
+            <button v-on:click="toggle()" class="title-button maximize"></button>
+            <button v-on:click="close()" class="title-button close"></button>
         </div>
-        <div class="nav"></div>
+        <div v-if="devices.length > 0" class="nav"></div>
         <div class="content">
-            <router-view />
+            <router-view v-if="devices.length > 0" />
+            <div v-else class="devices">
+                <div v-if="scanning" class="scanning">Scanning</div>
+                <div class="device" v-for="(device, index) in available" :key="index">
+                    <div class="join">
+                        <div class="button button-primary">Join</div>
+                    </div>
+                    <div class="info">
+                        <div class="title">{{ device.hostname || device.ip }}</div>
+                        <div v-if="device.hostname" class="ip">{{ device.ip }}</div>
+                    </div>
+                    <div class="service">
+                        <div class="version">HOOBS {{ device.version }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -23,12 +38,17 @@
     export default {
         name: "app",
 
-         data() {
+        data() {
             return {
                 delay: 700,
                 clicks: 0,
-                timer: null
+                timer: null,
+                devices: []
             }
+        },
+
+        async mounted() {
+            this.devices = this.settings.get("devices");
         },
 
         methods: {
@@ -42,10 +62,31 @@
                 } else {
                     clearTimeout(this.timer);  
 
-                    this.$maximize();
+                    if (this.$maximized()){
+                        this.$unmaximize();
+                    } else{
+                        this.$maximize();
+                    }
+
                     this.clicks = 0;
                 }         
-            }      
+            },
+
+            minimize() {
+                this.$minimize();
+            },
+
+            toggle() {
+                if (this.$maximized()){
+                    this.$unmaximize();
+                } else{
+                    this.$maximize();
+                }
+            },
+
+            close() {
+                this.$close();
+            }
         }
     }
 </script>
@@ -303,7 +344,7 @@
 
     #app .nav {
         min-width: 57px;
-        padding: 0 0 15px 0;
+        padding: 37px 0 15px 0;
         background: #262626;
         display: flex;
         flex-direction: column;
@@ -379,6 +420,7 @@
 
     #app .content {
         flex: 1;
+        padding: 37px;
         overflow: hidden;
         display: flex;
         flex-direction: column;

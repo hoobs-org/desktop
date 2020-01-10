@@ -1,6 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
-import Router from "./lib/router";
+import Router from "./router";
 import Settings from "./lib/settings";
 
 import { remote } from "electron";
@@ -13,39 +13,43 @@ const settings = new Settings({
 });
 
 Vue.mixin({
-    computed: {
-        $window() {
-            return remote.BrowserWindow.getFocusedWindow();
+    data: () => {
+        return {
+            settings: {
+                get(key) {
+                    return settings.get(key);
+                },
+    
+                set(key, value) {
+                    settings.set(key, value);
+                }
+            }
         }
     },
 
     methods: {
+        $window() {
+            return remote.BrowserWindow.getFocusedWindow();
+        },
+
+        $maximized() {
+            return remote.BrowserWindow.getFocusedWindow().isMaximized();
+        },
+
         $minimize() {
             remote.BrowserWindow.getFocusedWindow().minimize();
         },
 
         $maximize() {
-            const window = remote.BrowserWindow.getFocusedWindow();
+            remote.BrowserWindow.getFocusedWindow().maximize();
+        },
 
-            if (window.isMaximized()){
-                window.unmaximize();
-            } else{
-                window.maximize();
-            }
+        $unmaximize() {
+            remote.BrowserWindow.getFocusedWindow().unmaximize();
         },
 
         $close() {
             remote.BrowserWindow.getFocusedWindow().close();
-        },
-
-        $settings: {
-            get(key) {
-                return settings.get(key);
-            },
-
-            set(key, value) {
-                settings.set(key, value);
-            }
         }
     },
 });

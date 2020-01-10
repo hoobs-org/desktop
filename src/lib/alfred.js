@@ -34,8 +34,8 @@ export default class Alfred extends EventEmitter {
                 break;
             }
 
-            if (device.alive && await this.alive(this.port, device.ip)) {
-                const response = await this.detect(device.ip);
+            if (device.alive && await this.alive(device.ip, this.port)) {
+                const response = await this.detect(device.ip, this.port);
 
                 if (response) {
                     this.emit("data", {
@@ -50,7 +50,7 @@ export default class Alfred extends EventEmitter {
         }
     }
 
-    async alive(port, ip) {
+    async alive(ip, port) {
         return new Promise(((resolve) => {
             if (!this.dispose) {
                 const socket = new Net.Socket();
@@ -80,7 +80,7 @@ export default class Alfred extends EventEmitter {
         }));
     }
 
-    detect(ip) {
+    detect(ip, port) {
         return new Promise((resolve) => {
             let results = null;
 
@@ -89,7 +89,7 @@ export default class Alfred extends EventEmitter {
                     case "hoobs":
                         Request({
                             method: "get",
-                            url: `http://${ip}:${this.port}/api/status`,
+                            url: `http://${ip}:${port}/api/status`,
                             timeout: this.timeout
                         }).then((response) => {
                             results = ((response || {}).data || {}).hoobs_version;

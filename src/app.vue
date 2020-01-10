@@ -166,6 +166,7 @@
         white-space: nowrap;
         word-wrap: normal;
         direction: ltr;
+        user-select: none;
         font-feature-settings: "liga";
         -webkit-font-smoothing: antialiased;
     }
@@ -178,7 +179,7 @@
         color: #fff !important;
         text-decoration: none !important;
         display: inline-block;
-        border: 1px #333 solid;
+        border: 1px #1a1a1a solid;
         border-radius: 3px;
         padding: 10px;
         cursor: pointer;

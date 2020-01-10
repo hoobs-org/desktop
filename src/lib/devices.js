@@ -1,6 +1,6 @@
-import Scanner from "network-list";
-import PortReachable from "is-port-reachable";
-import Request from "axios";
+import * as Scanner from "network-list";
+import * as PortReachable from "is-port-reachable";
+import * as Request from "axios";
 
 export default class Devices {
     static type = {

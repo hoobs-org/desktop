@@ -208,19 +208,29 @@
                     }
 
                     if (errors.length === 0) {
-                        this.username = Encryption.encrypt(this.username);
-                        this.password = Encryption.encrypt(this.password);
-
-                        this.devices.push({
-                            ip: this.ip,
-                            port: this.port,
+                        const response = await this.api.post(this.ip, this.port, "/auth", {
                             username: this.username,
                             password: this.password
                         });
+                        
+                        if (!response.error) {
+                            this.username = Encryption.encrypt(this.username);
+                            this.password = Encryption.encrypt(this.password);
 
-                        this.settings.set("devices", this.devices);
+                            this.devices.push({
+                                ip: this.ip,
+                                port: this.port,
+                                username: this.username,
+                                password: this.password,
+                                token: response.token
+                            });
 
-                        this.close();
+                            this.settings.set("devices", this.devices);
+
+                            this.close();
+                        } else {
+                            errors.push(response.error);
+                        }
                     }
                 }
 

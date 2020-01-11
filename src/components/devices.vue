@@ -1,6 +1,8 @@
 <template>
     <div id="devices">
         <div class="actions">
+            <div v-if="this.devices.length > 0" v-on:click="cancel" class="icon">arrow_back</div>
+            <div v-if="this.devices.length > 0" class="action-seperator"></div>
             <div v-on:click="refresh()" class="icon">refresh</div>
             <div v-on:click="manual()" class="icon">add</div>
         </div>
@@ -43,14 +45,16 @@
             </div>
         </div>
         <div v-if="scanning" class="scanning">
-            <div class="message">Searching for Devices</div>
+            <div class="message">Searching for Devices ({{ progress.toFixed(1) }}%)</div>
             <marquee :height="3" color="#feb400" background="#856a3b" />
         </div>
-        <modal v-if="form" width="350px" title="Add Device" action="Add" :cancel="close" :ok="add">
+        <modal v-if="adding || joining" width="350px" title="Add Device" action="Add Device" :cancel="close" :ok="add">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="add()">
-                <div v-if="error && error !== ''" class="error">{{ error }}</div>
-                <text-field name="IP Address" description="This is the IP address your HOOBS device is running on" theme="light" v-model="ip" :required="true" />
-                <port-field name="Port" description="This the port number that your HOOBS device is configured to run on" theme="light" v-model.number="port" :required="true" />
+                <div v-if="error && error !== ''" class="error" v-html="error"></div>
+                <text-field v-if="adding" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="ip" :required="true" />
+                <port-field v-if="adding" name="Port" description="Enter the configured port number" theme="light" v-model.number="port" :required="true" />
+                <text-field v-if="adding || joining" name="Username" description="Enter the username this device was srtup with" theme="light" v-model="username" :required="true" />
+                <password-field v-if="adding || joining" name="Password" description="Enter the password for this device" theme="light" v-model="password" :required="true" />
             </form>
         </modal>
     </div>
@@ -58,10 +62,12 @@
 
 <script>
     import Alfred from "../lib/alfred";
+    import Encryption from "../lib/encryption";
 
     import Modal from "@/components/modal.vue";
     import Marquee from "@/components/marquee.vue";
     import TextField from "@/components/text-field.vue";
+    import PasswordField from "@/components/password-field.vue";
     import PortField from "@/components/port-field.vue";
 
     export default {
@@ -71,17 +77,26 @@
             "modal": Modal,
             "marquee": Marquee,
             "text-field": TextField,
+            "password-field": PasswordField,
             "port-field": PortField
+        },
+
+        props: {
+            cancel: Function
         },
 
         data() {
             return {
-                form: false,
+                progress: 0,
+                adding: false,
+                joining: false,
                 scanner: null,
                 scanning: false,
                 loaded: false,
                 ip: "",
                 port: 8080,
+                username: "",
+                password: "",
                 devices: [],
                 available: [],
                 error: ""
@@ -93,12 +108,17 @@
             this.available = [];
             this.scanner = new Alfred("hoobs", 8080);
 
-            this.scanner.on("data", (data) => {
+            this.scanner.on("progress", (data) => {
+                this.progress = data;
+            });
+
+            this.scanner.on("device", (data) => {
                 if (this.available.findIndex(d => d.ip === data.ip && d.port === 8080) === -1 && this.devices.findIndex(d => d.ip === data.ip && d.port === 8080) === -1) {
                     this.available.push(data);
                 }
             });
 
+            this.progress = 0;
             this.scanning = true;
 
             await this.scanner.scan();
@@ -118,7 +138,8 @@
 
         methods: {
             async refresh() {
-                if (this.scanner) {
+                if (!this.scanning && this.scanner) {
+                    this.progress = 0;
                     this.scanning = true;
 
                     await this.scanner.scan();
@@ -128,14 +149,31 @@
             },
 
             manual() {
-                this.form = true;
+                this.adding = true;
+                this.joining = false;
+                this.ip = "";
+                this.port = 8080;
+                this.username = "";
+                this.password = "";
                 this.error = "";
             },
 
+            join(ip, port) {
+                this.adding = false;
+                this.joining = true;
+                this.ip = ip;
+                this.port = port;
+                this.username = "";
+                this.password = "";
+            },
+
             close() {
-                this.form = false;
-                this.port = 8080;
+                this.adding = false;
+                this.joining = false;
                 this.ip = "";
+                this.port = 8080;
+                this.username = "";
+                this.password = "";
                 this.error = "";
             },
 
@@ -154,6 +192,14 @@
                     errors.push("This device has already been paired.");
                 }
 
+                if (!this.username || this.username === "") {
+                    errors.push("Username is required.");
+                }
+
+                if (!this.password || this.password === "") {
+                    errors.push("Password is required.");
+                }
+
                 if (errors.length === 0) {
                     const test = await this.scanner.detect(this.ip, this.port);
 
@@ -162,26 +208,23 @@
                     }
 
                     if (errors.length === 0) {
-                        this.form = false;
+                        this.username = Encryption.encrypt(this.username);
+                        this.password = Encryption.encrypt(this.password);
 
-                        this.join(this.ip, this.port);
+                        this.devices.push({
+                            ip: this.ip,
+                            port: this.port,
+                            username: this.username,
+                            password: this.password
+                        });
+
+                        this.settings.set("devices", this.devices);
+
+                        this.close();
                     }
                 }
 
                 this.error = errors.join("<br>");
-            },
-
-            join(ip, port) {
-                const index = this.available.findIndex(d => d.ip === ip && d.port === port);
-
-                if (index >= 0) {
-                    const device = this.available[index];
-
-                    // LOGIN
-
-                    this.devices.push(device);
-                    this.settings.set("devices", this.devices);
-                }
             },
 
             remove(ip, port) {
@@ -226,7 +269,7 @@
         flex-direction: row;
         padding: 0 0 10px 0;
         margin: 0 0 10px 0;
-        border-bottom: 1px #333 solid;
+        border-bottom: 1px #424242 solid;
     }
 
     #devices .actions .icon {
@@ -237,6 +280,13 @@
 
     #devices .actions .icon:hover {
         color: #fff;
+    }
+
+    #devices .actions .action-seperator {
+        display: inline;
+        margin: 0 7px 0 0;
+        border-right: 1px #5e5e5e solid;
+        cursor: default;
     }
 
     #devices .device {

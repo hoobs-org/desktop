@@ -95,28 +95,4 @@
         color: #fff !important;
         border: 1px #feb400 solid;
     }
-
-    @media (min-width: 300px) and (max-width: 815px) {
-        #modal {
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 300;
-            position: absolute;
-            display: unset;
-            background: #262626b8;
-        }
-
-        #modal .modal-inner {
-            display: block;
-            margin: 0;
-            max-height: unset;
-            width: 100% !important;
-            height: 100% !important;
-            display: flex;
-            border-radius: unset;
-            box-shadow: unset;
-        }
-    }
 </style>

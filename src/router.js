@@ -14,9 +14,29 @@ export default new Router({
             component: Home
         },
         {
-            path: "/about",
-            name: "about",
-            component: () => import(/* webpackChunkName: "about" */ "./views/about.vue")
+            path: "/accessories",
+            name: "accessories",
+            component: () => import(/* webpackChunkName: "about" */ "./views/accessories.vue")
+        },
+        {
+            path: "/log",
+            name: "log",
+            component: () => import(/* webpackChunkName: "about" */ "./views/log.vue")
+        },
+        {
+            path: "/users",
+            name: "users",
+            component: () => import(/* webpackChunkName: "about" */ "./views/users.vue")
+        },
+        {
+            path: "/plugins",
+            name: "plugins",
+            component: () => import(/* webpackChunkName: "about" */ "./views/plugins.vue")
+        },
+        {
+            path: "/config",
+            name: "config",
+            component: () => import(/* webpackChunkName: "about" */ "./views/config.vue")
         }
     ]
 });

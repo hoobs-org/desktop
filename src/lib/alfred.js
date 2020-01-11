@@ -13,7 +13,7 @@ export default class Alfred extends EventEmitter {
         this.service = service;
         this.port = port;
         this.timeout = timeout || 500;
-        this.dispose = false;
+        this.stopped = false;
 
         this.prefix = IP.address();
 
@@ -27,18 +27,22 @@ export default class Alfred extends EventEmitter {
     }
 
     async scan() {
+        this.stopped = false;
+
         for (let i = 1; i < 255; i++) {
             const device = await this.info(`${this.prefix}.${i}`);
 
-            if (this.dispose) {
+            if (this.stopped) {
                 break;
             }
+
+            this.emit("progress", Math.round(((i * 100) / 254) * 10) / 10);
 
             if (device.alive && await this.alive(device.ip, this.port)) {
                 const response = await this.detect(device.ip, this.port);
 
                 if (response) {
-                    this.emit("data", {
+                    this.emit("device", {
                         ip: device.ip,
                         hostname: device.hostname,
                         port: this.port,
@@ -52,7 +56,7 @@ export default class Alfred extends EventEmitter {
 
     async alive(ip, port) {
         return new Promise(((resolve) => {
-            if (!this.dispose) {
+            if (!this.stopped) {
                 const socket = new Net.Socket();
         
                 socket.setTimeout(10);
@@ -84,7 +88,7 @@ export default class Alfred extends EventEmitter {
         return new Promise((resolve) => {
             let results = null;
 
-            if (!this.dispose) {
+            if (!this.stopped) {
                 switch (this.service) {
                     case "hoobs":
                         Request({
@@ -119,7 +123,7 @@ export default class Alfred extends EventEmitter {
                 hostname: null,
             };
     
-            if (!this.dispose) {
+            if (!this.stopped) {
                 Ping.promise.probe(ip, {
                     timeout: 1,
                 }).then((response) => {
@@ -146,6 +150,6 @@ export default class Alfred extends EventEmitter {
     }
 
     stop() {
-        this.dispose = true;
+        this.stopped = true;
     }
 }

@@ -59,6 +59,9 @@
         <div v-if="show.manageDevices || devices.length === 0" class="devices">
             <devices :cancel="() => { show.manageDevices = false; }" />
         </div>
+        <div class="notifications">
+            <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
+        </div>
         <dropdown v-if="show.menu.header" class="header-menu">
             <div class="item" v-on:click="() => { show.about = true; }">About HOOBS</div>
             <div class="item">Help</div>
@@ -76,6 +79,7 @@
 
     import Modal from "@/components/modal.vue";
     import Dropdown from "@/components/dropdown.vue";
+    import Notification from "@/components/notification.vue";
     import Devices from "@/components/devices.vue";
     import About from "@/components/about.vue";
 
@@ -85,6 +89,7 @@
         components: {
             "modal": Modal,
             "dropdown": Dropdown,
+            "notification": Notification,
             "devices": Devices,
             "about": About
         },
@@ -107,6 +112,12 @@
                     timer: null
                 },
                 devices: []
+            }
+        },
+
+        computed: {
+            notifications() {
+                return this.$store.state.notifications;
             }
         },
 
@@ -187,6 +198,8 @@
             },
 
             async connectAll() {
+                this.$store.commit("resetStore");
+
                 await this.login();
 
                 for (let i = 0; i < this.devices.length; i++) {
@@ -229,6 +242,7 @@
 
                             case "push":
                                 message.data.instance = instance;
+                                message.data.hostname = hostname;
 
                                 this.$store.commit("updateNotifications", message.data);
                                 break;
@@ -663,6 +677,14 @@
     #app .nav .icon svg {
         width: 24px;
         height: 24px;
+    }
+
+    #app .notifications {
+        width: 350px;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 200;
     }
 
     #app .content {

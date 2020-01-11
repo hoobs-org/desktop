@@ -17,6 +17,19 @@ export default new Vuex.Store({
         notifications: []
     },
     mutations: {
+        resetStore(state) {
+            state.messages = [];
+            state.version = {};
+            state.running = {};
+            state.update = {};
+            state.uptime = {};
+            state.cpu = {};
+            state.memory = {};
+            state.temp = {};
+            state.streamed = {};
+            state.notifications = [];
+        },
+
         updateAccessories(state, instance) {
             if (!state.update[instance]) {
                 state.update[instance] = null;
@@ -47,6 +60,10 @@ export default new Vuex.Store({
 
         dismissNotification(state, index) {
             state.notifications.splice(index, 1);
+        },
+
+        clearNotifications(state) {
+            state.notifications = [];
         },
 
         updateMonitor(state, payload) {

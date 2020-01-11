@@ -1,5 +1,5 @@
 <template>
-    <div id="app" v-on:click="hideMenu('header')" class="hoobs-dark">
+    <div id="app" v-on:click="hideAll()" class="hoobs-dark">
         <div v-on:click="titleToggle()" class="header">
             <div class="logo">
                 <svg width="20" height="20" viewBox="0 0 80 80.92" xmlns="http://www.w3.org/2000/svg">
@@ -9,45 +9,45 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-on:click.stop="showMenu('header')" class="title-button icon">menu</button>
-            <div class="title-seperator"></div>
-            <button v-on:click="windowMinimize()" class="title-button icon">remove</button>
+            <button v-on:click.stop="() => { show.menu.header = !show.menu.header; }" class="title-button icon">menu</button>
+            <div class="seperator"></div>
+            <button v-on:click="$minimize()" class="title-button icon">remove</button>
             <button v-if="maximized" v-on:click="windowToggle()" class="title-button icon">fullscreen_exit</button>
             <button v-else v-on:click="windowToggle()" class="title-button icon">fullscreen</button>
-            <button v-on:click="windowClose()" class="title-button icon">close</button>
+            <button v-on:click="$close()" class="title-button icon">close</button>
         </div>
-        <div v-if="!show.manage && devices.length > 0" class="nav">
+        <div v-if="!show.manageDevices && devices.length > 0" class="nav">
             <div class="routes">
-                <div class="action-link" v-on:click.stop="showNav()">
+                <div class="action-link" v-on:click.stop="() => { show.navigation = !show.navigation; }">
                     <span v-if="show.navigation" class="icon">chevron_left</span>
                     <span v-else class="icon">chevron_right</span>
                 </div>
-                <div class="action-seperator">
+                <div class="seperator">
                     <div></div>
                 </div>
-                <router-link to="/" @click.native="hideNav()">
+                <router-link to="/" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('home')">dashboard</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('home')">{{ routeName('home') }}</span>
                 </router-link>
-                <router-link to="/accessories" @click.native="hideNav()">
+                <router-link to="/accessories" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('accessories', 'layout')">{{ routeName('accessories') }}</span>
                 </router-link>
-                <router-link to="/log" @click.native="hideNav()">
+                <router-link to="/log" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('log')">subject</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('log')">{{ routeName('log') }}</span>
                 </router-link>
-                <router-link to="/users" @click.native="hideNav()">
+                <router-link to="/users" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('users')">people</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('users')">{{ routeName('users') }}</span>
                 </router-link>
-                <router-link to="/plugins" @click.native="hideNav()">
+                <router-link to="/plugins" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('plugins', 'plugin', 'search')">{{ routeName('plugins') }}</span>
                 </router-link>
             </div>
             <div class="routes">
-                <router-link to="/config" @click.native="hideNav()">
+                <router-link to="/config" @click.native="() => { show.navigation = false; }">
                     <span v-bind:class="routeIcon('config')">settings</span>
                 </router-link>
             </div>
@@ -55,25 +55,35 @@
         <div class="content">
             <router-view v-if="devices.length > 0" />
         </div>
-        <div v-if="show.manage || devices.length === 0" class="devices">
-            <devices :cancel="manageClose" />
+        <div v-if="show.manageDevices || devices.length === 0" class="devices">
+            <devices :cancel="() => { show.manageDevices = false; }" />
         </div>
         <dropdown v-if="show.menu.header" class="header-menu">
-            <div class="item" v-on:click="manageDevices()">Manage Devices</div>
+            <div class="item" v-on:click="() => { show.about = true; }">About HOOBS</div>
+            <div class="item">Help</div>
+            <div class="seperator"></div>
+            <div class="item" v-on:click="() => { show.manageDevices = true; }">Manage Devices</div>
         </dropdown>
+        <modal v-if="show.about" width="450px" ok-title="OK" :ok-action="() => { show.about = false; }" cancel-title="Donate" :cancel-action="() => { $browse('https://www.paypal.me/hoobsofficial') }">
+            <about />
+        </modal>
     </div>
 </template>
 
 <script>
+    import Modal from "@/components/modal.vue";
     import Dropdown from "@/components/dropdown.vue";
     import Devices from "@/components/devices.vue";
+    import About from "@/components/about.vue";
 
     export default {
         name: "app",
 
         components: {
+            "modal": Modal,
             "dropdown": Dropdown,
-            "devices": Devices
+            "devices": Devices,
+            "about": About
         },
 
         data() {
@@ -84,7 +94,8 @@
                         header: false
                     },
                     navigation: false,
-                    manage: false
+                    manageDevices: false,
+                    about: false
                 },
                 header: {
                     delay: 700,
@@ -101,6 +112,11 @@
         },
 
         methods: {
+            hideAll() {
+                this.show.menu.header = false;
+                this.show.navigation = false;
+            },
+
             routeName(name) {
                 switch (name || this.$router.currentRoute.name) {
                     case "login":
@@ -160,34 +176,6 @@
                 return "icon";
             },
 
-            hideNav() {
-                this.show.navigation = false;
-            },
-
-            showNav() {
-                this.show.navigation = !this.show.navigation;
-            },
-
-            manageDevices() {
-                this.show.manage = true;
-            },
-
-            manageClose() {
-                this.show.manage = false;
-            },
-
-            showMenu(name) {
-                this.show.menu[name] = !this.show.menu[name];
-            },
-
-            hideMenu(name) {
-                this.show.menu[name] = false;
-            },
-
-            windowMinimize() {
-                this.$minimize();
-            },
-
             titleToggle() {
                 this.header.clicks += 1;
 
@@ -217,10 +205,6 @@
                 }
 
                 this.maximized = this.$maximized();
-            },
-
-            windowClose() {
-                this.$close();
             }
         }
     }
@@ -476,7 +460,7 @@
         color: #fff;
     }
 
-    #app .chrome .title-seperator {
+    #app .chrome .seperator {
         display: inline;
         margin: 0 7px 0 10px;
         border-right: 1px #5e5e5e solid;
@@ -502,7 +486,7 @@
         align-items: center;
     }
 
-    #app .nav .action-seperator {
+    #app .nav .seperator {
         width: 100%;
         height: 1px;
         margin: 10px 0 0 0;
@@ -510,7 +494,7 @@
         box-sizing: border-box;
     }
 
-    #app .nav .action-seperator div {
+    #app .nav .seperator div {
         background: #3d3d3d;
         height: 1px;
     }

@@ -88,8 +88,16 @@ Vue.mixin({
     },
 
     methods: {
+        $version() {
+            return remote.app.getVersion();
+        },
+
         $window() {
             return remote.BrowserWindow.getFocusedWindow();
+        },
+
+        $browse(url) {
+            remote.shell.openExternal(url);
         },
 
         $maximized() {

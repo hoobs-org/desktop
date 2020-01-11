@@ -6,8 +6,8 @@
                 <slot />
             </div>
             <div class="modal-footer">
-                <div v-if="cancel" class="button" v-on:click="cancel()">Cancel</div>
-                <div v-if="ok" class="button button-primary" v-on:click="ok()">{{ action }}</div>
+                <div v-if="cancelAction" class="button" v-on:click="cancelAction()">{{ cancelTitle }}</div>
+                <div v-if="okAction" class="button button-primary" v-on:click="okAction()">{{ okTitle }}</div>
             </div>
         </div>
     </div>
@@ -26,13 +26,17 @@
                 type: String,
                 default: "auto"
             },
-            action: {
+            "ok-title": {
                 type: String,
                 default: "OK"
             },
+            "cancel-title": {
+                type: String,
+                default: "Cancel"
+            },
             title: String,
-            ok: Function,
-            cancel: Function
+            "ok-action": Function,
+            "cancel-action": Function
         }
     };
 </script>

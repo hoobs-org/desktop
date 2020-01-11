@@ -27,6 +27,7 @@
         padding: 5px 20px;
         color: #515151;
         font-size: 14px;
+        text-align: left;
         display: block;
         text-decoration: none;
         cursor: default;
@@ -39,14 +40,14 @@
         color: #000;
     }
 
-    #dropdown .item-disabled {
+    #dropdown .disabled {
         padding: 10px 20px;
         cursor: default;
         user-select: none;
         opacity: 0.4;
     }
 
-    #dropdown .item-seperator {
+    #dropdown .seperator {
         height: 1px;
         margin: 0 10px;
         background: #e5e5e5;

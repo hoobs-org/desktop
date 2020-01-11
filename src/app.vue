@@ -9,7 +9,8 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-on:click.stop="() => { show.menu.header = !show.menu.header; }" class="title-button icon">menu</button>
+            <button v-if="!show.manageDevices && devices.length > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
+            <button v-on:click.stop="() => { show.menu.header = !show.menu.header; }" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
             <button v-if="maximized" v-on:click="windowToggle()" class="title-button icon">fullscreen_exit</button>
@@ -53,7 +54,7 @@
             </div>
         </div>
         <div class="content">
-            <router-view v-if="devices.length > 0" />
+            <router-view v-if="!show.manageDevices && devices.length > 0" />
         </div>
         <div v-if="show.manageDevices || devices.length === 0" class="devices">
             <devices :cancel="() => { show.manageDevices = false; }" />
@@ -71,6 +72,8 @@
 </template>
 
 <script>
+    import Encryption from "./lib/encryption";
+
     import Modal from "@/components/modal.vue";
     import Dropdown from "@/components/dropdown.vue";
     import Devices from "@/components/devices.vue";
@@ -88,6 +91,7 @@
 
         data() {
             return {
+                sockets: {},
                 maximized: false,
                 show: {
                     menu: {
@@ -109,6 +113,12 @@
         async mounted() {
             this.maximized = this.$maximized();
             this.devices = this.settings.get("devices");
+        },
+
+        watch: {
+            devices: function () {
+                this.connectAll();
+            }
         },
 
         methods: {
@@ -174,6 +184,106 @@
                 }
 
                 return "icon";
+            },
+
+            async connectAll() {
+                await this.login();
+
+                for (let i = 0; i < this.devices.length; i++) {
+                    this.connectInstance(`${this.devices[i].ip}:${this.devices[i].port}`, this.devices[i].hostname)
+                }
+            },
+
+            async connectInstance(instance, hostname) {
+                const session = this.settings.get("sessions")[instance];
+
+                let delay = 0;
+
+                if (this.sockets[instance] && this.sockets[instance].socket) {
+                    this.sockets[instance].closing = true;
+                    this.sockets[instance].socket.close();
+
+                    delay = 3500;
+                }
+
+                setTimeout(() => {
+                    this.sockets[instance] = {
+                        closing: false,
+                        socket: new WebSocket(`ws://${instance}/monitor?a=${session || ""}&t=${new Date().getTime()}`)
+                    };
+
+                    this.sockets[instance].socket.onmessage = (message) => {
+                        const now = new Date();
+
+                        message = JSON.parse(message.data);
+
+                        switch (message.event) {
+                            case "log":
+                                if (message.data !== "{CLEAR}") {
+                                    this.$store.commit("updateMessages", `[${hostname}] ${message.data}`);
+                                } else {
+                                    this.$store.commit("updateMessages", message.data);
+                                }
+
+                                break;
+
+                            case "push":
+                                message.data.instance = instance;
+
+                                this.$store.commit("updateNotifications", message.data);
+                                break;
+                            
+                            case "monitor":
+                                message.data.instance = instance;
+
+                                this.$store.commit("updateMonitor", message.data);
+                                break;
+
+                            case "update":
+                                if (!this.refresh || now.getTime() - this.refresh.getTime() > 1000) {
+                                    this.$store.commit("updateAccessories", instance);
+                                }
+
+                                break;
+                        }
+                    };
+
+                    this.sockets[instance].socket.onopen = () => {
+                        this.sockets[instance].socket.send("{HISTORY}");
+                    };
+
+                    this.sockets[instance].socket.onclose = () => {
+                        if (!this.sockets[instance].closing) {
+                            setTimeout(() => {
+                                this.connectInstance(instance, hostname);
+                            }, 3000);
+                        }
+                    };
+
+                    this.sockets[instance].socket.onerror = () => {
+                        if (!this.sockets[instance].closing) {
+                            this.sockets[instance].socket.close();
+                        }
+                    };
+                }, delay);
+            },
+
+            async login() {
+                const sessions = this.settings.get("sessions");
+
+                for (let i = 0; i < this.devices.length; i++) {
+                    const { ...device } = this.devices[i];
+
+                    const response = await this.api.post(device.ip, device.port, "/auth", {
+                        username: Encryption.decrypt(device.username),
+                        password: Encryption.decrypt(device.password),
+                        remember: true
+                    });
+
+                    sessions[`${device.ip}:${device.port}`] = response.token;
+                }
+
+                this.settings.set("sessions", sessions);
             },
 
             titleToggle() {
@@ -456,7 +566,19 @@
         padding: 0;
     }
 
-    #app .chrome .title-button:hover {
+    #app .chrome .title-action {
+        font-size: 18px;
+        margin: 0 0 0 7px;
+        color: #999;
+        background: transparent;
+        border: 0 none;
+        outline: 0 none !important;
+        cursor: default;
+        padding: 0;
+    }
+
+    #app .chrome .title-button:hover,
+    #app .chrome .title-action:hover {
         color: #fff;
     }
 
@@ -545,7 +667,7 @@
 
     #app .content {
         flex: 1;
-        padding: 37px;
+        padding: 37px 0 0 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;

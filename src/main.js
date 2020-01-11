@@ -3,14 +3,16 @@ import Request from "axios";
 
 import App from "./app.vue";
 import Router from "./router";
+import Store from "./lib/store";
 import Settings from "./lib/settings";
 
 import { remote } from "electron";
 
 const settings = new Settings({
-    name: "user-preferences",
+    name: "preferences",
     defaults: {
-        devices: []
+        devices: [],
+        sessions: {}
     }
 });
 
@@ -28,8 +30,8 @@ Vue.mixin({
             },
 
             api: {
-                async get(ip, port, url, token) {
-                    Request.defaults.headers.get["Authorization"] = token;
+                async get(ip, port, url) {
+                    Request.defaults.headers.get["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
 
                     return new Promise((resolve) => {
                         Request.get(`http://${ip}:${port}/api${url}`).then((response) => {
@@ -42,8 +44,8 @@ Vue.mixin({
                     });
                 },
 
-                async post(ip, port, url, data, token) {
-                    Request.defaults.headers.post["Authorization"] = token;
+                async post(ip, port, url, data) {
+                    Request.defaults.headers.post["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
 
                     return new Promise((resolve) => {
                         Request.post(`http://${ip}:${port}/api${url}`, data).then((response) => {
@@ -56,8 +58,8 @@ Vue.mixin({
                     });
                 },
 
-                async put(ip, port, url, data, token) {
-                    Request.defaults.headers.put["Authorization"] = token;
+                async put(ip, port, url, data) {
+                    Request.defaults.headers.put["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
 
                     return new Promise((resolve) => {
                         Request.put(`http://${ip}:${port}/api${url}`, data).then((response) => {
@@ -70,8 +72,8 @@ Vue.mixin({
                     });
                 },
 
-                async delete(ip, port, url, data, token) {
-                    Request.defaults.headers.delete["Authorization"] = token;
+                async delete(ip, port, url, data) {
+                    Request.defaults.headers.delete["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
 
                     return new Promise((resolve) => {
                         Request.delete(`http://${ip}:${port}/api${url}`, data).then((response) => {
@@ -126,5 +128,6 @@ Vue.config.productionTip = false;
 
 new Vue({
     router: Router,
+    store: Store,
     render: h => h(App)
 }).$mount("#app");

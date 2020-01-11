@@ -14,8 +14,9 @@
                 <div v-on:click="removeDevice(device.ip, device.port)" class="button">Remove</div>
             </div>
             <div class="info">
-                <span class="title">{{ device.hostname || device.ip }}</span>
-                <span v-if="device.hostname" class="ip">{{ device.ip }}</span>
+                <span v-if="device.hostname !== device.ip" class="title">{{ device.hostname }}</span>
+                <span v-if="device.hostname !== device.ip" class="ip">{{ device.ip }}</span>
+                <span v-else class="title">{{ device.ip }}</span>
             </div>
             <div class="service">
                 <span class="title">HOOBS</span>
@@ -27,11 +28,12 @@
                 <div class="icon">router</div>
             </div>
             <div class="action-cell">
-                <div v-on:click="addDevice(device.ip, device.port)" class="button button-primary">Join</div>
+                <div v-on:click="addDevice(device.ip, device.port, device.hostname)" class="button button-primary">Join</div>
             </div>
             <div class="info">
-                <span class="title">{{ device.hostname || device.ip }}</span>
+                <span v-if="device.hostname" class="title">{{ humanize(device.hostname) }}</span>
                 <span v-if="device.hostname" class="ip">{{ device.ip }}</span>
+                <span v-else class="title">{{ device.ip }}</span>
             </div>
             <div class="service">
                 <span class="title">HOOBS</span>
@@ -51,6 +53,7 @@
         <modal v-if="show.add || show.join" width="350px" title="Add Device" ok-title="Add Device" :cancel-action="closeAddDevice" :ok-action="saveDevice">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="saveDevice()">
                 <div v-if="errors.add && errors.add !== ''" class="error" v-html="errors.add"></div>
+                <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="data.hostname" :required="false" />
                 <text-field v-if="show.add" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="data.ip" :required="true" />
                 <port-field v-if="show.add" name="Port" description="Enter the configured port number" theme="light" v-model.number="data.port" :required="true" />
                 <text-field v-if="show.add || show.join" name="Username" description="Enter the username this device was srtup with" theme="light" v-model="data.username" :required="true" />
@@ -61,6 +64,9 @@
 </template>
 
 <script>
+    import Decamelize from "decamelize";
+    import Inflection from "inflection";
+
     import Alfred from "../lib/alfred";
     import Encryption from "../lib/encryption";
 
@@ -98,6 +104,7 @@
                 data: {
                     ip: "",
                     port: 8080,
+                    hostname: "",
                     username: "",
                     password: ""
                 },
@@ -150,7 +157,7 @@
                 }
             },
 
-            addDevice(ip, port) {
+            addDevice(ip, port, hostname) {
                 this.show.add = true;
                 this.show.join = false;
 
@@ -167,6 +174,12 @@
                     this.data.port = port;
                 }
 
+                this.hostname = ip;
+
+                if (hostname) {
+                    this.data.hostname = this.humanize(hostname);
+                }
+
                 this.data.username = "";
                 this.data.password = "";
 
@@ -179,6 +192,7 @@
 
                 this.data.ip = "";
                 this.data.port = 8080;
+                this.hostname = "";
 
                 this.data.username = "";
                 this.data.password = "";
@@ -267,8 +281,7 @@
                     if (errors.length === 0) {
                         const response = await this.api.post(this.data.ip, this.data.port, "/auth", {
                             username: this.data.username,
-                            password: this.data.password,
-                            remember: true
+                            password: this.data.password
                         });
                         
                         if (!response.error) {
@@ -281,12 +294,16 @@
                             this.data.username = Encryption.encrypt(this.data.username);
                             this.data.password = Encryption.encrypt(this.data.password);
 
+                            if (!this.data.hostname || this.data.hostname === "") {
+                                this.data.hostname = this.data.ip;
+                            }
+
                             this.devices.push({
                                 ip: this.data.ip,
                                 port: this.data.port,
+                                hostname: this.data.hostname,
                                 username: this.data.username,
-                                password: this.data.password,
-                                token: response.token
+                                password: this.data.password
                             });
 
                             this.settings.set("devices", this.devices);
@@ -308,6 +325,10 @@
                     this.devices.splice(index, 1);
                     this.settings.set("devices", this.devices);
                 }
+            },
+
+            humanize(string) {
+                return Inflection.titleize(Decamelize((string || "").split(".")[0].replace(/-/gi, " ").trim()));
             }
         }
     }

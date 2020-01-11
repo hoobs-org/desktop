@@ -57,7 +57,7 @@
 
     #modal .modal-inner {
         display: inline;
-        margin: 0 auto 10% auto;
+        margin: 0 auto 7% auto;
         max-height: 65%;
         background: #fff;
         color: #515151;

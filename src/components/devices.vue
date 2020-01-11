@@ -323,6 +323,8 @@
         padding: 20px 0;
         font-size: 14px;
         margin: 0 auto;
+        user-select: none;
+        cursor: default;
     }
 
     #devices .empty .message {
@@ -349,7 +351,7 @@
     #devices .actions .icon {
         font-size: 18px;
         margin: 0 7px 0 0;
-        cursor: pointer;
+        cursor: default;
     }
 
     #devices .actions .icon:hover {
@@ -434,6 +436,8 @@
 
     #devices .scanning {
         text-align: left;
+        user-select: none;
+        cursor: default;
     }
 
     #devices .scanning .message {

@@ -46,15 +46,20 @@
     #password-field .title {
         font-weight: bold;
         font-size: 12px;
+        user-select: none;
+        cursor: default;
     }
 
     #password-field .description {
         font-size: 12px;
+        user-select: none;
+        cursor: default;
     }
 
     #password-field.dark input {
         flex: 1;
         padding: 7px;
+        margin: 4px 0 0 0;
         font-size: 14px;
         background: #444;
         color: #fff;
@@ -70,6 +75,7 @@
     #password-field.light input {
         flex: 1;
         padding: 7px;
+        margin: 4px 0 0 0;
         font-size: 14px;
         background: #fff;
         color: #000;

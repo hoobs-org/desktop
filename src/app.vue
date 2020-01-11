@@ -307,7 +307,7 @@
         border: 1px #1a1a1a solid;
         border-radius: 3px;
         padding: 10px;
-        cursor: pointer;
+        cursor: default;
         user-select: none;
         margin: 0 10px 0 0;
         white-space: pre;
@@ -513,7 +513,7 @@
         align-items: center;
         align-content: center;
         justify-content: flex-start;
-        cursor: pointer;
+        cursor: default;
     }
 
     #app .nav a:hover,

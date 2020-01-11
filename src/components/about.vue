@@ -31,6 +31,8 @@ import About from '@/components/about.vue';
     #about {
         text-align: left;
         font-size: 12px;
+        user-select: none;
+        cursor: default;
     }
 
     #about .seperator {

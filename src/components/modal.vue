@@ -6,8 +6,8 @@
                 <slot />
             </div>
             <div class="modal-footer">
-                <div v-if="cancelAction" class="button" v-on:click="cancelAction()">{{ cancelTitle }}</div>
-                <div v-if="okAction" class="button button-primary" v-on:click="okAction()">{{ okTitle }}</div>
+                <div v-if="confirm" class="button" v-on:click="$emit('cancel')">{{ cancelTitle }}</div>
+                <div class="button button-primary" v-on:click="$emit('confirm')">{{ okTitle }}</div>
             </div>
         </div>
     </div>
@@ -26,6 +26,10 @@
                 type: String,
                 default: "auto"
             },
+            confirm: {
+                type: Boolean,
+                default: true
+            },
             "ok-title": {
                 type: String,
                 default: "OK"
@@ -34,9 +38,7 @@
                 type: String,
                 default: "Cancel"
             },
-            title: String,
-            "ok-action": Function,
-            "cancel-action": Function
+            title: String
         }
     };
 </script>
@@ -58,7 +60,7 @@
     #modal .modal-inner {
         display: inline;
         margin: 0 auto 7% auto;
-        max-height: 65%;
+        max-height: 85%;
         background: #fff;
         color: #515151;
         display: flex;

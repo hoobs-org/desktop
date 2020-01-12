@@ -30,7 +30,7 @@
         text-align: left;
         display: block;
         text-decoration: none;
-        cursor: default;
+        cursor: pointer;
         user-select: none;
     }
 

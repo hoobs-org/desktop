@@ -1,56 +1,32 @@
 <template>
     <div id="devices">
         <div class="actions">
-            <div v-if="this.devices.length > 0" v-on:click="cancel" class="icon">arrow_back</div>
-            <div v-if="this.devices.length > 0" class="action-seperator"></div>
-            <div v-on:click="scanNetwork()" class="icon">refresh</div>
-            <div v-on:click="addDevice()" class="icon">add</div>
+            <div v-if="devices.length > 0" v-on:click="$emit('close')" title="Back" class="icon">arrow_back</div>
+            <div v-if="devices.length > 0" class="action-seperator"></div>
+            <div v-on:click="scanNetwork()" title="Scan Network" class="icon">refresh</div>
+            <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
         </div>
-        <div class="device" v-for="(device, didx) in devices" :key="didx">
-            <div class="image">
-                <div class="icon">router</div>
+        <div class="flow">
+            <device v-for="(device, didx) in devices" :key="didx" :joined="true" :value="device" v-on:details="() => { selected = device }" v-on:terminal="() => { terminal = device }" v-on:remove="removeDevice(device.ip, device.port)" />
+            <device v-for="(device, aidx) in available" :key="aidx" :joined="false" :value="device" v-on:join="addDevice(device.ip, device.port, device.hostname)" />
+            <div v-if="loaded && !show.scanning && available.length === 0 && devices.length === 0" class="empty">
+                <div class="message">
+                    <span>No Devices Found</span>
+                    <div v-on:click="addDevice()" class="button">Add Manually</div>
+                </div>
             </div>
-            <div class="action-cell">
-                <div v-on:click="removeDevice(device.ip, device.port)" class="button">Remove</div>
-            </div>
-            <div class="info">
-                <span v-if="device.hostname !== device.ip" class="title">{{ device.hostname }}</span>
-                <span v-if="device.hostname !== device.ip" class="ip">{{ device.ip }}</span>
-                <span v-else class="title">{{ device.ip }}</span>
-            </div>
-            <div class="service">
-                <span class="title">HOOBS</span>
-                <div class="version">{{ device.version }}</div>
+            <div v-if="show.scanning" class="scanning">
+                <div class="message">Searching for Devices ({{ progress.toFixed(1) }}%)</div>
+                <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
         </div>
-        <div class="device" v-for="(device, aidx) in available" :key="aidx">
-            <div class="image">
-                <div class="icon">router</div>
-            </div>
-            <div class="action-cell">
-                <div v-on:click="addDevice(device.ip, device.port, device.hostname)" class="button button-primary">Join</div>
-            </div>
-            <div class="info">
-                <span v-if="device.hostname" class="title">{{ humanize(device.hostname) }}</span>
-                <span v-if="device.hostname" class="ip">{{ device.ip }}</span>
-                <span v-else class="title">{{ device.ip }}</span>
-            </div>
-            <div class="service">
-                <span class="title">HOOBS</span>
-                <div class="version">{{ device.version }}</div>
-            </div>
+        <div v-if="selected" class="overlay">
+            <system v-on:close="() => { selected = null }" :value="selected" />
         </div>
-        <div v-if="loaded && !show.scanning && available.length === 0" class="empty">
-            <div class="message">
-                <span>No Devices Found</span>
-                <div v-on:click="addDevice()" class="button">Add Manually</div>
-            </div>
+        <div v-if="terminal" class="overlay terminal">
+            <terminal v-on:close="() => { terminal = null }" :value="terminal" />
         </div>
-        <div v-if="show.scanning" class="scanning">
-            <div class="message">Searching for Devices ({{ progress.toFixed(1) }}%)</div>
-            <marquee :height="3" color="#feb400" background="#856a3b" />
-        </div>
-        <modal v-if="show.add || show.join" width="350px" title="Add Device" ok-title="Add Device" :cancel-action="closeAddDevice" :ok-action="saveDevice">
+        <modal v-if="show.add || show.join" v-on:confirm="saveDevice()" v-on:cancel="closeAddDevice()" title="Add Device" ok-title="Add Device" width="350px">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="saveDevice()">
                 <div v-if="errors.add && errors.add !== ''" class="error" v-html="errors.add"></div>
                 <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="data.hostname" :required="false" />
@@ -75,6 +51,9 @@
     import TextField from "@/components/text-field.vue";
     import PasswordField from "@/components/password-field.vue";
     import PortField from "@/components/port-field.vue";
+    import Device from "@/components/device.vue";
+    import System from "@/components/system.vue";
+    import Terminal from "@/components/terminal.vue";
 
     export default {
         name: "devices",
@@ -84,11 +63,10 @@
             "marquee": Marquee,
             "text-field": TextField,
             "password-field": PasswordField,
-            "port-field": PortField
-        },
-
-        props: {
-            cancel: Function
+            "port-field": PortField,
+            "device": Device,
+            "system": System,
+            "terminal": Terminal
         },
 
         data() {
@@ -110,6 +88,8 @@
                 },
                 devices: [],
                 available: [],
+                selected: null,
+                terminal: null,
                 errors: {
                     add: ""
                 }
@@ -131,7 +111,9 @@
                 }
             });
 
-            this.scanNetwork();
+            if (this.devices.length === 0) {
+                this.scanNetwork();
+            }
 
             this.loaded = true;
         },
@@ -328,7 +310,7 @@
             },
 
             humanize(string) {
-                return Inflection.titleize(Decamelize((string || "").split(".")[0].replace(/-/gi, " ").trim()));
+                return Inflection.titleize(Decamelize((string || "").split(".")[0].replace(/-/gi, " ").replace(/_/gi, " ").trim())).replace(/hoobs/gi, "HOOBS");
             }
         }
     }
@@ -336,6 +318,7 @@
 
 <style scoped>
     #devices {
+        flex: 1;
         display: flex;
         flex-direction: column;
     }
@@ -372,7 +355,7 @@
     #devices .actions .icon {
         font-size: 18px;
         margin: 0 7px 0 0;
-        cursor: default;
+        cursor: pointer;
     }
 
     #devices .actions .icon:hover {
@@ -384,6 +367,14 @@
         margin: 0 7px 0 0;
         border-right: 1px #5e5e5e solid;
         cursor: default;
+    }
+
+    #devices .flow {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 3px;
+        overflow: auto;
     }
 
     #devices .device {
@@ -411,8 +402,12 @@
         font-size: 37px;
     }
 
-    #devices .device .joiaction-celln {
+    #devices .device .action-cell {
         padding: 20px 0 20px 0;
+    }
+
+    #devices .device .action-cell:last-child {
+        padding: 20px 20px 20px 0;
     }
 
     #devices .device .action-cell .button {
@@ -471,5 +466,21 @@
         text-align: left;
         color: #e30505;
         margin: 0 0 14px 0;
+    }
+
+    #devices .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 44px;
+        display: flex;
+        background: #262626;
+        box-sizing: border-box;
+    }
+
+    #devices .terminal {
+        padding: 44px 44px 20px 44px;
     }
 </style>

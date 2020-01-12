@@ -16,7 +16,7 @@
                 {{ value.message }}
             </p>
         </div>
-        <div class="icon close" v-on:click="close(value.id)">close</div>
+        <div class="icon dismiss" v-on:click="dismissNotification(value.id)">close</div>
     </div>
 </template>
 
@@ -36,12 +36,12 @@
 
         mounted() {
             setTimeout(() => {
-                this.close();
+                this.dismissNotification();
             }, 1000 * 7);
         },
 
         methods: {
-            close() {
+            dismissNotification() {
                 const index = this.notifications.findIndex(n => n.id === this.value.id);
 
                 if (index > -1) {
@@ -129,7 +129,7 @@
         font-size: 12px;
     }
 
-    #notification .close {
+    #notification .dismiss {
         position: absolute;
         top: 7px;
         right: 7px;

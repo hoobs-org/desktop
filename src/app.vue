@@ -10,7 +10,7 @@
         </div>
         <div class="chrome">
             <button v-if="!show.manageDevices && devices.length > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
-            <button v-on:click.stop="() => { show.menu.header = !show.menu.header; }" class="title-action icon">menu</button>
+            <button v-on:click.stop="() => { show.menu.header = !show.menu.header }" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
             <button v-if="maximized" v-on:click="windowToggle()" class="title-button icon">fullscreen_exit</button>
@@ -19,36 +19,36 @@
         </div>
         <div v-if="!show.manageDevices && devices.length > 0" class="nav">
             <div class="routes">
-                <div class="action-link" v-on:click.stop="() => { show.navigation = !show.navigation; }">
+                <div class="action-link" v-on:click.stop="() => { show.navigation = !show.navigation }">
                     <span v-if="show.navigation" class="icon">chevron_left</span>
                     <span v-else class="icon">chevron_right</span>
                 </div>
                 <div class="seperator">
                     <div></div>
                 </div>
-                <router-link to="/" @click.native="() => { show.navigation = false; }">
+                <router-link to="/" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('home')">dashboard</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('home')">{{ routeName('home') }}</span>
                 </router-link>
-                <router-link to="/accessories" @click.native="() => { show.navigation = false; }">
+                <router-link to="/accessories" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('accessories', 'layout')">{{ routeName('accessories') }}</span>
                 </router-link>
-                <router-link to="/log" @click.native="() => { show.navigation = false; }">
+                <router-link to="/log" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('log')">subject</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('log')">{{ routeName('log') }}</span>
                 </router-link>
-                <router-link to="/users" @click.native="() => { show.navigation = false; }">
+                <router-link to="/users" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('users')">people</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('users')">{{ routeName('users') }}</span>
                 </router-link>
-                <router-link to="/plugins" @click.native="() => { show.navigation = false; }">
+                <router-link to="/plugins" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
                     <span v-if="show.navigation" v-bind:class="routeActive('plugins', 'plugin', 'search')">{{ routeName('plugins') }}</span>
                 </router-link>
             </div>
             <div class="routes">
-                <router-link to="/config" @click.native="() => { show.navigation = false; }">
+                <router-link to="/config" @click.native="() => { show.navigation = false }">
                     <span v-bind:class="routeIcon('config')">settings</span>
                 </router-link>
             </div>
@@ -57,18 +57,18 @@
             <router-view v-if="!show.manageDevices && devices.length > 0" />
         </div>
         <div v-if="show.manageDevices || devices.length === 0" class="devices">
-            <devices :cancel="() => { show.manageDevices = false; }" />
+            <devices v-on:close="() => { show.manageDevices = false }" />
         </div>
         <div class="notifications">
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
         </div>
         <dropdown v-if="show.menu.header" class="header-menu">
-            <div class="item" v-on:click="() => { show.about = true; }">About HOOBS</div>
+            <div class="item" v-on:click="() => { show.about = true }">About HOOBS</div>
             <div class="item">Help</div>
-            <div class="seperator"></div>
-            <div class="item" v-on:click="() => { show.manageDevices = true; }">Manage Devices</div>
+            <div v-if="!show.manageDevices && devices.length > 0" class="seperator"></div>
+            <div v-if="!show.manageDevices && devices.length > 0" class="item" v-on:click="() => { show.manageDevices = true }">Manage Devices</div>
         </dropdown>
-        <modal v-if="show.about" width="450px" ok-title="OK" :ok-action="() => { show.about = false; }" cancel-title="Donate" :cancel-action="() => { $browse('https://www.paypal.me/hoobsofficial') }">
+        <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" cancel-title="Donate" width="450px">
             <about />
         </modal>
     </div>
@@ -431,7 +431,7 @@
         border: 1px #1a1a1a solid;
         border-radius: 3px;
         padding: 10px;
-        cursor: default;
+        cursor: pointer;
         user-select: none;
         margin: 0 10px 0 0;
         white-space: pre;
@@ -570,24 +570,26 @@
     }
 
     #app .chrome .title-button {
+        height: 18px;
         font-size: 18px;
         margin: 0 0 0 3px;
         color: #999;
         background: transparent;
         border: 0 none;
         outline: 0 none !important;
-        cursor: default;
+        cursor: pointer;
         padding: 0;
     }
 
     #app .chrome .title-action {
+        height: 18px;
         font-size: 18px;
         margin: 0 0 0 7px;
         color: #999;
         background: transparent;
         border: 0 none;
         outline: 0 none !important;
-        cursor: default;
+        cursor: pointer;
         padding: 0;
     }
 
@@ -649,7 +651,7 @@
         align-items: center;
         align-content: center;
         justify-content: flex-start;
-        cursor: default;
+        cursor: pointer;
     }
 
     #app .nav a:hover,
@@ -703,8 +705,8 @@
         width: 100%;
         height: 100%;
         padding: 44px;
+        display: flex;
         background: #262626;
         box-sizing: border-box;
-        overflow: auto;
     }
 </style>

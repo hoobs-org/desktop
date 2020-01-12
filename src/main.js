@@ -1,4 +1,5 @@
 import Vue from "vue";
+
 import Request from "axios";
 
 import App from "./app.vue";
@@ -12,7 +13,10 @@ const settings = new Settings({
     name: "preferences",
     defaults: {
         devices: [],
-        sessions: {}
+        sessions: {},
+        units: {
+            temperature: "fahrenheit"
+        }
     }
 });
 

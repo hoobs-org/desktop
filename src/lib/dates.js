@@ -116,11 +116,7 @@ export default class Dates {
         return new Date(day.setDate(day.getDate() - day.getDay() + (day.getDay() === 0 ? -6 : 1) - 1));
     }
 
-    static getMinCacheTime() {
-        return Dates.formatSqlDateTime(new Date());
-    }
-
-    static getWeekDayName(value) {
+    static dayName(value) {
         value = new Date(value);
 
         let day = null;
@@ -159,7 +155,7 @@ export default class Dates {
         }
     }
 
-    static getMonthName(value) {
+    static monthName(value) {
         value = new Date(value);
 
         let month = null;
@@ -213,27 +209,31 @@ export default class Dates {
         }
     }
 
-    static displayDate(date) {
+    static display(date) {
         date = new Date(date);
 
         const now = new Date();
 
         if (now.getFullYear() === date.getFullYear()) {
-            return `${Dates.getMonthName(date)} ${date.getDate()}`;
+            return `${Dates.monthName(date)} ${date.getDate()}`;
         }
 
-        return `${Dates.getMonthName(date)} ${date.getDate()} ${date.getFullYear()}`;
+        return `${Dates.monthName(date)} ${date.getDate()} ${date.getFullYear()}`;
     }
 
-    static getAgeDisplay(date) {
+    static age(date) {
         date = new Date(date);
 
         if (date && date instanceof Date) {
             const age = new Date() - date;
             const future = age < 0;
 
-            if (Math.abs(age) < 60000) {
+            if (Math.abs(age) < 2000) {
                 return "Now";
+            }
+
+            if (Math.abs(age) < 60000) {
+                return "A few seconds ago";
             }
 
             if (Math.abs(age) < 3600000 && Math.abs(age) >= 120000) {
@@ -264,7 +264,7 @@ export default class Dates {
         return "";
     }
 
-    static getDateRange(date, hours) {
+    static range(date, hours) {
         date = new Date(date);
 
         const now = new Date().getTime();
@@ -283,7 +283,7 @@ export default class Dates {
         };
     }
 
-    static latestDate(date1, date2) {
+    static latest(date1, date2) {
         date1 = new Date(date1);
         date2 = new Date(date2);
 

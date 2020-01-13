@@ -76,8 +76,6 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
-    import Alfred from "../lib/alfred";
-
     import Marquee from "@/components/marquee.vue";
 
     export default {
@@ -103,7 +101,13 @@
         },
 
         async mounted() {
-            await this.load();
+            this.device.wait.start(this.value.ip, this.value.port, async () => {
+                await this.load();
+            });
+        },
+
+        destroyed() {
+            this.device.wait.stop(this.value.ip, this.value.port);
         },
 
         methods: {
@@ -121,16 +125,12 @@
             },
 
             async load() {
+                await this.api.login(this.value.ip, this.value.port);
+
                 this.filesystem = await this.api.get(this.value.ip, this.value.port, "/system/filesystem");
                 this.temp = await this.api.get(this.value.ip, this.value.port, "/system/temp");
                 this.status = await this.api.get(this.value.ip, this.value.port, "/status");
                 this.info = await this.api.get(this.value.ip, this.value.port, "/system");
-
-                await this.checkVersion();
-            },
-
-            async checkVersion() {
-                this.working = true;
                 this.updates = await this.api.get(this.value.ip, this.value.port, "/system/updates");
 
                 setTimeout(() => {
@@ -141,28 +141,15 @@
             async updateSystem() {
                 this.working = true;
 
+                await this.api.login(this.value.ip, this.value.port);
                 await this.api.post(this.value.ip, this.value.port, "/service/stop");
                 await this.api.put(this.value.ip, this.value.port, "/update");
 
                 setTimeout(async () => {
-                    await this.deviceAlive();
-                }, 2000);
-            },
-
-            async deviceAlive() {
-                const scanner = new Alfred("hoobs");
-
-                const test = await scanner.detect(this.value.ip, this.value.port);
-
-                scanner.stop();
-
-                if (test && test !== "") {
-                    this.show.working = false;
-                } else {
-                    setTimeout(async () => {
-                        await this.deviceAlive();
-                    }, 2000);
-                }
+                    this.device.wait.start(this.value.ip, this.value.port, () => {
+                        this.show.working = false;
+                    });
+                }, 5000);
             },
 
             getTemp(value) {

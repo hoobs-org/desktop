@@ -14,8 +14,10 @@ export default new Vuex.Store({
         memory: {},
         temp: {},
         streamed: {},
-        notifications: []
+        notifications: [],
+        connected: 0
     },
+
     mutations: {
         resetStore(state) {
             state.messages = [];
@@ -30,6 +32,14 @@ export default new Vuex.Store({
             state.notifications = [];
         },
 
+        deviceConnected(state) {
+            state.connected += 1;
+        },
+
+        deviceDisconected(state) {
+            state.connected -= 1;
+        },
+
         updateAccessories(state, instance) {
             if (!state.update[instance]) {
                 state.update[instance] = null;
@@ -39,8 +49,8 @@ export default new Vuex.Store({
         },
 
         updateMessages(state, message) {
-            if (message === "{CLEAR}") {
-                state.messages = [];
+            if (message.endsWith("{CLEAR}")) {
+                state.messages = state.messages.filter(m => !m.startsWith(message.split("{{SPLIT}}")[0]));
             } else {
                 state.messages.push(message)
 

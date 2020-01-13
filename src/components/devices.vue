@@ -43,7 +43,7 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
-    import Alfred from "../lib/alfred";
+    import Scanner from "../lib/scanner";
     import Encryption from "../lib/encryption";
 
     import Modal from "@/components/modal.vue";
@@ -99,7 +99,7 @@
         async mounted() {
             this.devices = this.settings.get("devices");
             this.available = [];
-            this.scanner = new Alfred("hoobs", 8080);
+            this.scanner = new Scanner("hoobs", 8080);
 
             this.scanner.on("progress", (data) => {
                 this.progress = data;
@@ -301,6 +301,9 @@
             },
 
             removeDevice(ip, port) {
+                this.device.wait.stop(ip, port);
+                this.device.wait.stop(ip, port, true);
+
                 const index = this.devices.findIndex(d => d.ip === ip && d.port === port);
 
                 if (index >= 0) {

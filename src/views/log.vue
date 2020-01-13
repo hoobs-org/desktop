@@ -1,14 +1,25 @@
 <template>
-    <div id="log">
+    <div v-if="connected > 0" id="log">
         <span class="message" v-for="(message, midx) in messages" :key="midx">{{ message }}</span>
     </div>
+    <loader v-else id="loader" value="Connecting..." />
 </template>
 
 <script>
+    import Loader from "@/components/loader.vue";
+
     export default {
         name: "log",
 
+        components: {
+            "loader": Loader
+        },
+
         computed: {
+            connected() {
+                return this.$store.state.connected;
+            },
+
             messages() {
                 return this.$store.state.messages;
             }
@@ -27,12 +38,12 @@
 <style scoped>
     #log {
         flex: 1;
-        margin: 0 0 20px 0;
+        margin: 0 20px 20px 0;
         padding: 0 20px 0 7px;
         background: #262626;
-        overflow: auto;
         text-align: left;
         font-size: 12px;
+        overflow: auto;
     }
 
     #log .message {
@@ -41,5 +52,10 @@
         font-family: monospace;
         white-space: pre-wrap;
         color: #d1d1d1;
+    }
+
+    #loader {
+        margin: 10% auto;
+        width: 350px;
     }
 </style>

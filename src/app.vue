@@ -75,8 +75,6 @@
 </template>
 
 <script>
-    import Encryption from "./lib/encryption";
-
     import Modal from "@/components/modal.vue";
     import Dropdown from "@/components/dropdown.vue";
     import Notification from "@/components/notification.vue";
@@ -111,7 +109,8 @@
                     clicks: 0,
                     timer: null
                 },
-                devices: []
+                devices: [],
+                sessions: []
             }
         },
 
@@ -123,7 +122,15 @@
 
         async mounted() {
             this.maximized = this.$maximized();
+
             this.devices = this.settings.get("devices");
+            this.sessions = this.settings.get("sessions");
+        },
+
+        destroyed() {
+            for (let i = 0; i < this.devices.length; i++) {
+                this.device.wait.stop(this.devices[i].ip, this.devices[i].port, true);
+            }
         },
 
         watch: {
@@ -200,14 +207,17 @@
             async connectAll() {
                 this.$store.commit("resetStore");
 
-                await this.login();
-
                 for (let i = 0; i < this.devices.length; i++) {
-                    this.connectInstance(`${this.devices[i].ip}:${this.devices[i].port}`, this.devices[i].hostname)
+                    this.device.wait.start(this.devices[i].ip, this.devices[i].port, () => {
+                        this.connectInstance(this.devices[i].ip, this.devices[i].port, this.devices[i].hostname);
+                    }, true);
                 }
             },
 
-            async connectInstance(instance, hostname) {
+            async connectInstance(ip, port, hostname) {
+                await this.api.login(ip, port);
+
+                const instance = `${ip}:${port}`;
                 const session = this.settings.get("sessions")[instance];
 
                 let delay = 0;
@@ -232,10 +242,10 @@
 
                         switch (message.event) {
                             case "log":
-                                if (message.data !== "{CLEAR}") {
-                                    this.$store.commit("updateMessages", `[${hostname}] ${message.data}`);
+                                if (message.data === "{CLEAR}") {
+                                    this.$store.commit("updateMessages", `[${hostname}]{{SPLIT}}${message.data}`);
                                 } else {
-                                    this.$store.commit("updateMessages", message.data);
+                                    this.$store.commit("updateMessages", `[${hostname}] ${message.data}`);
                                 }
 
                                 break;
@@ -263,13 +273,18 @@
                     };
 
                     this.sockets[instance].socket.onopen = () => {
+                        this.$store.commit("deviceConnected");
                         this.sockets[instance].socket.send("{HISTORY}");
                     };
 
                     this.sockets[instance].socket.onclose = () => {
+                        this.$store.commit("deviceDisconected");
+
                         if (!this.sockets[instance].closing) {
                             setTimeout(() => {
-                                this.connectInstance(instance, hostname);
+                                this.device.wait.start(ip, port, () => {
+                                    this.connectInstance(ip, port, hostname);
+                                }, true);
                             }, 3000);
                         }
                     };
@@ -280,24 +295,6 @@
                         }
                     };
                 }, delay);
-            },
-
-            async login() {
-                const sessions = this.settings.get("sessions");
-
-                for (let i = 0; i < this.devices.length; i++) {
-                    const { ...device } = this.devices[i];
-
-                    const response = await this.api.post(device.ip, device.port, "/auth", {
-                        username: Encryption.decrypt(device.username),
-                        password: Encryption.decrypt(device.password),
-                        remember: true
-                    });
-
-                    sessions[`${device.ip}:${device.port}`] = response.token;
-                }
-
-                this.settings.set("sessions", sessions);
             },
 
             titleToggle() {

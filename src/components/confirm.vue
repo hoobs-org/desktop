@@ -50,7 +50,7 @@
 
     #confirm .icon {
         margin: 0 0 0 7px;
-        font-size: 22px;
+        font-size: 18px;
         cursor: pointer;
     }
 

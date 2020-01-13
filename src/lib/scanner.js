@@ -6,7 +6,7 @@ import * as IP from "ip";
 import * as Net from "net";
 import * as Request from "axios";
 
-export default class Alfred extends EventEmitter {
+export default class Scanner extends EventEmitter {
     constructor(service, port, timeout) {
         super();
 
@@ -14,6 +14,7 @@ export default class Alfred extends EventEmitter {
         this.port = port;
         this.timeout = timeout || 500;
         this.stopped = false;
+        this.timer = null;
 
         this.prefix = IP.address();
 
@@ -23,6 +24,28 @@ export default class Alfred extends EventEmitter {
             if (parts.length === 4) {
                 this.prefix = parts.slice(0, -1).join(".");
             }
+        }
+    }
+
+    async wait(ip, port, callback, interval) {
+        const test = await this.detect(ip, port);
+
+        interval = interval || 5000;
+
+        if (test && test !== "") {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+
+            this.timer = null;
+
+            if (callback) {
+                callback();
+            }
+        } else {
+            this.timer = setTimeout(() => {
+                this.wait(ip, port, callback, interval);
+            }, interval);
         }
     }
 
@@ -151,5 +174,11 @@ export default class Alfred extends EventEmitter {
 
     stop() {
         this.stopped = true;
+
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
+
+        this.timer = null;
     }
 }

@@ -1,9 +1,36 @@
 <template>
-    <div class="home"></div>
+    <div v-if="connected > 0" class="home"></div>
+    <loader v-else id="loader" value="Connecting..." />
 </template>
 
 <script>
+    import Loader from "@/components/loader.vue";
+
     export default {
-        name: "home"
+        name: "home",
+
+        components: {
+            "loader": Loader
+        },
+
+        computed: {
+            connected() {
+                return this.$store.state.connected;
+            }
+        }
     };
 </script>
+
+<style scoped>
+    #home {
+        flex: 1;
+        background: #262626;
+        text-align: left;
+        overflow: auto;
+    }
+
+    #loader {
+        margin: 10% auto;
+        width: 350px;
+    }
+</style>

@@ -32,7 +32,7 @@
             <confirm v-if="show.restart" value="Restart Bridge" icon="cached" title="Are you sure you want to restart the bridge?" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
         </div>
         <div v-if="joined" class="action-cell">
-            <confirm v-if="show.reboot" value="Reboot Device" icon="power_settings_new" title="Are you sure you want to restart this device?" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
+            <confirm v-if="show.reboot" value="Reboot Device" icon="power_settings_new" title="Are you sure you want to reboot this device?" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
         </div>
         <div v-if="joined">
             <div v-if="(show.restart || show.reboot) && show.seperators" class="action-seperator"></div>

@@ -254,10 +254,27 @@ Vue.mixin({
     },
 });
 
+const router = Router();
+
+router.beforeEach(async (to, _from, next) => {
+    if (to.path !== "/devices" && to.path !== "/etcher" && settings.get("devices").length === 0) {
+        router.push({
+            path: "/devices",
+            query: {
+                url: to.path
+            }
+        });
+        
+        return;
+    }
+
+    next();
+});
+
 Vue.config.productionTip = false;
 
 new Vue({
-    router: Router,
+    router,
     store: Store,
     render: h => h(App)
 }).$mount("#app");

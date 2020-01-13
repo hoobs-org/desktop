@@ -5,10 +5,8 @@ import Home from "./views/home.vue";
 
 Vue.use(Router);
 
-export default new Router({
-    mode: "history",
-    base: process.env.BASE_URL,
-    routes: [
+const routes = () => {
+    return [
         {
             path: "/",
             name: "home",
@@ -59,5 +57,13 @@ export default new Router({
             name: "config",
             component: () => import(/* webpackChunkName: "config" */ "./views/config.vue")
         }
-    ]
-});
+    ];
+}
+
+export default function() {
+    return new Router({
+        mode: "history",
+        base: process.env.BASE_URL,
+        routes: routes()
+    });
+}

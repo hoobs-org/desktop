@@ -13,7 +13,6 @@ export default new Vuex.Store({
         cpu: {},
         memory: {},
         temp: {},
-        streamed: {},
         notifications: [],
         connected: 0
     },
@@ -28,7 +27,6 @@ export default new Vuex.Store({
             state.cpu = {};
             state.memory = {};
             state.temp = {};
-            state.streamed = {};
             state.notifications = [];
         },
 
@@ -186,14 +184,6 @@ export default new Vuex.Store({
                     state.cpu[payload.instance].history[state.cpu[payload.instance].history.length - 1] = [state.cpu[payload.instance].history.length - 1, state.cpu[payload.instance].used];
                     state.memory[payload.instance].history[state.memory[payload.instance].history.length - 1] = [state.memory[payload.instance].history.length - 1, state.memory[payload.instance].load];
 
-                    break;
-
-                default:
-                    if (!state.streamed[payload.name]) {
-                        state.streamed[payload.name] = {};
-                    }
-
-                    state.streamed[payload.name] = payload.data;
                     break;
             }
         }

@@ -477,13 +477,13 @@
         left: 0;
         width: 100%;
         height: 100%;
-        padding: 44px;
+        padding: 44px 20px 20px 20px;
         display: flex;
         background: #262626;
         box-sizing: border-box;
     }
 
     #devices .terminal {
-        padding: 44px 44px 20px 44px;
+        padding: 44px 20px 10px 20px;
     }
 </style>

@@ -9,7 +9,7 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-if="!show.manageDevices && devices.length > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
+            <button v-if="!show.manageDevices && connected > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
             <button v-on:click.stop="() => { show.menu.header = !show.menu.header }" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
@@ -115,6 +115,10 @@
         },
 
         computed: {
+            connected() {
+                return this.$store.state.connected;
+            },
+
             notifications() {
                 return this.$store.state.notifications;
             }
@@ -701,7 +705,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        padding: 44px;
+        padding: 44px 20px 20px 20px;
         display: flex;
         background: #262626;
         box-sizing: border-box;

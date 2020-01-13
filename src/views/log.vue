@@ -55,7 +55,7 @@
     }
 
     #loader {
-        margin: 10% auto;
+        margin: 7em auto;
         width: 350px;
     }
 </style>

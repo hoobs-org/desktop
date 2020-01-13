@@ -16,7 +16,7 @@
         },
 
         props: {
-            value: Object
+            value: String
         }
     }
 </script>

@@ -133,6 +133,7 @@
 
         destroyed() {
             for (let i = 0; i < this.devices.length; i++) {
+                this.device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
                 this.device.wait.stop(this.devices[i].ip, this.devices[i].port, true);
             }
         },
@@ -212,6 +213,8 @@
                 this.$store.commit("resetStore");
 
                 for (let i = 0; i < this.devices.length; i++) {
+                    this.device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
+
                     this.device.wait.start(this.devices[i].ip, this.devices[i].port, () => {
                         this.connectInstance(this.devices[i].ip, this.devices[i].port, this.devices[i].hostname);
                     }, true);
@@ -277,13 +280,10 @@
                     };
 
                     this.sockets[instance].socket.onopen = () => {
-                        this.$store.commit("deviceConnected");
                         this.sockets[instance].socket.send("{HISTORY}");
                     };
 
                     this.sockets[instance].socket.onclose = () => {
-                        this.$store.commit("deviceDisconected");
-
                         if (!this.sockets[instance].closing) {
                             setTimeout(() => {
                                 this.device.wait.start(ip, port, () => {
@@ -298,6 +298,17 @@
                             this.sockets[instance].socket.close();
                         }
                     };
+
+                    this.$store.commit("deviceConnected");
+
+                    this.device.heartbeat.start(ip, port, () => {
+                        if (this.sockets[instance] && this.sockets[instance].socket) {
+                            this.sockets[instance].closing = true;
+                            this.sockets[instance].socket.close();
+                        }
+
+                        this.$store.commit("deviceDisconected");
+                    });
                 }, delay);
             },
 

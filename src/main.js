@@ -25,6 +25,7 @@ const settings = new Settings({
 
 const scanners = {};
 const persistant = {};
+const heartbeats = {};
 
 Vue.mixin({
     data: () => {
@@ -40,6 +41,27 @@ Vue.mixin({
             },
 
             device: {
+                heartbeat: {
+                    start(ip, port, callback, interval) {
+                        if (heartbeats[`${ip}:${port}`]) {
+                            heartbeats[`${ip}:${port}`].stop();
+                        }
+    
+                        heartbeats[`${ip}:${port}`] = new Scanner("hoobs");
+                        heartbeats[`${ip}:${port}`].heartbeat(ip, port, callback, interval);
+                    },
+
+                    stop(ip, port) {
+                        if (heartbeats[`${ip}:${port}`]) {
+                            heartbeats[`${ip}:${port}`].stop();
+                        }
+
+                        heartbeats[`${ip}:${port}`] = null;
+
+                        delete heartbeats[`${ip}:${port}`];
+                    }
+                },
+
                 wait: {
                     start(ip, port, callback, persist, interval) {
                         if (persist) {

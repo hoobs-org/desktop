@@ -27,6 +27,28 @@ export default class Scanner extends EventEmitter {
         }
     }
 
+    async heartbeat(ip, port, callback, interval) {
+        const test = await this.detect(ip, port);
+
+        interval = interval || 5000;
+
+        if (test && test !== "") {
+            this.timer = setTimeout(() => {
+                this.heartbeat(ip, port, callback, interval);
+            }, interval);
+        } else {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+
+            this.timer = null;
+
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
     async wait(ip, port, callback, interval) {
         const test = await this.detect(ip, port);
 

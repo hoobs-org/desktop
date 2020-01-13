@@ -1,5 +1,5 @@
 <template>
-    <div id="app" v-on:click="() => { this.show.menu.header = false }" class="hoobs-dark">
+    <div id="app" v-on:click="$store.commit('hideAllMenus')" class="hoobs-dark">
         <div v-on:click="titleToggle()" class="header">
             <div class="logo">
                 <svg width="20" height="20" viewBox="0 0 80 80.92" xmlns="http://www.w3.org/2000/svg">
@@ -10,7 +10,7 @@
         </div>
         <div class="chrome">
             <button v-if="!serviceRoute() && connected > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
-            <button v-on:click.stop="() => { show.menu.header = !show.menu.header }" class="title-action icon">menu</button>
+            <button v-on:click.stop="$store.commit('toggleMenu', 'header')" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
             <button v-if="maximized" v-on:click="windowToggle()" class="title-button icon">fullscreen_exit</button>
@@ -24,7 +24,7 @@
         <div class="notifications">
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
         </div>
-        <dropdown v-if="show.menu.header" class="header-menu">
+        <dropdown v-if="menus['header']" class="header-menu">
             <div class="item" v-on:click="() => { show.about = true }">About HOOBS</div>
             <div class="item" v-on:click="() => { show.help = true }">Help</div>
             <div v-if="!serviceRoute() && devices.length > 0" class="seperator"></div>
@@ -64,11 +64,8 @@
                 sockets: {},
                 maximized: false,
                 show: {
-                    menu: {
-                        header: false
-                    },
                     about: false,
-                    help: false,
+                    help: false
                 },
                 header: {
                     delay: 700,
@@ -81,6 +78,10 @@
         },
 
         computed: {
+            menus() {
+                return this.$store.state.menus;
+            },
+
             connected() {
                 return this.$store.state.connected;
             },
@@ -482,7 +483,7 @@
 
     #app .header-menu {
         position: absolute;
-        top: 27px;
+        top: 32px;
         right: 95px;
         z-index: 1000;
     }

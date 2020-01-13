@@ -26,11 +26,15 @@
         },
 
         mounted() {
-            this.$el.scrollTo(0, this.$el.scrollHeight);
+            if (this.connected > 0) {
+                this.$el.scrollTo(0, this.$el.scrollHeight);
+            }
         },
 
         updated() {
-            this.$el.scrollTo(0, this.$el.scrollHeight);
+            if (this.connected > 0) {
+                this.$el.scrollTo(0, this.$el.scrollHeight);
+            }
         }
     }
 </script>

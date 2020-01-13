@@ -8,17 +8,40 @@
         <div class="flow">
             <div class="section">
                 <div class="software">
-                    <b>HOOBS Server</b>
-                    <span v-if="status">Current Version: {{ status["hoobs_version"] }}</span>
-                    <div v-if="working" class="working">
-                        <marquee :height="3" color="#feb400" background="#856a3b" />
+                    <div class="details">
+                        <b>HOOBS Server</b>
+                        <span v-if="status">Current Version: {{ status["hoobs_version"] }}</span>
+                        <div v-if="show.working" class="working">
+                            <marquee :height="3" color="#feb400" background="#856a3b" />
+                        </div>
+                        <div v-else-if="updates.length > 0" class="updates">
+                            <b>{{ updates[0].version }} Update Available</b>
+                            <br>
+                            <div class="button button-primary" v-on:click="updateSystem()">Update</div>
+                        </div>
+                        <div v-else class="updates">
+                            <b>Up to Date</b>
+                            <br>
+                            <div class="button" v-on:click="$browse('https://github.com/hoobs-org/hoobs-core')">Details</div>
+                        </div>
                     </div>
-                    <div v-else-if="updates.length > 0" class="updates">
-                        <b>{{ updates[0].version }} Update Available</b><br>
-                        <div class="button button-primary" v-on:click="updateSystem()">Update</div>
+                    <div class="action-cell">
+                        <router-link v-if="show.terminal" :to="`/terminal/${device.mac}/${device.port}`" title="Terminal" class="icon action-icon">code</router-link>
                     </div>
-                    <div v-else class="updates">
-                        <b>Up to Date</b>
+                    <div>
+                        <div v-if="(show.restart || show.reboot) && show.seperators" class="action-seperator"></div>
+                    </div>
+                    <div class="action-cell">
+                        <confirm v-if="show.restart" value="Restart Bridge" icon="cached" title="Are you sure you want to restart the bridge?" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
+                    </div>
+                    <div class="action-cell">
+                        <confirm v-if="show.reboot" value="Reboot Device" icon="power_settings_new" title="Are you sure you want to reboot this device?" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
+                    </div>
+                    <div>
+                        <div v-if="show.extra && show.seperators" class="action-seperator"></div>
+                    </div>
+                    <div class="action-cell">
+                        <div v-if="show.extra" v-on:click.stop="$store.commit('toggleMenu', 'system')" class="icon action-icon">menu</div>
                     </div>
                 </div>
                 <h2 v-if="status">Software</h2>
@@ -68,6 +91,15 @@
                     </tbody>
                 </table>
             </div>
+            <dropdown v-if="menus['system']" class="system-menu">
+                <div class="item">Reset Connection</div>
+                <div class="item">Generate New Username</div>
+                <div class="seperator"></div>
+                <div class="item">System Backup</div>
+                <div class="item">System Restore</div>
+                <div class="seperator"></div>
+                <div class="item">Factory Reset</div>
+            </dropdown>
         </div>
     </div>
 </template>
@@ -76,13 +108,17 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
+    import Confirm from "@/components/confirm.vue";
     import Marquee from "@/components/marquee.vue";
+    import Dropdown from "@/components/dropdown.vue";
 
     export default {
         name: "system",
 
         components: {
-            "marquee": Marquee
+            "confirm": Confirm,
+            "marquee": Marquee,
+            "dropdown": Dropdown,
         },
 
         data() {
@@ -92,8 +128,21 @@
                 filesystem: null,
                 temp: null,
                 device: null,
-                working: true,
+                show: {
+                    terminal: false,
+                    restart: false,
+                    reboot: false,
+                    extra: false,
+                    seperators: false,
+                    working: false
+                },
                 updates: []
+            }
+        },
+
+        computed: {
+            menus() {
+                return this.$store.state.menus;
             }
         },
 
@@ -103,9 +152,13 @@
 
             if (index > -1) {
                 this.device = devices[index];
+                this.toggleFields(false, false, false, false, false);
 
                 this.Device.wait.start(this.device.ip, this.device.port, async () => {
                     await this.load();
+
+                    this.toggleFields(true, true, true, true, true);
+
                 });
             }
         },
@@ -115,12 +168,47 @@
         },
 
         methods: {
+            toggleFields(terminal, restart, reboot, extra, seperators) {
+                this.show.terminal = terminal;
+                this.show.restart = restart;
+                this.show.reboot = reboot;
+                this.show.extra = extra;
+                this.show.seperators = seperators;
+            },
+
+            async restartDevice() {
+                this.toggleFields(true, false, false, false, true);
+                this.show.working = true;
+
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.post(this.device.ip, this.device.port, "/service/restart");
+
+                this.show.working = false;
+                this.toggleFields(true, true, true, true, true);
+            },
+
+            async rebootDevice() {
+                this.toggleFields(false, false, false, false, false);
+                this.show.working = true;
+
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.post(this.device.ip, this.device.port, "/service/stop");
+                await this.API.put(this.device.ip, this.device.port, "/reboot");
+
+                setTimeout(async () => {
+                    this.Device.wait.start(this.device.ip, this.device.port, () => {
+                        this.show.working = false;
+                        this.toggleFields(true, true, true, true, true);
+                    });
+                }, 5000);
+            },
+
             async reload() {
                 this.info = null;
                 this.status = null;
                 this.filesystem = null;
                 this.temp = null;
-                this.working = true;
+                this.show.working = true;
                 this.updates = [];
 
                 setTimeout(async () => {
@@ -138,12 +226,12 @@
                 this.updates = await this.API.get(this.device.ip, this.device.port, "/system/updates");
 
                 setTimeout(() => {
-                    this.working = false;
+                    this.show.working = false;
                 }, 100);
             },
 
             async updateSystem() {
-                this.working = true;
+                this.show.working = true;
 
                 await this.API.login(this.device.ip, this.device.port);
                 await this.API.post(this.device.ip, this.device.port, "/service/stop");
@@ -234,6 +322,7 @@
     #system .flow {
         flex: 1;
         display: flex;
+        position: relative;
         flex-direction: column;
         padding: 0 3px 3px 3px;
         overflow: auto;
@@ -246,9 +335,12 @@
     }
 
     #system .software {
+        height: 116px;
         padding: 20px;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
         background: #262626;
         box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.24),
                     0 2px 1px -1px rgba(0, 0, 0, 0.22),
@@ -257,6 +349,43 @@
         color: #999 !important;
         font-size: 14px;
         margin: 7px 0 30px 0;
+    }
+
+    #system .software .details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #system .software .action-cell {
+        padding: 20px 0 20px 0;
+    }
+
+    #system .software .action-cell:last-child {
+        padding: 20px 20px 20px 0;
+    }
+
+    #system .software .action-cell .action-icon,
+    #system .software .action-cell .action-icon:link,
+    #system .software .action-cell .action-icon:active,
+    #system .software .action-cell .action-icon:visited {
+        margin: 0 0 0 7px;
+        font-size: 18px;
+        text-decoration: none;
+        color: #999;
+        cursor: pointer;
+    }
+
+    #system .software .action-cell .action-icon:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    #system .software .action-seperator {
+        width: 8px;
+        height: 20px;
+        margin: 0 7px;
+        border-right: 1px #5e5e5e solid;
     }
 
     #system .software .updates {
@@ -301,5 +430,12 @@
     #system .section table .empty {
         padding: 30px;
         text-align: center;
+    }
+
+    #system .system-menu {
+        position: absolute;
+        top: 96px;
+        right: 45px;
+        z-index: 1000;
     }
 </style>

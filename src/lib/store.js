@@ -5,6 +5,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
+        menus: {
+            header: false,
+            system: false
+        },
         messages: [],
         version: {},
         running: {},
@@ -28,6 +32,30 @@ export default new Vuex.Store({
             state.memory = {};
             state.temp = {};
             state.notifications = [];
+        },
+
+        toggleMenu(state, name) {
+            const keys = Object.keys(state.menus);
+
+            for (let i = 0; i < keys.length; i++) {
+                if (keys[i] === name) {
+                    state.menus[name] = !state.menus[name];
+                } else {
+                    state.menus[keys[i]] = false;
+                }
+            }
+        },
+
+        hideMenu(state, name) {
+            state.menus[name] = false;
+        },
+
+        hideAllMenus(state) {
+            const keys = Object.keys(state.menus);
+
+            for (let i = 0; i < keys.length; i++) {
+                state.menus[keys[i]] = false;
+            }
         },
 
         deviceConnected(state) {

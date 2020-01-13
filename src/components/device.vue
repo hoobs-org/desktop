@@ -77,6 +77,7 @@
                     restart: false,
                     reboot: false,
                     remove: false,
+                    seperators: false,
                     working: false
                 }
             }

@@ -1,5 +1,5 @@
 <template>
-    <div id="loader">
+    <div v-if="show" id="loader">
         <div class="message">{{ value }}</div>
         <marquee :height="3" color="#feb400" background="#856a3b" />
     </div>
@@ -15,8 +15,27 @@
             "marquee": Marquee
         },
 
+        data() {
+            return {
+                timer: null,
+                show: false
+            }
+        },
+
         props: {
             value: String
+        },
+
+        mounted() {
+            this.timer = setTimeout(() => {
+                this.show = true;
+            }, 250);
+        },
+
+        destroyed() {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
         }
     }
 </script>

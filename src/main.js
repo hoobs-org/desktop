@@ -10,7 +10,7 @@ import Settings from "./lib/settings";
 import Scanner from "./lib/scanner";
 import Encryption from "./lib/encryption";
 
-import { remote } from "electron";
+import { remote, ipcRenderer } from "electron";
 
 const settings = new Settings({
     name: "preferences",
@@ -203,11 +203,24 @@ Vue.mixin({
         },
 
         $window() {
+            return remote.getCurrentWindow();
+        },
+
+        $focused() {
             return remote.BrowserWindow.getFocusedWindow();
         },
 
         $browse(url) {
             remote.shell.openExternal(url);
+        },
+
+        async $download(url) {
+            ipcRenderer.send("download", {
+                url,
+                properties: {
+                    saveAs: true
+                }
+            });
         },
 
         $maximized() {

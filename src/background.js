@@ -1,20 +1,14 @@
-import {
-    app,
-    protocol,
-    BrowserWindow
-} from "electron";
+import { app, protocol,  BrowserWindow, ipcMain } from "electron";
+import { createProtocol, installVueDevtools } from "vue-cli-plugin-electron-builder/lib";
 
-import {
-    createProtocol,
-    installVueDevtools
-} from "vue-cli-plugin-electron-builder/lib";
+import { download } from "electron-dl";
 
 import windowStateKeeper from "electron-window-state";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 let state;
-let win;
+let window;
 
 protocol.registerSchemesAsPrivileged([{
     scheme: "app",
@@ -30,7 +24,7 @@ function createWindow() {
         defaultHeight: 800
     });
 
-    win = new BrowserWindow({
+    window = new BrowserWindow({
         title: "HOOBS",
         x: state.x,
         y: state.y,
@@ -45,18 +39,22 @@ function createWindow() {
         }
     });
 
-    state.manage(win);
+    state.manage(window);
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
-        win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+        window.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
     } else {
         createProtocol("app");
 
-        win.loadURL("app://./index.html");
+        window.loadURL("app://./index.html");
     }
 
-    win.on("closed", () => {
-        win = null
+    ipcMain.on("download", (_event, payload) => {
+        download(BrowserWindow.getFocusedWindow(), payload.url, payload.properties).then(d => window.webContents.send("download_complete", d.getSavePath()));
+    });
+
+    window.on("closed", () => {
+        window = null
     });
 }
 
@@ -67,7 +65,7 @@ app.on("window-all-closed", () => {
 })
 
 app.on("activate", () => {
-    if (win === null) {
+    if (window === null) {
         createWindow();
     }
 })
@@ -79,7 +77,6 @@ app.on("ready", async () => {
         } catch (e) {
             console.error("Vue Devtools failed to install:", e.toString());
         }
-
     }
 
     createWindow();

@@ -92,14 +92,32 @@
                 </table>
             </div>
             <dropdown v-if="menus['system']" class="system-menu">
-                <div class="item">Reset Connection</div>
-                <div class="item">Generate New Username</div>
+                <div class="item" v-on:click="() => { confirm.connection = true }">Reset Connection</div>
+                <div class="item" v-on:click="() => { confirm.username = true }">Generate New Username</div>
                 <div class="seperator"></div>
-                <div class="item">System Backup</div>
+                <div class="item" v-on:click="systemBackup()">System Backup</div>
                 <div class="item">System Restore</div>
                 <div class="seperator"></div>
-                <div class="item">Factory Reset</div>
+                <div class="item" v-on:click="() => { confirm.reset = true }">Factory Reset</div>
             </dropdown>
+            <modal v-if="confirm.connection" v-on:confirm="resetConnection()" v-on:cancel="() => { confirm.connection = false }" width="350px">
+                <b>Are you sure you want to reset the connection?</b>
+                <p>
+                    This will disconnect this device from Apple Home. It will also remove all cached devices and connections. This action can not be reversed.
+                </p>
+            </modal>
+            <modal v-if="confirm.username" v-on:confirm="generateUsername()" v-on:cancel="() => { confirm.username = false }" width="350px">
+                <b>Are you sure you want to rgenerate the bridge username?</b>
+                <p>
+                    This will disconnect this device from Apple Home.
+                </p>
+            </modal>
+            <modal v-if="confirm.reset" v-on:confirm="factoryReset()" v-on:cancel="() => { confirm.reset = false }" width="350px">
+                <b>Are you sure you want to factory reset this device?</b>
+                <p>
+                    This will remove all configurations and plugins. This action can not be reversed.
+                </p>
+            </modal>
         </div>
     </div>
 </template>
@@ -108,6 +126,7 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
+    import Modal from "@/components/modal.vue";
     import Confirm from "@/components/confirm.vue";
     import Marquee from "@/components/marquee.vue";
     import Dropdown from "@/components/dropdown.vue";
@@ -116,6 +135,7 @@
         name: "system",
 
         components: {
+            "modal": Modal,
             "confirm": Confirm,
             "marquee": Marquee,
             "dropdown": Dropdown,
@@ -136,6 +156,11 @@
                     seperators: false,
                     working: false
                 },
+                confirm: {
+                    connection: false,
+                    username: false,
+                    reset: false
+                },
                 updates: []
             }
         },
@@ -152,13 +177,13 @@
 
             if (index > -1) {
                 this.device = devices[index];
+
                 this.toggleFields(false, false, false, false, false);
 
                 this.Device.wait.start(this.device.ip, this.device.port, async () => {
                     await this.load();
 
                     this.toggleFields(true, true, true, true, true);
-
                 });
             }
         },
@@ -176,19 +201,38 @@
                 this.show.seperators = seperators;
             },
 
+            async systemBackup() {
+                this.toggleFields(false, false, false, false, false);
+
+                this.show.working = true;
+
+                const response = await this.API.post(this.device.ip, this.device.port, "/backup");
+
+                if (response.success) {
+                    this.$download(`http://${this.device.ip}:${this.device.port}${response.filename}`);
+                }
+
+                this.show.working = false;
+
+                this.toggleFields(true, true, true, true, true);
+            },
+
             async restartDevice() {
                 this.toggleFields(true, false, false, false, true);
+
                 this.show.working = true;
 
                 await this.API.login(this.device.ip, this.device.port);
                 await this.API.post(this.device.ip, this.device.port, "/service/restart");
 
                 this.show.working = false;
+
                 this.toggleFields(true, true, true, true, true);
             },
 
             async rebootDevice() {
                 this.toggleFields(false, false, false, false, false);
+
                 this.show.working = true;
 
                 await this.API.login(this.device.ip, this.device.port);
@@ -198,9 +242,98 @@
                 setTimeout(async () => {
                     this.Device.wait.start(this.device.ip, this.device.port, () => {
                         this.show.working = false;
+
                         this.toggleFields(true, true, true, true, true);
                     });
                 }, 5000);
+            },
+
+            async factoryReset() {
+                this.confirm.reset = false;
+
+                this.toggleFields(false, false, false, false, false);
+
+                this.show.working = true;
+
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.put(this.device.ip, this.device.port, "/reset");
+
+                setTimeout(async () => {
+                    this.Device.wait.start(this.device.ip, this.device.port, () => {
+                        this.show.working = false;
+
+                        this.toggleFields(true, true, true, true, true);
+                    });
+                }, 5000);
+            },
+
+            async resetConnection() {
+                this.confirm.connection = false;
+
+                this.toggleFields(true, false, false, false, true);
+
+                this.show.working = true;
+
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.post(this.device.ip, this.device.port, "/service/stop");
+                await this.API.post(this.device.ip, this.device.port, "/service/clean");
+
+                const username = (await this.API.get(this.device.ip, this.device.port, "/config/generate")).username || "";
+                const config = await this.API.get(this.device.ip, this.device.port, "/config");
+
+                const data = {
+                    client: config.client,
+                    bridge: config.bridge,
+                    description: config.description,
+                    ports: config.ports,
+                    accessories: config.accessories || [],
+                    platforms: config.platforms || []
+                }
+
+                if (username && username !== "") {
+                    data.bridge.username = username;
+                }
+
+                await this.API.post(this.device.ip, this.device.port, "/config", data);
+                await this.API.post(this.device.ip, this.device.port, "/service/start");
+
+                this.show.working = false;
+
+                this.toggleFields(true, true, true, true, true);
+            },
+
+            async generateUsername() {
+                this.confirm.username = false;
+
+                this.toggleFields(true, false, false, false, true);
+
+                this.show.working = true;
+
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.post(this.device.ip, this.device.port, "/service/stop");
+
+                const username = (await this.API.get(this.device.ip, this.device.port, "/config/generate")).username || "";
+                const config = await this.API.get(this.device.ip, this.device.port, "/config");
+
+                const data = {
+                    client: config.client,
+                    bridge: config.bridge,
+                    description: config.description,
+                    ports: config.ports,
+                    accessories: config.accessories || [],
+                    platforms: config.platforms || []
+                }
+
+                if (username && username !== "") {
+                    data.bridge.username = username;
+                }
+
+                await this.API.post(this.device.ip, this.device.port, "/config", data);
+                await this.API.post(this.device.ip, this.device.port, "/service/start");
+
+                this.show.working = false;
+
+                this.toggleFields(true, true, true, true, true);
             },
 
             async reload() {

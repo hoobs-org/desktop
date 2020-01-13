@@ -85,10 +85,12 @@
 
         async mounted() {
             this.show.working = true;
+
             this.toggleFields(false, false, false, true, true);
 
             this.Device.wait.start(this.value.ip, this.value.port, () => {
                 this.show.working = false;
+
                 this.toggleFields(true, true, true, true, true);
             });
         },
@@ -108,17 +110,20 @@
 
             async restartDevice() {
                 this.toggleFields(true, false, false, true, true);
+
                 this.show.working = true;
 
                 await this.API.login(this.value.ip, this.value.port);
                 await this.API.post(this.value.ip, this.value.port, "/service/restart");
 
                 this.show.working = false;
+
                 this.toggleFields(true, true, true, true, true);
             },
 
             async rebootDevice() {
                 this.toggleFields(false, false, false, true, true);
+
                 this.show.working = true;
 
                 await this.API.login(this.value.ip, this.value.port);
@@ -128,6 +133,7 @@
                 setTimeout(async () => {
                     this.Device.wait.start(this.value.ip, this.value.port, () => {
                         this.show.working = false;
+
                         this.toggleFields(true, true, true, true, true);
                     });
                 }, 5000);

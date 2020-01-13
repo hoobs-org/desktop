@@ -19,6 +19,7 @@
         "core-js": "^3.6.2",
         "decamelize": "^3.2.0",
         "electron": "^7.1.8",
+        "electron-dl": "^3.0.0",
         "electron-window-state": "^5.0.3",
         "eslint": "^6.8.0",
         "eslint-plugin-vue": "^6.1.2",

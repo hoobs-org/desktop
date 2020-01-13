@@ -28,6 +28,12 @@
             value: Object
         },
 
+        data() {
+            return {
+                timer: null
+            }
+        },
+
         computed: {
             notifications() {
                 return this.$store.state.notifications;
@@ -35,9 +41,9 @@
         },
 
         mounted() {
-            setTimeout(() => {
+            this.timer = setTimeout(() => {
                 this.dismissNotification();
-            }, 1000 * 7);
+            }, 1000 * 3);
         },
 
         methods: {

@@ -1,0 +1,212 @@
+<template>
+    <div v-if="!serviceRoute() && devices.length > 0" id="navigation">
+        <div class="routes">
+            <div class="action-link" v-on:click.stop="() => { show.tips = !show.tips }">
+                <span v-if="show.tips" class="icon">chevron_left</span>
+                <span v-else class="icon">chevron_right</span>
+            </div>
+            <div class="seperator">
+                <div></div>
+            </div>
+            <router-link to="/" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('home')">dashboard</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('home')">{{ routeName('home') }}</span>
+            </router-link>
+            <router-link to="/accessories" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('accessories', 'layout')">{{ routeName('accessories') }}</span>
+            </router-link>
+            <router-link to="/log" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('log')">subject</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('log')">{{ routeName('log') }}</span>
+            </router-link>
+            <router-link to="/users" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('users')">people</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('users')">{{ routeName('users') }}</span>
+            </router-link>
+            <router-link to="/plugins" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('plugins', 'plugin', 'search')">{{ routeName('plugins') }}</span>
+            </router-link>
+        </div>
+        <div class="routes">
+            <router-link to="/config" @click.native="() => { show.tips = false }">
+                <span v-bind:class="routeIcon('config')">settings</span>
+            </router-link>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "navigation",
+
+        props: {
+            route: String,
+            devices: {
+                type: Array,
+                default: () => []
+            }
+        },
+
+        data() {
+            return {
+                show: {
+                    tips: false
+                },
+            }
+        },
+
+        methods: {
+            serviceRoute() {
+                switch(this.$route.name) {
+                    case "devices":
+                    case "system":
+                    case "terminal":
+                    case "etcher":
+                        return true;
+
+                    default:
+                        return false;
+                }
+            },
+
+            routeName(value) {
+                switch (value) {
+                    case "login":
+                        return "";
+
+                    case "help":
+                        return "Help";
+
+                    case "system":
+                    case "terminal":
+                        return "System";
+
+                    case "profile":
+                        return "Profile";
+
+                    case "home":
+                        return "Dashboard";
+
+                    case "log":
+                        return "Log";
+
+                    case "users":
+                        return "Users";
+
+                    case "plugin":
+                    case "plugins":
+                    case "search":
+                    case "browse":
+                        return "Plugins";
+
+                    case "config":
+                    case "config-advanced":
+                        return "Configuration";
+
+                    case "accessories":
+                    case "layout":
+                        return "Accessories";
+
+                    default:
+                        return "";
+                }
+            },
+
+            activeRoute(...values) {
+                if (values.filter(r => this.route === r).length > 0) {
+                    return "route-link route-link-on";
+                }
+
+                return "route-link";
+            },
+
+            routeIcon(...values) {
+                if (values.filter(r => this.route === r).length > 0) {
+                    return "icon icon-on";
+                }
+
+                return "icon";
+            }
+        }
+    }
+</script>
+
+<style scoped>
+    #navigation {
+        min-width: 57px;
+        padding: 37px 0 15px 0;
+        background: #262626;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        user-select: none;
+        z-index: 100;
+    }
+
+    #navigation .routes {
+        min-width: 57px;
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        align-items: center;
+    }
+
+    #navigation .seperator {
+        width: 100%;
+        height: 1px;
+        margin: 10px 0 0 0;
+        padding: 0 17px;
+        box-sizing: border-box;
+    }
+
+    #navigation .seperator div {
+        background: #3d3d3d;
+        height: 1px;
+    }
+
+    #navigation a,
+    #navigation a:link,
+    #navigation a:active,
+    #navigation a:visited,
+    #navigation .action-link {
+        color: #bababa;
+        text-decoration: none;
+        margin-top: 15px;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        align-content: center;
+        justify-content: flex-start;
+        cursor: pointer;
+    }
+
+    #navigation a:hover,
+    #navigation .action-link:hover {
+        color: #fff !important;
+        text-decoration: none;
+    }
+
+    #navigation .route-link {
+        font-size: 17px;
+        margin: 0 24px 0 -6px;
+    }
+
+    #navigation .icon {
+        margin: 0 16px;
+    }
+
+    #navigation .route-link-on,
+    #navigation .icon-on,
+    #navigation .route-link-on:hover,
+    #navigation .icon-on:hover {
+        color: #feb400 !important;
+    }
+
+    #navigation .icon svg {
+        width: 24px;
+        height: 24px;
+    }
+</style>

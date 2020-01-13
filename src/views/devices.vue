@@ -1,13 +1,15 @@
 <template>
     <div id="devices">
         <div class="actions">
-            <div v-if="devices.length > 0" v-on:click="$emit('close')" title="Back" class="icon">arrow_back</div>
+            <div v-if="devices.length > 0" v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
+            <div v-if="devices.length > 0" class="action-seperator"></div>
+            <router-link to="/etcher" title="Scan Network" class="icon">sd_storage</router-link>
             <div v-if="devices.length > 0" class="action-seperator"></div>
             <div v-on:click="scanNetwork()" title="Scan Network" class="icon">refresh</div>
             <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
         </div>
         <div class="flow">
-            <device v-for="(device) in devices" :key="device.mac" :joined="true" :value="device" v-on:details="() => { selected = device }" v-on:terminal="() => { terminal = device }" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
+            <device v-for="(device) in devices" :key="device.mac" :joined="true" :value="device" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
             <device v-for="(device) in available" :key="device.mac" :joined="false" :value="device" v-on:join="addDevice(device.mac, device.ip, device.port, device.hostname)" />
             <div v-if="loaded && !show.scanning && available.length === 0 && devices.length === 0" class="empty">
                 <div class="message">
@@ -19,12 +21,6 @@
                 <div class="message">Searching for Devices ({{ show.progress.toFixed(1) }}%)</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
-        </div>
-        <div v-if="selected" class="overlay">
-            <system v-on:close="() => { selected = null }" :value="selected" />
-        </div>
-        <div v-if="terminal" class="overlay terminal">
-            <terminal v-on:close="() => { terminal = null }" :value="terminal" />
         </div>
         <modal v-if="show.add || show.join" v-on:confirm="saveDevice()" v-on:cancel="closeAddDevice()" title="Add Device" ok-title="Add Device" width="350px">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="saveDevice()">
@@ -52,8 +48,6 @@
     import PasswordField from "@/components/password-field.vue";
     import PortField from "@/components/port-field.vue";
     import Device from "@/components/device.vue";
-    import System from "@/components/system.vue";
-    import Terminal from "@/components/terminal.vue";
 
     export default {
         name: "devices",
@@ -64,9 +58,7 @@
             "text-field": TextField,
             "password-field": PasswordField,
             "port-field": PortField,
-            "device": Device,
-            "system": System,
-            "terminal": Terminal
+            "device": Device
         },
 
         data() {
@@ -88,7 +80,6 @@
                 },
                 devices: [],
                 available: [],
-                selected: null,
                 terminal: null,
                 errors: {
                     add: ""
@@ -97,7 +88,7 @@
         },
 
         async mounted() {
-            this.devices = this.settings.get("devices");
+            this.devices = this.Settings.get("devices");
             this.available = [];
             this.scanner = new Scanner("hoobs", 8080);
 
@@ -152,7 +143,7 @@
 
                 if (index > -1 && this.devices[index] !== ip) {
                     this.devices[index].ip = ip;
-                    this.settings.set("devices", this.devices);
+                    this.Settings.set("devices", this.devices);
                 }
             },
 
@@ -293,7 +284,7 @@
                     }
 
                     if (errors.length === 0) {
-                        const response = await this.api.post(this.values.ip, this.values.port, "/auth", {
+                        const response = await this.API.post(this.values.ip, this.values.port, "/auth", {
                             username: this.values.username,
                             password: this.values.password
                         });
@@ -321,7 +312,7 @@
                                 password: this.values.password
                             });
 
-                            this.settings.set("devices", this.devices);
+                            this.Settings.set("devices", this.devices);
 
                             this.closeAddDevice();
                         } else {
@@ -334,14 +325,14 @@
             },
 
             removeDevice(mac, ip, port) {
-                this.device.wait.stop(ip, port);
-                this.device.wait.stop(ip, port, true);
+                this.Device.wait.stop(ip, port);
+                this.Device.wait.stop(ip, port, true);
 
                 const index = this.devices.findIndex(d => d.mac === mac && d.port === port);
 
                 if (index >= 0) {
                     this.devices.splice(index, 1);
-                    this.settings.set("devices", this.devices);
+                    this.Settings.set("devices", this.devices);
                 }
             },
 
@@ -357,6 +348,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 7px 20px 20px 20px;
+        overflow: hidden;
     }
 
     #devices .empty {
@@ -388,14 +381,19 @@
         border-bottom: 1px #424242 solid;
     }
 
-    #devices .actions .icon {
+    #devices .actions .icon,
+    #devices .actions .icon:link,
+    #devices .actions .icon:active,
+    #devices .actions .icon:visited {
         font-size: 18px;
+        color: #999;
         margin: 0 7px 0 0;
         cursor: pointer;
     }
 
     #devices .actions .icon:hover {
         color: #fff;
+        text-decoration: none;
     }
 
     #devices .actions .action-seperator {
@@ -502,21 +500,5 @@
         text-align: left;
         color: #e30505;
         margin: 0 0 14px 0;
-    }
-
-    #devices .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        padding: 44px 20px 20px 20px;
-        display: flex;
-        background: #262626;
-        box-sizing: border-box;
-    }
-
-    #devices .terminal {
-        padding: 44px 20px 10px 20px;
     }
 </style>

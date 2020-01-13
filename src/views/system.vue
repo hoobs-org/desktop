@@ -1,7 +1,7 @@
 <template>
     <div id="system">
         <div class="actions">
-            <div v-on:click="$emit('close')" title="Back" class="icon">arrow_back</div>
+            <div v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
             <div class="action-seperator"></div>
             <div v-on:click="reload()" title="Refresh Device Details" class="icon">refresh</div>
         </div>
@@ -85,29 +85,33 @@
             "marquee": Marquee
         },
 
-        props: {
-            value: Object
-        },
-
         data() {
             return {
                 info: null,
                 status: null,
                 filesystem: null,
                 temp: null,
+                device: null,
                 working: true,
                 updates: []
             }
         },
 
         async mounted() {
-            this.device.wait.start(this.value.ip, this.value.port, async () => {
-                await this.load();
-            });
+            const devices = this.Settings.get("devices");
+            const index = devices.findIndex(d => d.mac === this.$route.params.mac && d.port === parseInt(this.$route.params.port, 10))
+
+            if (index > -1) {
+                this.device = devices[index];
+
+                this.Device.wait.start(this.device.ip, this.device.port, async () => {
+                    await this.load();
+                });
+            }
         },
 
         destroyed() {
-            this.device.wait.stop(this.value.ip, this.value.port);
+            this.Device.wait.stop(this.device.ip, this.device.port);
         },
 
         methods: {
@@ -125,13 +129,13 @@
             },
 
             async load() {
-                await this.api.login(this.value.ip, this.value.port);
+                await this.API.login(this.device.ip, this.device.port);
 
-                this.filesystem = await this.api.get(this.value.ip, this.value.port, "/system/filesystem");
-                this.temp = await this.api.get(this.value.ip, this.value.port, "/system/temp");
-                this.status = await this.api.get(this.value.ip, this.value.port, "/status");
-                this.info = await this.api.get(this.value.ip, this.value.port, "/system");
-                this.updates = await this.api.get(this.value.ip, this.value.port, "/system/updates");
+                this.filesystem = await this.API.get(this.device.ip, this.device.port, "/system/filesystem");
+                this.temp = await this.API.get(this.device.ip, this.device.port, "/system/temp");
+                this.status = await this.API.get(this.device.ip, this.device.port, "/status");
+                this.info = await this.API.get(this.device.ip, this.device.port, "/system");
+                this.updates = await this.API.get(this.device.ip, this.device.port, "/system/updates");
 
                 setTimeout(() => {
                     this.working = false;
@@ -141,19 +145,19 @@
             async updateSystem() {
                 this.working = true;
 
-                await this.api.login(this.value.ip, this.value.port);
-                await this.api.post(this.value.ip, this.value.port, "/service/stop");
-                await this.api.put(this.value.ip, this.value.port, "/update");
+                await this.API.login(this.device.ip, this.device.port);
+                await this.API.post(this.device.ip, this.device.port, "/service/stop");
+                await this.API.put(this.device.ip, this.device.port, "/update");
 
                 setTimeout(async () => {
-                    this.device.wait.start(this.value.ip, this.value.port, () => {
+                    this.Device.wait.start(this.device.ip, this.device.port, () => {
                         this.show.working = false;
                     });
                 }, 5000);
             },
 
             getTemp(value) {
-                if (this.settings.get("units").temperature === "celsius") {
+                if (this.Settings.get("units").temperature === "celsius") {
                     return Math.round(value);
                 }
 
@@ -198,6 +202,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 7px 20px 20px 20px;
+        overflow: hidden;
     }
 
     #system .actions {

@@ -1,7 +1,7 @@
 <template>
     <div id="terminal">
         <div class="actions">
-            <div v-on:click="$emit('close')" title="Back" class="icon">arrow_back</div>
+            <div v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
             <div class="action-seperator"></div>
             <div v-on:click="refreshTerminal()" title="Reload Terminal" class="icon">refresh</div>
         </div>
@@ -20,13 +20,10 @@
     export default {
         name: "terminal",
 
-        props: {
-            value: Object
-        },
-
         data() {
             return {
                 term: null,
+                device: null,
                 socket: null,
                 screen: null,
                 closing: false,
@@ -38,23 +35,30 @@
             this.closing = false;
             this.opening = true;
 
-            this.term = new Terminal({
-                cursorBlink: false,
-                fontSize: 12,
-                theme: {
-                    background: "#262626",
-                    foreground: "#d1d1d1"
-                }
-            });
+            const devices = this.Settings.get("devices");
+            const index = devices.findIndex(d => d.mac === this.$route.params.mac && d.port === parseInt(this.$route.params.port, 10))
 
-            this.screen = new FitAddon();
+            if (index > -1) {
+                this.device = devices[index];
 
-            this.term.loadAddon(this.screen);
-            this.term.loadAddon(new WebLinksAddon());
-            this.term.open(this.$refs.terminal);
+                this.term = new Terminal({
+                    cursorBlink: false,
+                    fontSize: 12,
+                    theme: {
+                        background: "#262626",
+                        foreground: "#d1d1d1"
+                    }
+                });
 
-            this.screen.fit();
-            this.connectTerminal();
+                this.screen = new FitAddon();
+
+                this.term.loadAddon(this.screen);
+                this.term.loadAddon(new WebLinksAddon());
+                this.term.open(this.$refs.terminal);
+
+                this.screen.fit();
+                this.connectTerminal();
+            }
 
             window.addEventListener("resize", this.resizeTerminal);
         },
@@ -84,9 +88,9 @@
             },
 
             connectTerminal() {
-                const session = this.settings.get("sessions")[`${this.value.ip}:${this.value.port}`];
+                const session = this.Settings.get("sessions")[`${this.device.ip}:${this.device.port}`];
 
-                this.socket = new WebSocket(`ws://${this.value.ip}:${this.value.port}/shell?a=${session || ""}&t=${new Date().getTime()}`);
+                this.socket = new WebSocket(`ws://${this.device.ip}:${this.device.port}/shell?a=${session || ""}&t=${new Date().getTime()}`);
 
                 this.socket.onopen = () => {
                     this.term.loadAddon(new AttachAddon(this.socket));
@@ -253,6 +257,7 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 7px 20px 10px 20px;
     }
 
     #terminal .actions {

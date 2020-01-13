@@ -1,5 +1,5 @@
 <template>
-    <div id="app" v-on:click="hideAll()" class="hoobs-dark">
+    <div id="app" v-on:click="() => { this.show.menu.header = false }" class="hoobs-dark">
         <div v-on:click="titleToggle()" class="header">
             <div class="logo">
                 <svg width="20" height="20" viewBox="0 0 80 80.92" xmlns="http://www.w3.org/2000/svg">
@@ -9,7 +9,7 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-if="!show.manageDevices && connected > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
+            <button v-if="!serviceRoute() && connected > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
             <button v-on:click.stop="() => { show.menu.header = !show.menu.header }" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
@@ -17,50 +17,9 @@
             <button v-else v-on:click="windowToggle()" class="title-button icon">fullscreen</button>
             <button v-on:click="$close()" class="title-button icon">close</button>
         </div>
-        <div v-if="!show.manageDevices && !show.etcher && devices.length > 0" class="nav">
-            <div class="routes">
-                <div class="action-link" v-on:click.stop="() => { show.navigation = !show.navigation }">
-                    <span v-if="show.navigation" class="icon">chevron_left</span>
-                    <span v-else class="icon">chevron_right</span>
-                </div>
-                <div class="seperator">
-                    <div></div>
-                </div>
-                <router-link to="/" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('home')">dashboard</span>
-                    <span v-if="show.navigation" v-bind:class="routeActive('home')">{{ routeName('home') }}</span>
-                </router-link>
-                <router-link to="/accessories" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
-                    <span v-if="show.navigation" v-bind:class="routeActive('accessories', 'layout')">{{ routeName('accessories') }}</span>
-                </router-link>
-                <router-link to="/log" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('log')">subject</span>
-                    <span v-if="show.navigation" v-bind:class="routeActive('log')">{{ routeName('log') }}</span>
-                </router-link>
-                <router-link to="/users" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('users')">people</span>
-                    <span v-if="show.navigation" v-bind:class="routeActive('users')">{{ routeName('users') }}</span>
-                </router-link>
-                <router-link to="/plugins" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
-                    <span v-if="show.navigation" v-bind:class="routeActive('plugins', 'plugin', 'search')">{{ routeName('plugins') }}</span>
-                </router-link>
-            </div>
-            <div class="routes">
-                <router-link to="/config" @click.native="() => { show.navigation = false }">
-                    <span v-bind:class="routeIcon('config')">settings</span>
-                </router-link>
-            </div>
-        </div>
+        <navigation :route="$route.name" :devices="devices" />
         <div class="content">
-            <router-view v-if="!show.manageDevices && !show.etcher && devices.length > 0" />
-        </div>
-        <div v-if="show.manageDevices || devices.length === 0" class="overlay">
-            <devices v-on:close="hideOverlays()" />
-        </div>
-        <div v-if="show.etcher" class="overlay">
-            <etcher v-on:exit="hideOverlays()" />
+            <router-view />
         </div>
         <div class="notifications">
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
@@ -68,10 +27,8 @@
         <dropdown v-if="show.menu.header" class="header-menu">
             <div class="item" v-on:click="() => { show.about = true }">About HOOBS</div>
             <div class="item" v-on:click="() => { show.help = true }">Help</div>
-            <div class="seperator"></div>
-            <div class="item" v-on:click="showEtcher()">Write SD Cards</div>
-            <div v-if="!show.manageDevices && devices.length > 0" class="seperator"></div>
-            <div v-if="!show.manageDevices && devices.length > 0" class="item" v-on:click="showDevices()">Manage Devices</div>
+            <div v-if="!serviceRoute() && devices.length > 0" class="seperator"></div>
+            <router-link v-if="!serviceRoute() && devices.length > 0" to="/devices" class="item">Manage Devices</router-link>
         </dropdown>
         <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" cancel-title="Donate" width="450px">
             <about />
@@ -83,11 +40,10 @@
 </template>
 
 <script>
+    import Navigation from "@/components/navigation.vue";
     import Modal from "@/components/modal.vue";
     import Dropdown from "@/components/dropdown.vue";
     import Notification from "@/components/notification.vue";
-    import Devices from "@/components/devices.vue";
-    import Etcher from "@/components/etcher.vue";
     import About from "@/components/about.vue";
     import Help from "@/components/help.vue";
 
@@ -95,11 +51,10 @@
         name: "app",
 
         components: {
+            "navigation": Navigation,
             "modal": Modal,
             "dropdown": Dropdown,
             "notification": Notification,
-            "devices": Devices,
-            "etcher": Etcher,
             "about": About,
             "help": Help
         },
@@ -112,8 +67,6 @@
                     menu: {
                         header: false
                     },
-                    navigation: false,
-                    manageDevices: false,
                     about: false,
                     help: false,
                 },
@@ -140,14 +93,14 @@
         async mounted() {
             this.maximized = this.$maximized();
 
-            this.devices = this.settings.get("devices");
-            this.sessions = this.settings.get("sessions");
+            this.devices = this.Settings.get("devices");
+            this.sessions = this.Settings.get("sessions");
         },
 
         destroyed() {
             for (let i = 0; i < this.devices.length; i++) {
-                this.device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
-                this.device.wait.stop(this.devices[i].ip, this.devices[i].port, true);
+                this.Device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
+                this.Device.wait.stop(this.devices[i].ip, this.devices[i].port, true);
             }
         },
 
@@ -158,102 +111,36 @@
         },
 
         methods: {
-            hideAll() {
-                this.show.menu.header = false;
-                this.show.navigation = false;
-            },
-
-            hideOverlays() {
-                this.show.etcher = false;
-                this.show.manageDevices = false;
-            },
-
-            showDevices() {
-                this.show.etcher = false;
-                this.show.manageDevices = true;
-            },
-
-            showEtcher() {
-                this.show.etcher = true;
-                this.show.manageDevices = false;
-            },
-
-            routeName(name) {
-                switch (name || this.$router.currentRoute.name) {
-                    case "login":
-                        return "";
-
-                    case "help":
-                        return "Help";
-
+            serviceRoute() {
+                switch(this.$route.name) {
+                    case "devices":
                     case "system":
                     case "terminal":
-                        return "System";
-
-                    case "profile":
-                        return "Profile";
-
-                    case "home":
-                        return "Dashboard";
-
-                    case "log":
-                        return "Log";
-
-                    case "users":
-                        return "Users";
-
-                    case "plugin":
-                    case "plugins":
-                    case "search":
-                    case "browse":
-                        return "Plugins";
-
-                    case "config":
-                    case "config-advanced":
-                        return "Configuration";
-
-                    case "accessories":
-                    case "layout":
-                        return "Accessories";
+                    case "etcher":
+                        return true;
 
                     default:
-                        return "";
+                        return false;
                 }
-            },
-
-            routeActive(...controller) {
-                if (controller.filter(r => (this.$router.currentRoute || {}).name === r).length > 0) {
-                    return "route-link route-link-on";
-                }
-
-                return "route-link";
-            },
-
-            routeIcon(...controller) {
-                if (controller.filter(r => (this.$router.currentRoute || {}).name === r).length > 0) {
-                    return "icon icon-on";
-                }
-
-                return "icon";
             },
 
             async connectAll() {
                 this.$store.commit("resetStore");
 
                 for (let i = 0; i < this.devices.length; i++) {
-                    this.device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
+                    this.Device.heartbeat.stop(this.devices[i].ip, this.devices[i].port);
 
-                    this.device.wait.start(this.devices[i].ip, this.devices[i].port, () => {
+                    this.Device.wait.start(this.devices[i].ip, this.devices[i].port, () => {
                         this.connectInstance(this.devices[i].ip, this.devices[i].port, this.devices[i].hostname);
                     }, true);
                 }
             },
 
             async connectInstance(ip, port, hostname) {
-                await this.api.login(ip, port);
+                await this.API.login(ip, port);
 
                 const instance = `${ip}:${port}`;
-                const session = this.settings.get("sessions")[instance];
+                const session = this.Settings.get("sessions")[instance];
 
                 let delay = 0;
 
@@ -314,7 +201,7 @@
                     this.sockets[instance].socket.onclose = () => {
                         if (!this.sockets[instance].closing) {
                             setTimeout(() => {
-                                this.device.wait.start(ip, port, () => {
+                                this.Device.wait.start(ip, port, () => {
                                     this.connectInstance(ip, port, hostname);
                                 }, true);
                             }, 3000);
@@ -329,7 +216,7 @@
 
                     this.$store.commit("deviceConnected");
 
-                    this.device.heartbeat.start(ip, port, () => {
+                    this.Device.heartbeat.start(ip, port, () => {
                         if (this.sockets[instance] && this.sockets[instance].socket) {
                             this.sockets[instance].closing = true;
                             this.sockets[instance].socket.close();
@@ -643,82 +530,6 @@
         margin: 0 7px 0 10px;
         border-right: 1px #5e5e5e solid;
         cursor: default;
-    }
-
-    #app .nav {
-        min-width: 57px;
-        padding: 37px 0 15px 0;
-        background: #262626;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        user-select: none;
-        z-index: 100;
-    }
-
-    #app .nav .routes {
-        min-width: 57px;
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        align-items: center;
-    }
-
-    #app .nav .seperator {
-        width: 100%;
-        height: 1px;
-        margin: 10px 0 0 0;
-        padding: 0 17px;
-        box-sizing: border-box;
-    }
-
-    #app .nav .seperator div {
-        background: #3d3d3d;
-        height: 1px;
-    }
-
-    #app .nav a,
-    #app .nav a:link,
-    #app .nav a:active,
-    #app .nav a:visited,
-    #app .nav .action-link {
-        color: #bababa;
-        text-decoration: none;
-        margin-top: 15px;
-        width: 100%;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        align-content: center;
-        justify-content: flex-start;
-        cursor: pointer;
-    }
-
-    #app .nav a:hover,
-    #app .nav .action-link:hover {
-        color: #fff !important;
-        text-decoration: none;
-    }
-
-    #app .nav .route-link {
-        font-size: 17px;
-        margin: 0 24px 0 -6px;
-    }
-
-    #app .nav .icon {
-        margin: 0 16px;
-    }
-
-    #app .nav .route-link-on,
-    #app .nav .icon-on,
-    #app .nav .route-link-on:hover,
-    #app .nav .icon-on:hover {
-        color: #feb400 !important;
-    }
-
-    #app .nav .icon svg {
-        width: 24px;
-        height: 24px;
     }
 
     #app .notifications {

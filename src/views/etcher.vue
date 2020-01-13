@@ -1,7 +1,7 @@
 <template>
     <div id="etcher">
         <div class="actions">
-            <div v-on:click="$emit('exit')" title="Back" class="icon">arrow_back</div>
+            <div v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
         </div>
         <div class="flow">
             
@@ -20,6 +20,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 7px 20px 20px 20px;
+        overflow: hidden;
     }
 
     #etcher .actions {

@@ -30,7 +30,7 @@ const heartbeats = {};
 Vue.mixin({
     data: () => {
         return {
-            settings: {
+            Settings: {
                 get(key) {
                     return settings.get(key);
                 },
@@ -40,7 +40,7 @@ Vue.mixin({
                 }
             },
 
-            device: {
+            Device: {
                 heartbeat: {
                     start(ip, port, callback, interval) {
                         if (heartbeats[`${ip}:${port}`]) {
@@ -103,7 +103,7 @@ Vue.mixin({
                 }
             },
 
-            api: {
+            API: {
                 async login(ip, port) {
                     Request.defaults.headers.get["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
 

@@ -15,29 +15,49 @@ export default new Router({
             component: Home
         },
         {
+            path: "/devices",
+            name: "devices",
+            component: () => import(/* webpackChunkName: "devices" */ "./views/devices.vue")
+        },
+        {
+            path: "/devices/:mac/:port",
+            name: "system",
+            component: () => import(/* webpackChunkName: "system" */ "./views/system.vue")
+        },
+        {
+            path: "/terminal/:mac/:port",
+            name: "terminal",
+            component: () => import(/* webpackChunkName: "terminal" */ "./views/terminal.vue")
+        },
+        {
+            path: "/etcher",
+            name: "etcher",
+            component: () => import(/* webpackChunkName: "etcher" */ "./views/etcher.vue")
+        },
+        {
             path: "/accessories",
             name: "accessories",
-            component: () => import(/* webpackChunkName: "about" */ "./views/accessories.vue")
+            component: () => import(/* webpackChunkName: "accessories" */ "./views/accessories.vue")
         },
         {
             path: "/log",
             name: "log",
-            component: () => import(/* webpackChunkName: "about" */ "./views/log.vue")
+            component: () => import(/* webpackChunkName: "log" */ "./views/log.vue")
         },
         {
             path: "/users",
             name: "users",
-            component: () => import(/* webpackChunkName: "about" */ "./views/users.vue")
+            component: () => import(/* webpackChunkName: "users" */ "./views/users.vue")
         },
         {
             path: "/plugins",
             name: "plugins",
-            component: () => import(/* webpackChunkName: "about" */ "./views/plugins.vue")
+            component: () => import(/* webpackChunkName: "plugins" */ "./views/plugins.vue")
         },
         {
             path: "/config",
             name: "config",
-            component: () => import(/* webpackChunkName: "about" */ "./views/config.vue")
+            component: () => import(/* webpackChunkName: "config" */ "./views/config.vue")
         }
     ]
 });

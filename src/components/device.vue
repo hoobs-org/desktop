@@ -4,7 +4,7 @@
             <div class="icon">router</div>
         </div>
         <div v-if="joined" class="action-cell">
-            <div v-on:click="$emit('details')" class="button">Details</div>
+            <router-link :to="`/devices/${value.mac}/${value.port}`" class="button">Details</router-link>
         </div>
         <div v-else class="action-cell">
             <div v-on:click="$emit('join')" class="button button-primary">Join</div>
@@ -23,7 +23,7 @@
             <span v-else class="title">{{ value.ip }}</span>
         </div>
         <div v-if="joined" class="action-cell">
-            <div v-if="show.terminal" v-on:click="$emit('terminal')" title="Terminal" class="icon action-icon">code</div>
+            <router-link v-if="show.terminal" :to="`/terminal/${value.mac}/${value.port}`" title="Terminal" class="icon action-icon">code</router-link>
         </div>
         <div v-if="joined">
             <div v-if="show.terminal && show.seperators" class="action-seperator"></div>
@@ -86,14 +86,14 @@
             this.show.working = true;
             this.toggleFields(false, false, false, true, true);
 
-            this.device.wait.start(this.value.ip, this.value.port, () => {
+            this.Device.wait.start(this.value.ip, this.value.port, () => {
                 this.show.working = false;
                 this.toggleFields(true, true, true, true, true);
             });
         },
 
         destroyed() {
-            this.device.wait.stop(this.value.ip, this.value.port);
+            this.Device.wait.stop(this.value.ip, this.value.port);
         },
 
         methods: {
@@ -109,8 +109,8 @@
                 this.toggleFields(true, false, false, true, true);
                 this.show.working = true;
 
-                await this.api.login(this.value.ip, this.value.port);
-                await this.api.post(this.value.ip, this.value.port, "/service/restart");
+                await this.API.login(this.value.ip, this.value.port);
+                await this.API.post(this.value.ip, this.value.port, "/service/restart");
 
                 this.show.working = false;
                 this.toggleFields(true, true, true, true, true);
@@ -120,12 +120,12 @@
                 this.toggleFields(false, false, false, true, true);
                 this.show.working = true;
 
-                await this.api.login(this.value.ip, this.value.port);
-                await this.api.post(this.value.ip, this.value.port, "/service/stop");
-                await this.api.put(this.value.ip, this.value.port, "/reboot");
+                await this.API.login(this.value.ip, this.value.port);
+                await this.API.post(this.value.ip, this.value.port, "/service/stop");
+                await this.API.put(this.value.ip, this.value.port, "/reboot");
 
                 setTimeout(async () => {
-                    this.device.wait.start(this.value.ip, this.value.port, () => {
+                    this.Device.wait.start(this.value.ip, this.value.port, () => {
                         this.show.working = false;
                         this.toggleFields(true, true, true, true, true);
                     });
@@ -173,14 +173,20 @@
         width: 72px;
     }
 
-    #device .action-cell .action-icon {
+    #device .action-cell .action-icon,
+    #device .action-cell .action-icon:link,
+    #device .action-cell .action-icon:active,
+    #device .action-cell .action-icon:visited {
         margin: 0 0 0 7px;
         font-size: 18px;
+        text-decoration: none;
+        color: #999;
         cursor: pointer;
     }
 
     #device .action-cell .action-icon:hover {
         color: #fff;
+        text-decoration: none;
     }
 
     #device .action-seperator {

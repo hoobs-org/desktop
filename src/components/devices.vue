@@ -7,8 +7,8 @@
             <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
         </div>
         <div class="flow">
-            <device v-for="(device, didx) in devices" :key="didx" :joined="true" :value="device" v-on:details="() => { selected = device }" v-on:terminal="() => { terminal = device }" v-on:remove="removeDevice(device.ip, device.port)" />
-            <device v-for="(device, aidx) in available" :key="aidx" :joined="false" :value="device" v-on:join="addDevice(device.ip, device.port, device.hostname)" />
+            <device v-for="(device) in devices" :key="device.mac" :joined="true" :value="device" v-on:details="() => { selected = device }" v-on:terminal="() => { terminal = device }" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
+            <device v-for="(device) in available" :key="device.mac" :joined="false" :value="device" v-on:join="addDevice(device.mac, device.ip, device.port, device.hostname)" />
             <div v-if="loaded && !show.scanning && available.length === 0 && devices.length === 0" class="empty">
                 <div class="message">
                     <span>No Devices Found</span>
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div v-if="show.scanning" class="scanning">
-                <div class="message">Searching for Devices ({{ progress.toFixed(1) }}%)</div>
+                <div class="message">Searching for Devices ({{ show.progress.toFixed(1) }}%)</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
         </div>
@@ -29,11 +29,11 @@
         <modal v-if="show.add || show.join" v-on:confirm="saveDevice()" v-on:cancel="closeAddDevice()" title="Add Device" ok-title="Add Device" width="350px">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="saveDevice()">
                 <div v-if="errors.add && errors.add !== ''" class="error" v-html="errors.add"></div>
-                <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="data.hostname" :required="false" />
-                <text-field v-if="show.add" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="data.ip" :required="true" />
-                <port-field v-if="show.add" name="Port" description="Enter the configured port number" theme="light" v-model.number="data.port" :required="true" />
-                <text-field v-if="show.add || show.join" name="Username" description="Enter the username this device was srtup with" theme="light" v-model="data.username" :required="true" />
-                <password-field v-if="show.add || show.join" name="Password" description="Enter the password for this device" theme="light" v-model="data.password" :required="true" />
+                <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="values.hostname" :required="false" />
+                <text-field v-if="show.add" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="values.ip" :required="true" />
+                <port-field v-if="show.add" name="Port" description="Enter the configured port number" theme="light" v-model.number="values.port" :required="true" />
+                <text-field v-if="show.add || show.join" name="Username" description="Enter the username this device was srtup with" theme="light" v-model="values.username" :required="true" />
+                <password-field v-if="show.add || show.join" name="Password" description="Enter the password for this device" theme="light" v-model="values.password" :required="true" />
             </form>
         </modal>
     </div>
@@ -73,13 +73,13 @@
             return {
                 loaded: false,
                 scanner: null,
-                progress: 0,
                 show: {
                     scanning: false,
+                    progress: 0,
                     add: false,
                     join: false
                 },
-                data: {
+                values: {
                     ip: "",
                     port: 8080,
                     hostname: "",
@@ -101,14 +101,24 @@
             this.available = [];
             this.scanner = new Scanner("hoobs", 8080);
 
-            this.scanner.on("progress", (data) => {
-                this.progress = data;
+            this.scanner.on("progress", (response) => {
+                if (response > this.show.progress) {
+                    this.show.progress = response;
+                }
             });
 
-            this.scanner.on("device", (data) => {
-                if (this.available.findIndex(d => d.ip === data.ip && d.port === 8080) === -1 && this.devices.findIndex(d => d.ip === data.ip && d.port === 8080) === -1) {
-                    this.available.push(data);
+            this.scanner.on("device", (response) => {
+                const index = this.devices.findIndex(d => d.mac === response.mac && d.port === 8080);
+
+                if (response.mac && this.available.findIndex(d => d.mac === response.mac && d.port === 8080) === -1 && index === -1) {
+                    this.available.push(response);
+                } else if (index > -1 && this.devices[index] !== response.ip) {
+                    this.updateDevice(response.mac, 8080, response.ip)
                 }
+            });
+
+            this.scanner.on("stop", () => {
+                this.show.scanning = false;
             });
 
             if (this.devices.length === 0) {
@@ -130,16 +140,23 @@
         methods: {
             async scanNetwork() {
                 if (this.scanner && !this.show.scanning) {
-                    this.progress = 0;
+                    this.show.progress = 0;
                     this.show.scanning = true;
 
                     await this.scanner.scan();
-
-                    this.show.scanning = false;
                 }
             },
 
-            addDevice(ip, port, hostname) {
+            updateDevice(mac, port, ip) {
+                const index = this.devices.findIndex(d => d.mac === mac && d.port === port);
+
+                if (index > -1 && this.devices[index] !== ip) {
+                    this.devices[index].ip = ip;
+                    this.settings.set("devices", this.devices);
+                }
+            },
+
+            addDevice(mac, ip, port, hostname) {
                 this.show.add = true;
                 this.show.join = false;
 
@@ -148,22 +165,28 @@
                     this.show.join = true;
                 }
 
-                this.data.ip = "";
-                this.data.port = 8080;
+                this.values.ip = "";
+                this.values.port = 8080;
 
                 if (ip && port) {
-                    this.data.ip = ip;
-                    this.data.port = port;
+                    this.values.ip = ip;
+                    this.values.port = port;
                 }
 
-                this.hostname = ip;
+                this.values.mac = null;
+
+                if (mac && mac !== "") {
+                    this.values.mac = mac;
+                }
+
+                this.values.hostname = ip;
 
                 if (hostname) {
-                    this.data.hostname = this.humanize(hostname);
+                    this.values.hostname = this.humanize(hostname);
                 }
 
-                this.data.username = "";
-                this.data.password = "";
+                this.values.username = "";
+                this.values.password = "";
 
                 this.errors.add = "";
             },
@@ -172,12 +195,13 @@
                 this.show.add = false;
                 this.show.join = false;
 
-                this.data.ip = "";
-                this.data.port = 8080;
-                this.hostname = "";
+                this.values.ip = "";
+                this.values.port = 8080;
+                this.values.mac = null;
+                this.values.hostname = "";
 
-                this.data.username = "";
-                this.data.password = "";
+                this.values.username = "";
+                this.values.password = "";
 
                 this.errors.add = "";
             },
@@ -233,59 +257,68 @@
             async saveDevice() {
                 const errors = [];
 
-                if (!this.validateIpAddress(this.data.ip)) {
+                if (!this.validateIpAddress(this.values.ip)) {
                     errors.push("Invalid IP address.");
                 }
 
-                if (!this.validatePort(this.data.port)) {
+                if (!this.validatePort(this.values.port)) {
                     errors.push("Invalid IP port number.");
                 }
 
-                if (this.devices.findIndex(d => d.ip === this.data.ip && d.port === this.data.port) >= 0) {
-                    errors.push("This device has already been paired.");
-                }
-
-                if (!this.data.username || this.data.username === "") {
+                if (!this.values.username || this.values.username === "") {
                     errors.push("Username is required.");
                 }
 
-                if (!this.data.password || this.data.password === "") {
+                if (!this.values.password || this.values.password === "") {
                     errors.push("Password is required.");
                 }
 
+                if ((!this.values.mac || this.values.mac === "") && this.validateIpAddress(this.values.ip)) {
+                    this.values.mac = await this.scanner.identify(this.values.ip);
+                }
+
+                if (!this.values.mac || this.values.mac === "") {
+                    errors.push("This device doesn't have a valid MAC address.");
+                }
+
+                if (this.values.mac && this.values.mac !== "" && this.devices.findIndex(d => d.mac === this.values.mac && d.port === this.values.port) >= 0) {
+                    errors.push("This device has already been paired.");
+                }
+
                 if (errors.length === 0) {
-                    const test = await this.scanner.detect(this.data.ip, this.data.port);
+                    const test = await this.scanner.detect(this.values.ip, this.values.port);
 
                     if (!test || test === "") {
                         errors.push("HOOBS is not available on this device.");
                     }
 
                     if (errors.length === 0) {
-                        const response = await this.api.post(this.data.ip, this.data.port, "/auth", {
-                            username: this.data.username,
-                            password: this.data.password
+                        const response = await this.api.post(this.values.ip, this.values.port, "/auth", {
+                            username: this.values.username,
+                            password: this.values.password
                         });
                         
                         if (!response.error) {
-                            const index = this.available.findIndex(d => d.ip === this.data.ip && d.port === this.data.port);
+                            const index = this.available.findIndex(d => d.mac === this.values.mac && d.port === this.values.port);
 
                             if (index >= 0) {
                                 this.available.splice(index, 1);
                             }
 
-                            this.data.username = Encryption.encrypt(this.data.username);
-                            this.data.password = Encryption.encrypt(this.data.password);
+                            this.values.username = Encryption.encrypt(this.values.username);
+                            this.values.password = Encryption.encrypt(this.values.password);
 
-                            if (!this.data.hostname || this.data.hostname === "") {
-                                this.data.hostname = this.data.ip;
+                            if (!this.values.hostname || this.values.hostname === "") {
+                                this.values.hostname = this.values.ip;
                             }
 
                             this.devices.push({
-                                ip: this.data.ip,
-                                port: this.data.port,
-                                hostname: this.data.hostname,
-                                username: this.data.username,
-                                password: this.data.password
+                                ip: this.values.ip,
+                                port: this.values.port,
+                                mac: this.values.mac,
+                                hostname: this.values.hostname,
+                                username: this.values.username,
+                                password: this.values.password
                             });
 
                             this.settings.set("devices", this.devices);
@@ -300,11 +333,11 @@
                 this.errors.add = errors.join("<br>");
             },
 
-            removeDevice(ip, port) {
+            removeDevice(mac, ip, port) {
                 this.device.wait.stop(ip, port);
                 this.device.wait.stop(ip, port, true);
 
-                const index = this.devices.findIndex(d => d.ip === ip && d.port === port);
+                const index = this.devices.findIndex(d => d.mac === mac && d.port === port);
 
                 if (index >= 0) {
                     this.devices.splice(index, 1);

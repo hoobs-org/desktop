@@ -1,9 +1,11 @@
 import EventEmitter from "events";
 
+import * as OS from "os";
 import * as Ping from "ping";
 import * as DNS from "dns";
 import * as IP from "ip";
 import * as Net from "net";
+import * as ARP from "node-arp";
 import * as Request from "axios";
 
 export default class Scanner extends EventEmitter {
@@ -16,15 +18,8 @@ export default class Scanner extends EventEmitter {
         this.stopped = false;
         this.timer = null;
 
-        this.prefix = IP.address();
-
-        if (this.prefix) {
-            const parts = this.prefix.split(".");
-
-            if (parts.length === 4) {
-                this.prefix = parts.slice(0, -1).join(".");
-            }
-        }
+        this.total = 0;
+        this.count = 0;
     }
 
     async heartbeat(ip, port, callback, interval) {
@@ -74,26 +69,48 @@ export default class Scanner extends EventEmitter {
     async scan() {
         this.stopped = false;
 
-        for (let i = 1; i < 255; i++) {
-            const device = await this.info(`${this.prefix}.${i}`);
+        this.total = 0;
+        this.count = 0;
 
+        const subnets = this.subnets();
+
+        for (let i = 0; i < subnets.length; i++) {
             if (this.stopped) {
                 break;
+            } else {
+                this.subnet(subnets[i].start, subnets[i].end);
             }
+        }
+    }
 
-            this.emit("progress", Math.round(((i * 100) / 254) * 10) / 10);
+    async subnet(start, end) {
+        for (let i = start; i <= end; i++ ) {
+            if (this.stopped) {
+                break;
+            } else {
+                const device = await this.info(IP.fromLong(i));
 
-            if (device.alive && await this.alive(device.ip, this.port)) {
-                const response = await this.detect(device.ip, this.port);
+                this.emit("progress", Math.round((((this.count + 1) * 100) / this.total) * 10) / 10);
 
-                if (response) {
-                    this.emit("device", {
-                        ip: device.ip,
-                        hostname: device.hostname,
-                        port: this.port,
-                        service: this.service,
-                        version: response
-                    });
+                if (device.alive && await this.alive(device.ip, this.port)) {
+                    const response = await this.detect(device.ip, this.port);
+
+                    if (response) {
+                        this.emit("device", {
+                            ip: device.ip,
+                            mac: device.mac,
+                            hostname: device.hostname,
+                            port: this.port,
+                            service: this.service,
+                            version: response
+                        });
+                    }
+                }
+
+                this.count += 1;
+
+                if (this.count >= this.total) {
+                    this.emit("stop");
                 }
             }
         }
@@ -129,6 +146,29 @@ export default class Scanner extends EventEmitter {
         }));
     }
 
+    subnets() {
+        const ifaces = OS.networkInterfaces();
+        const subnets = [];
+        const keys = Object.keys(ifaces);
+
+        for (let i = 0; i < keys.length; i++) {
+            for (let j = 0; j < ifaces[keys[i]].length; j++) {
+                if (ifaces[keys[i]][j].family === "IPv4" && !ifaces[keys[i]][j].internal) {
+                    const details = IP.cidrSubnet(ifaces[keys[i]][j].cidr);
+
+                    this.total += (IP.toLong(details.lastAddress) - IP.toLong(details.firstAddress));
+
+                    subnets.push({
+                        start: IP.toLong(details.firstAddress),
+                        end: IP.toLong(details.lastAddress)
+                    });
+                }
+            }
+        }
+
+        return subnets;
+    }
+
     detect(ip, port) {
         return new Promise((resolve) => {
             let results = null;
@@ -160,28 +200,50 @@ export default class Scanner extends EventEmitter {
         });
     }
 
+    lookup(ip) {
+        return new Promise((resolve) => {
+            DNS.reverse(ip, (error, host) => {
+                if (!error) {
+                    resolve((host && host.length) ? host[0] : null);
+                } else {
+                    resolve(null);
+                }
+            });
+        });
+    }
+
+    identify(ip) {
+        return new Promise((resolve) => {
+            ARP.getMAC(ip, (error, mac) => {
+                if (!error && mac) {
+                    resolve(mac);
+                } else {
+                    resolve(null);
+                }
+            });
+        });
+    }
+
     info(ip) {
         return new Promise((resolve) => {
             const results = {
                 ip,
+                mac: null,
                 alive: false,
-                hostname: null,
+                hostname: null
             };
     
             if (!this.stopped) {
                 Ping.promise.probe(ip, {
                     timeout: 1,
                 }).then((response) => {
-                    if (response.alive) {
-                        results.alive = true;
-        
-                        DNS.reverse(ip, (error, host) => {
-                            if (!error) {
-                                results.hostname = (host && host.length) ? host[0] : null;
-                            }
-                        });
+                    results.alive = response.alive;
+                }).finally(async () => {
+                    if (results.alive) {  
+                        results.hostname = await this.lookup(ip);
+                        results.mac = await this.identify(ip);
                     }
-                }).finally(() => {
+
                     resolve(results);
                 });
             } else {
@@ -197,10 +259,15 @@ export default class Scanner extends EventEmitter {
     stop() {
         this.stopped = true;
 
+        this.total = 0;
+        this.count = 0;
+
         if (this.timer) {
             clearTimeout(this.timer);
         }
 
         this.timer = null;
+
+        this.emit("stop");
     }
 }

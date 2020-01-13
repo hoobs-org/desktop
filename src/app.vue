@@ -17,7 +17,7 @@
             <button v-else v-on:click="windowToggle()" class="title-button icon">fullscreen</button>
             <button v-on:click="$close()" class="title-button icon">close</button>
         </div>
-        <div v-if="!show.manageDevices && devices.length > 0" class="nav">
+        <div v-if="!show.manageDevices && !show.etcher && devices.length > 0" class="nav">
             <div class="routes">
                 <div class="action-link" v-on:click.stop="() => { show.navigation = !show.navigation }">
                     <span v-if="show.navigation" class="icon">chevron_left</span>
@@ -54,22 +54,30 @@
             </div>
         </div>
         <div class="content">
-            <router-view v-if="!show.manageDevices && devices.length > 0" />
+            <router-view v-if="!show.manageDevices && !show.etcher && devices.length > 0" />
         </div>
-        <div v-if="show.manageDevices || devices.length === 0" class="devices">
-            <devices v-on:close="() => { show.manageDevices = false }" />
+        <div v-if="show.manageDevices || devices.length === 0" class="overlay">
+            <devices v-on:close="hideOverlays()" />
+        </div>
+        <div v-if="show.etcher" class="overlay">
+            <etcher v-on:exit="hideOverlays()" />
         </div>
         <div class="notifications">
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
         </div>
         <dropdown v-if="show.menu.header" class="header-menu">
             <div class="item" v-on:click="() => { show.about = true }">About HOOBS</div>
-            <div class="item">Help</div>
+            <div class="item" v-on:click="() => { show.help = true }">Help</div>
+            <div class="seperator"></div>
+            <div class="item" v-on:click="showEtcher()">Write SD Cards</div>
             <div v-if="!show.manageDevices && devices.length > 0" class="seperator"></div>
-            <div v-if="!show.manageDevices && devices.length > 0" class="item" v-on:click="() => { show.manageDevices = true }">Manage Devices</div>
+            <div v-if="!show.manageDevices && devices.length > 0" class="item" v-on:click="showDevices()">Manage Devices</div>
         </dropdown>
         <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" cancel-title="Donate" width="450px">
             <about />
+        </modal>
+        <modal v-if="show.help" v-on:confirm="() => { show.help = false }" title="Help" :confirm="false" width="550px">
+            <help />
         </modal>
     </div>
 </template>
@@ -79,7 +87,9 @@
     import Dropdown from "@/components/dropdown.vue";
     import Notification from "@/components/notification.vue";
     import Devices from "@/components/devices.vue";
+    import Etcher from "@/components/etcher.vue";
     import About from "@/components/about.vue";
+    import Help from "@/components/help.vue";
 
     export default {
         name: "app",
@@ -89,7 +99,9 @@
             "dropdown": Dropdown,
             "notification": Notification,
             "devices": Devices,
-            "about": About
+            "etcher": Etcher,
+            "about": About,
+            "help": Help
         },
 
         data() {
@@ -102,7 +114,8 @@
                     },
                     navigation: false,
                     manageDevices: false,
-                    about: false
+                    about: false,
+                    help: false,
                 },
                 header: {
                     delay: 700,
@@ -148,6 +161,21 @@
             hideAll() {
                 this.show.menu.header = false;
                 this.show.navigation = false;
+            },
+
+            hideOverlays() {
+                this.show.etcher = false;
+                this.show.manageDevices = false;
+            },
+
+            showDevices() {
+                this.show.etcher = false;
+                this.show.manageDevices = true;
+            },
+
+            showEtcher() {
+                this.show.etcher = true;
+                this.show.manageDevices = false;
             },
 
             routeName(name) {
@@ -710,7 +738,7 @@
         font-size: 12pt;
     }
 
-    #app .devices {
+    #app .overlay {
         position: absolute;
         top: 0;
         left: 0;

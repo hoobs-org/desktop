@@ -7,6 +7,7 @@
 <script>
     export default {
         name: "marquee",
+
         props: {
             background: String,
             color: String,

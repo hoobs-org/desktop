@@ -9,6 +9,7 @@
 <script>
     export default {
         name: "text-field",
+
         props: {
             name: String,
             description: String,

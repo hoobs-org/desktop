@@ -51,16 +51,8 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
-    import Confirm from "@/components/confirm.vue";
-    import Marquee from "@/components/marquee.vue";
-
     export default {
         name: "devices",
-
-        components: {
-            "confirm": Confirm,
-            "marquee": Marquee
-        },
 
         props: {
             value: Object,

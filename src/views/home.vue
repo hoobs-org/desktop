@@ -4,14 +4,8 @@
 </template>
 
 <script>
-    import Loader from "@/components/loader.vue";
-
     export default {
         name: "home",
-
-        components: {
-            "loader": Loader
-        },
 
         computed: {
             connected() {

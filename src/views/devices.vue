@@ -7,8 +7,8 @@
             <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
         </div>
         <div class="flow">
-            <device v-for="(device) in devices" :key="device.mac" :joined="true" :value="device" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
-            <device v-for="(device) in available" :key="device.mac" :joined="false" :value="device" v-on:join="addDevice(device.mac, device.ip, device.port, device.hostname)" />
+            <device v-for="(device) in devices" :key="`${device.mac}:${device.port}`" :joined="true" :value="device" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
+            <device v-for="(device) in available" :key="`${device.mac}:${device.port}`" :joined="false" :value="device" v-on:join="addDevice(device.mac, device.ip, device.port, device.hostname)" />
             <div v-if="loaded && !show.scanning && available.length === 0 && devices.length === 0" class="empty">
                 <div class="message">
                     <span>No Devices Found</span>
@@ -40,8 +40,6 @@
     import Scanner from "../lib/scanner";
     import Encryption from "../lib/encryption";
 
-    import Modal from "@/components/modal.vue";
-    import Marquee from "@/components/marquee.vue";
     import TextField from "@/components/text-field.vue";
     import PasswordField from "@/components/password-field.vue";
     import PortField from "@/components/port-field.vue";
@@ -51,8 +49,6 @@
         name: "devices",
 
         components: {
-            "modal": Modal,
-            "marquee": Marquee,
             "text-field": TextField,
             "password-field": PasswordField,
             "port-field": PortField,

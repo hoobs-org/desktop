@@ -142,7 +142,6 @@
         flex-direction: column;
         justify-content: space-between;
         user-select: none;
-        z-index: 100;
     }
 
     #navigation .routes {

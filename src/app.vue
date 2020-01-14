@@ -9,7 +9,6 @@
             </div>
         </div>
         <div class="chrome">
-            <button v-if="!serviceRoute() && connected > 0" v-on:click="connectAll()" class="title-action icon">refresh</button>
             <button v-on:click.stop="$store.commit('toggleMenu', 'header')" class="title-action icon">menu</button>
             <div class="seperator"></div>
             <button v-on:click="$minimize()" class="title-button icon">remove</button>
@@ -19,7 +18,7 @@
         </div>
         <navigation :route="$route.name" :devices="devices" />
         <div class="content">
-            <router-view />
+            <router-view v-on:refresh="connectAll()" />
         </div>
         <div class="notifications">
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
@@ -41,9 +40,6 @@
 
 <script>
     import Navigation from "@/components/navigation.vue";
-    import Modal from "@/components/modal.vue";
-    import Dropdown from "@/components/dropdown.vue";
-    import Notification from "@/components/notification.vue";
     import About from "@/components/about.vue";
     import Help from "@/components/help.vue";
 
@@ -52,9 +48,6 @@
 
         components: {
             "navigation": Navigation,
-            "modal": Modal,
-            "dropdown": Dropdown,
-            "notification": Notification,
             "about": About,
             "help": Help
         },
@@ -168,7 +161,11 @@
                                 if (message.data === "{CLEAR}") {
                                     this.$store.commit("updateMessages", `[${hostname}]{{SPLIT}}${message.data}`);
                                 } else {
-                                    this.$store.commit("updateMessages", `[${hostname}] ${message.data}`);
+                                    const lines = (message.data || "").split(/\r?\n/);
+
+                                    for (let i = 0; i < lines.length; i++) {
+                                        this.$store.commit("updateMessages", `[${hostname}] ${lines[i]}`);
+                                    }
                                 }
 
                                 break;
@@ -401,28 +398,6 @@
         position: absolute;
     }
 
-    .m-chckbox--container {
-        margin: 0 !important;
-    }
-
-    .m-chckbox--container .m-chckbox--group {
-        background-color: #444;
-        border: 1px #333 solid;
-    }
-
-    .m-chckbox--container.active .m-chckbox--group {
-        background-color: #feb400 !important;
-        border: 1px #feb400 solid !important;
-    }
-
-    .m-chckbox--ripple {
-        display: none !important;
-    }
-
-    .m-chckbox--label {
-        padding-left: 7px !important;
-    }
-
     #app {
         flex: 1;
         margin: 0;
@@ -460,7 +435,7 @@
         left: 0;
         width: 100%;
         height: 37px;
-        z-index: 500;
+        z-index: 100;
     }
 
     #app .header .logo {
@@ -485,7 +460,7 @@
         position: absolute;
         top: 32px;
         right: 95px;
-        z-index: 1000;
+        z-index: 300;
     }
 
     #app .chrome {
@@ -494,7 +469,7 @@
         top: 10px;
         right: 14px;
         display: flex;
-        z-index: 1000;
+        z-index: 100;
     }
 
     #app .chrome .title-button {

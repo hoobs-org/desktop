@@ -9,6 +9,7 @@
 <script>
     export default {
         name: "password-field",
+
         props: {
             name: String,
             description: String,

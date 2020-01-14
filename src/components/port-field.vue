@@ -9,6 +9,7 @@
 <script>
     export default {
         name: "port-field",
+
         props: {
             name: String,
             description: String,

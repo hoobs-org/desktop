@@ -74,6 +74,8 @@ export default class Scanner extends EventEmitter {
 
         const subnets = this.subnets();
 
+        this.emit("progress", 0);
+
         for (let i = 0; i < subnets.length; i++) {
             if (this.stopped) {
                 break;
@@ -84,22 +86,22 @@ export default class Scanner extends EventEmitter {
     }
 
     async subnet(start, end) {
-        for (let i = start; i <= end; i++ ) {
+        for (let l = start, r = end; l <= r; l++, r-- ) {
             if (this.stopped) {
                 break;
             } else {
-                const device = await this.info(IP.fromLong(i));
+                const [left, right] = await Promise.all([this.info(IP.fromLong(l)), await this.info(IP.fromLong(r))]);
 
-                this.emit("progress", Math.round((((this.count + 1) * 100) / this.total) * 10) / 10);
+                this.emit("progress", Math.round((((this.count + 2) * 100) / this.total) * 10) / 10);
 
-                if (device.alive && await this.alive(device.ip, this.port)) {
-                    const response = await this.detect(device.ip, this.port);
+                if (left.alive && await this.alive(left.ip, this.port)) {
+                    const response = await this.detect(left.ip, this.port);
 
                     if (response) {
                         this.emit("device", {
-                            ip: device.ip,
-                            mac: device.mac,
-                            hostname: device.hostname,
+                            ip: left.ip,
+                            mac: left.mac,
+                            hostname: left.hostname,
                             port: this.port,
                             service: this.service,
                             version: response
@@ -107,7 +109,22 @@ export default class Scanner extends EventEmitter {
                     }
                 }
 
-                this.count += 1;
+                if (right.alive && await this.alive(right.ip, this.port)) {
+                    const response = await this.detect(right.ip, this.port);
+
+                    if (response) {
+                        this.emit("device", {
+                            ip: right.ip,
+                            mac: right.mac,
+                            hostname: right.hostname,
+                            port: this.port,
+                            service: this.service,
+                            version: response
+                        });
+                    }
+                }
+
+                this.count += 2;
 
                 if (this.count >= this.total) {
                     this.emit("stop");

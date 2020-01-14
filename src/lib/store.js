@@ -7,7 +7,8 @@ export default new Vuex.Store({
     state: {
         menus: {
             header: false,
-            system: false
+            system: false,
+            logFilter: false
         },
         messages: [],
         version: {},

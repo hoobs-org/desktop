@@ -1,7 +1,7 @@
 <template>
     <div id="modal">
         <div class="modal-inner" :style="`width: ${width}; height: ${height};`">
-            <div v-if="title" class="modal-header">{{ title }}</div>
+            <div class="modal-header">{{ title }}</div>
             <div class="modal-content">
                 <slot />
             </div>
@@ -47,19 +47,20 @@
     #modal {
         top: 0;
         left: 0;
+        padding: 37px 0 0 0;
         width: 100%;
         height: 100%;
-        z-index: 300;
+        z-index: 500;
         position: absolute;
-        display: flex;
-        align-content: center;
-        align-items: center;
         background: #262626b8;
     }
 
     #modal .modal-inner {
         display: inline;
-        margin: 0 auto 2% auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%);
         max-height: 85%;
         background: #fff;
         color: #515151;
@@ -67,6 +68,7 @@
         display: flex;
         flex-direction: column;
         border-radius: 3px;
+        z-index: 600;
         box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
                     0 4px 5px 0 rgba(0, 0, 0, 0.14),
                     0 1px 10px 0 rgba(0, 0, 0, 0.12);
@@ -101,5 +103,10 @@
         background: #feb400;
         color: #fff !important;
         border: 1px #feb400 solid;
+    }
+
+    #modal .m-chckbox--container .m-chckbox--group {
+        background-color: #fff;
+        border: 1px #e5e5e5 solid;
     }
 </style>

@@ -126,22 +126,10 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
-    import Modal from "@/components/modal.vue";
-    import Confirm from "@/components/confirm.vue";
-    import Marquee from "@/components/marquee.vue";
-    import Dropdown from "@/components/dropdown.vue";
-
     import { remote } from "electron";
 
     export default {
         name: "system",
-
-        components: {
-            "modal": Modal,
-            "confirm": Confirm,
-            "marquee": Marquee,
-            "dropdown": Dropdown,
-        },
 
         data() {
             return {

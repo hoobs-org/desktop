@@ -6,14 +6,8 @@
 </template>
 
 <script>
-    import Marquee from "@/components/marquee.vue";
-
     export default {
         name: "loader",
-
-        components: {
-            "marquee": Marquee
-        },
 
         data() {
             return {

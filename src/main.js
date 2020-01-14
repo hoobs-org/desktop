@@ -5,6 +5,7 @@ import FormData from "form-data";
 import App from "./app.vue";
 import Router from "./router";
 
+import Components from "./lib/components";
 import Store from "./lib/store";
 import Settings from "./lib/settings";
 import Scanner from "./lib/scanner";
@@ -134,7 +135,7 @@ Vue.mixin({
                                 }
                             })).data;
     
-                            if (response && response.token && (!sessions[`${device.ip}:${device.port}`] || sessions[`${device.ip}:${device.port}`] !== response.token)) {
+                            if (response && response.token) {
                                 sessions[`${device.ip}:${device.port}`] = response.token;
     
                                 settings.set("sessions", sessions);
@@ -308,6 +309,8 @@ Vue.mixin({
         }
     },
 });
+
+Components();
 
 const router = Router();
 

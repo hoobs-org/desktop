@@ -287,6 +287,15 @@
                     }
 
                     if (errors.length === 0) {
+                        if ((await this.API.get(this.values.ip, this.values.port, "/auth")).state === -1) {
+                            await this.API.put(this.values.ip, this.values.port, "/auth", {
+                                name: "Administrator",
+                                admin: true,
+                                username: this.values.username.toLowerCase(),
+                                password: this.values.password
+                            });
+                        }
+
                         const response = await this.API.post(this.values.ip, this.values.port, "/auth", {
                             username: this.values.username,
                             password: this.values.password

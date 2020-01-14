@@ -183,9 +183,9 @@
                 this.toggleFields(false, false, false, false, false);
 
                 this.Device.wait.start(this.device.ip, this.device.port, async () => {
-                    await this.load();
-
                     this.toggleFields(true, true, true, true, true);
+
+                    await this.load();
                 });
             }
         },
@@ -599,7 +599,7 @@
     #system .system-menu {
         position: absolute;
         top: 96px;
-        right: 45px;
+        right: 43px;
         z-index: 1000;
     }
 </style>

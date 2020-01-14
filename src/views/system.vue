@@ -123,8 +123,6 @@
 </template>
 
 <script>
-    import FormData from "form-data";
-    import Request from "axios";
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
@@ -134,8 +132,6 @@
     import Dropdown from "@/components/dropdown.vue";
 
     import { remote } from "electron";
-    import { existsSync, readFileSync } from "fs";
-    import { basename } from "path";
 
     export default {
         name: "system",
@@ -218,25 +214,13 @@
                     ]
                 })[0];
 
-                if (filename && existsSync(filename)) {
+                if (filename) {
                     this.toggleFields(false, false, false, false, false);
 
                     this.show.working = true;
 
                     await this.API.login(this.device.ip, this.device.port);
-
-                    const data = new FormData();
-
-                    data.append("file", new File([readFileSync(filename)], basename(filename), {
-                        type: "application/octet-stream"
-                    }));
-
-                    await Request.post(`http://${this.device.ip}:${this.device.port}/api/restore`, data, {
-                        headers: {
-                            "Authorization": this.Settings.get("sessions")[`${this.device.ip}:${this.device.port}`],
-                            "Content-Type": "multipart/form-data"
-                        }
-                    });
+                    await this.API.upload(this.device.ip, this.device.port, "/restore", filename);
 
                     setTimeout(async () => {
                         this.Device.wait.start(this.device.ip, this.device.port, () => {

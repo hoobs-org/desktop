@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Request from "axios";
+import FormData from "form-data";
 
 import App from "./app.vue";
 import Router from "./router";
@@ -9,6 +10,8 @@ import Settings from "./lib/settings";
 import Scanner from "./lib/scanner";
 import Encryption from "./lib/encryption";
 
+import { basename } from "path";
+import { existsSync, readFileSync } from "fs";
 import { remote, ipcRenderer } from "electron";
 
 const settings = new Settings({
@@ -104,8 +107,6 @@ Vue.mixin({
 
             API: {
                 async login(ip, port) {
-                    Request.defaults.headers.get["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
-
                     let response = "unauthorized";
 
                     try {
@@ -126,6 +127,11 @@ Vue.mixin({
                                 username: Encryption.decrypt(device.username),
                                 password: Encryption.decrypt(device.password),
                                 remember: true
+                            },
+                            {
+                                headers: {
+                                    "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                                }
                             })).data;
     
                             if (response && response.token && (!sessions[`${device.ip}:${device.port}`] || sessions[`${device.ip}:${device.port}`] !== response.token)) {
@@ -137,11 +143,42 @@ Vue.mixin({
                     }
                 },
 
-                async get(ip, port, url) {
-                    Request.defaults.headers.get["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
-
+                async upload(ip, port, url, filename) {
                     return new Promise((resolve) => {
-                        Request.get(`http://${ip}:${port}/api${url}`).then((response) => {
+                        if (filename && existsSync(filename)) {
+                            const data = new FormData();
+
+                            data.append("file", new File([readFileSync(filename)], basename(filename), {
+                                type: "application/octet-stream"
+                            }));
+
+                            Request.post(`http://${ip}:${port}/api${url}`, data, {
+                                headers: {
+                                    "Authorization": settings.get("sessions")[`${ip}:${port}`],
+                                    "Content-Type": "multipart/form-data"
+                                }
+                            }).then((response) => {
+                                resolve(response.data);
+                            }).catch((error) => {
+                                resolve({
+                                    error: error.message
+                                });
+                            });
+                        } else {
+                            resolve({
+                                error: "File does not exist"
+                            });
+                        }
+                    });
+                },
+
+                async get(ip, port, url) {
+                    return new Promise((resolve) => {
+                        Request.get(`http://${ip}:${port}/api${url}`, {
+                            headers: {
+                                "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                            }
+                        }).then((response) => {
                             resolve(response.data);
                         }).catch((error) => {
                             resolve({
@@ -152,10 +189,12 @@ Vue.mixin({
                 },
 
                 async post(ip, port, url, data) {
-                    Request.defaults.headers.post["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
-
                     return new Promise((resolve) => {
-                        Request.post(`http://${ip}:${port}/api${url}`, data).then((response) => {
+                        Request.post(`http://${ip}:${port}/api${url}`, data, {
+                            headers: {
+                                "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                            }
+                        }).then((response) => {
                             resolve(response.data);
                         }).catch((error) => {
                             resolve({
@@ -166,10 +205,12 @@ Vue.mixin({
                 },
 
                 async put(ip, port, url, data) {
-                    Request.defaults.headers.put["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
-
                     return new Promise((resolve) => {
-                        Request.put(`http://${ip}:${port}/api${url}`, data).then((response) => {
+                        Request.put(`http://${ip}:${port}/api${url}`, data, {
+                            headers: {
+                                "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                            }
+                        }).then((response) => {
                             resolve(response.data);
                         }).catch((error) => {
                             resolve({
@@ -179,11 +220,13 @@ Vue.mixin({
                     });
                 },
 
-                async delete(ip, port, url, data) {
-                    Request.defaults.headers.delete["Authorization"] = settings.get("sessions")[`${ip}:${port}`] || null;
-
+                async delete(ip, port, url) {
                     return new Promise((resolve) => {
-                        Request.delete(`http://${ip}:${port}/api${url}`, data).then((response) => {
+                        Request.delete(`http://${ip}:${port}/api${url}`, {
+                            headers: {
+                                "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                            }
+                        }).then((response) => {
                             resolve(response.data);
                         }).catch((error) => {
                             resolve({

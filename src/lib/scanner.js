@@ -1,12 +1,12 @@
 import EventEmitter from "events";
 
-import * as OS from "os";
-import * as Ping from "ping";
-import * as DNS from "dns";
-import * as IP from "ip";
-import * as Net from "net";
-import * as ARP from "node-arp";
-import * as Request from "axios";
+import OS from "os";
+import Ping from "ping";
+import DNS from "dns";
+import IP from "ip";
+import Net from "net";
+import ARP from "node-arp";
+import Request from "axios";
 
 export default class Scanner extends EventEmitter {
     constructor(service, port, timeout) {

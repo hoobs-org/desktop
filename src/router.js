@@ -28,11 +28,6 @@ const routes = () => {
             component: () => import(/* webpackChunkName: "terminal" */ "./views/terminal.vue")
         },
         {
-            path: "/etcher",
-            name: "etcher",
-            component: () => import(/* webpackChunkName: "etcher" */ "./views/etcher.vue")
-        },
-        {
             path: "/accessories",
             name: "accessories",
             component: () => import(/* webpackChunkName: "accessories" */ "./views/accessories.vue")

@@ -3,8 +3,6 @@
         <div class="actions">
             <div v-if="devices.length > 0" v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
             <div v-if="devices.length > 0" class="action-seperator"></div>
-            <router-link to="/etcher" title="Flash SD Card" class="icon">sd_storage</router-link>
-            <div class="action-seperator"></div>
             <div v-on:click="scanNetwork()" title="Scan Network" class="icon">refresh</div>
             <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
         </div>

@@ -96,7 +96,7 @@
                 <div class="item" v-on:click="() => { confirm.username = true }">Generate New Username</div>
                 <div class="seperator"></div>
                 <div class="item" v-on:click="systemBackup()">System Backup</div>
-                <div class="item">System Restore</div>
+                <div class="item" v-on:click="systemRestore()">System Restore</div>
                 <div class="seperator"></div>
                 <div class="item" v-on:click="() => { confirm.reset = true }">Factory Reset</div>
             </dropdown>
@@ -123,6 +123,8 @@
 </template>
 
 <script>
+    import FormData from "form-data";
+    import Request from "axios";
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
@@ -130,6 +132,10 @@
     import Confirm from "@/components/confirm.vue";
     import Marquee from "@/components/marquee.vue";
     import Dropdown from "@/components/dropdown.vue";
+
+    import { remote } from "electron";
+    import { existsSync, readFileSync } from "fs";
+    import { basename } from "path";
 
     export default {
         name: "system",
@@ -199,6 +205,47 @@
                 this.show.reboot = reboot;
                 this.show.extra = extra;
                 this.show.seperators = seperators;
+            },
+
+            async systemRestore() {
+                const filename = remote.dialog.showOpenDialogSync({
+                    properties: ["openFile"],
+                    filters: [
+                        {
+                            name: "HOOBS Backup",
+                            extensions: ["hbf"]
+                        }
+                    ]
+                })[0];
+
+                if (filename && existsSync(filename)) {
+                    this.toggleFields(false, false, false, false, false);
+
+                    this.show.working = true;
+
+                    await this.API.login(this.device.ip, this.device.port);
+
+                    const data = new FormData();
+
+                    data.append("file", new File([readFileSync(filename)], basename(filename), {
+                        type: "application/octet-stream"
+                    }));
+
+                    await Request.post(`http://${this.device.ip}:${this.device.port}/api/restore`, data, {
+                        headers: {
+                            "Authorization": this.Settings.get("sessions")[`${this.device.ip}:${this.device.port}`],
+                            "Content-Type": "multipart/form-data"
+                        }
+                    });
+
+                    setTimeout(async () => {
+                        this.Device.wait.start(this.device.ip, this.device.port, () => {
+                            this.show.working = false;
+
+                            this.toggleFields(true, true, true, true, true);
+                        });
+                    }, 5000);
+                }
             },
 
             async systemBackup() {

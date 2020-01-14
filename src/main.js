@@ -1,5 +1,4 @@
 import Vue from "vue";
-
 import Request from "axios";
 
 import App from "./app.vue";

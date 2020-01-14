@@ -28,8 +28,8 @@
                 <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="values.hostname" :required="false" />
                 <text-field v-if="show.add" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="values.ip" :required="true" />
                 <port-field v-if="show.add" name="Port" description="Enter the configured port number" theme="light" v-model.number="values.port" :required="true" />
-                <text-field v-if="show.add || show.join" name="Username" description="Enter the username this device was srtup with" theme="light" v-model="values.username" :required="true" />
-                <password-field v-if="show.add || show.join" name="Password" description="Enter the password for this device" theme="light" v-model="values.password" :required="true" />
+                <text-field v-if="show.add || show.join" name="Username" description="Enter your HOOBS username" theme="light" v-model="values.username" :required="true" />
+                <password-field v-if="show.add || show.join" name="Password" description="Enter your HOOBS password" theme="light" v-model="values.password" :required="true" />
             </form>
         </modal>
     </div>

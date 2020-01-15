@@ -10,7 +10,7 @@
                 <div class="loading-message">Loading...</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
-            <span class="message" v-for="(message, midx) in messages.filter(m => expression.test(m))" :key="midx">{{ message }}</span>
+            <span class="message" v-for="(message, midx) in messages.filter(m => expression.test(m))" :key="midx" v-html="color(message)"></span>
         </div>
         <dropdown v-if="menus['logFilter']" v-on:click.stop.prevent class="filter-menu">
             <div v-on:click.stop v-for="(device) in devices" :key="`${device.mac}:${device.port}`" class="item">
@@ -93,6 +93,24 @@
                 this.show.loading = true;
 
                 this.$emit("refresh");
+            },
+
+            color(line) {
+                const parts = line.split("]");
+
+                let value = parts.shift();
+                let hash = 0;
+
+                value = value.replace("[", "");
+                line = parts.join("]");
+
+                for (let i = 0; i < value.length; i++) {
+                    hash = value.charCodeAt(i) + ((hash << 6) - hash); /* eslint-disable-line */
+                }
+
+                const hex = (hash & 0x00FFFFFF).toString(16).toLowerCase(); /* eslint-disable-line */
+
+                return `[<span style="color: #${"000000".substring(0, 6 - hex.length) + hex};">${value}</span>]${line}`;
             }
         }
     }

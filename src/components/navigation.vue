@@ -155,7 +155,7 @@
     #navigation .seperator {
         width: 100%;
         height: 1px;
-        margin: 10px 0 0 0;
+        margin: 5px 0 0 0;
         padding: 0 17px;
         box-sizing: border-box;
     }
@@ -189,7 +189,7 @@
     #navigation .action-link {
         color: #bababa;
         text-decoration: none;
-        margin-top: 7px;
+        margin-top: 12px;
         width: 100%;
         text-align: left;
         display: flex;

@@ -168,8 +168,7 @@
     #navigation a,
     #navigation a:link,
     #navigation a:active,
-    #navigation a:visited,
-    #navigation .action-link {
+    #navigation a:visited {
         color: #bababa;
         text-decoration: none;
         margin-top: 15px;
@@ -182,7 +181,24 @@
         cursor: pointer;
     }
 
-    #navigation a:hover,
+    #navigation a:hover {
+        color: #fff !important;
+        text-decoration: none;
+    }
+
+    #navigation .action-link {
+        color: #bababa;
+        text-decoration: none;
+        margin-top: 7px;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        align-content: center;
+        justify-content: flex-start;
+        cursor: pointer;
+    }
+
     #navigation .action-link:hover {
         color: #fff !important;
         text-decoration: none;

@@ -1,7 +1,7 @@
 <template>
     <div v-if="connected > 0" id="log">
         <div class="actions">
-            <div v-on:click.stop="$store.commit('toggleMenu', 'logFilter')" title="Filters" class="icon">menu</div>
+            <div v-on:click.stop="$store.commit('toggleMenu', 'logFilter')" title="Filters" class="icon">router</div>
             <div class="action-seperator"></div>
             <div v-on:click="refresh()" title="Refresh Configuration" class="icon">refresh</div>
         </div>

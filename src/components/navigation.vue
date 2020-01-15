@@ -1,7 +1,7 @@
 <template>
     <div v-if="!serviceRoute() && devices.length > 0" id="navigation">
         <div class="routes">
-            <div class="action-link" v-on:click.stop="() => { show.tips = !show.tips }">
+            <div class="action-link" v-on:click="() => { show.tips = !show.tips }">
                 <span v-if="show.tips" class="icon">chevron_left</span>
                 <span v-else class="icon">chevron_right</span>
             </div>

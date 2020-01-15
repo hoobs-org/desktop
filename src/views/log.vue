@@ -10,7 +10,7 @@
                 <div class="loading-message">Loading...</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
-            <span class="message" v-for="(message, midx) in messages.filter(m => expression.test(m))" :key="midx" v-html="color(message)"></span>
+            <span class="message" v-for="(message, midx) in messages.filter(m => expression.test(m))" :key="midx" v-html="colorCodeDevice(message)"></span>
         </div>
         <dropdown v-if="menus['logFilter']" v-on:click.stop.prevent class="filter-menu">
             <div v-on:click.stop v-for="(device) in devices" :key="`${device.mac}:${device.port}`" class="item">
@@ -95,7 +95,7 @@
                 this.$emit("refresh");
             },
 
-            color(line) {
+            colorCodeDevice(line) {
                 const parts = line.split("]");
 
                 let value = parts.shift();

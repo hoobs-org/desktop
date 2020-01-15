@@ -11,6 +11,7 @@ export default new Vuex.Store({
             logFilter: false
         },
         messages: [],
+        timestamp: null,
         version: {},
         running: {},
         update: {},
@@ -75,11 +76,49 @@ export default new Vuex.Store({
             state.update[instance] = new Date();
         },
 
-        updateMessages(state, message) {
-            if (message.endsWith("{CLEAR}")) {
-                state.messages = state.messages.filter(m => !m.startsWith(message.split("{{SPLIT}}")[0]));
+        updateMessages(state, payload) {
+            if (payload.clear) {
+                state.messages = state.messages.filter(m => m.hostname !== payload.hostname);
+            } else if (!Number.isNaN(parseInt(payload.timestamp, 10))) {
+                state.messages.push({
+                    hostname: payload.hostname,
+                    timestamp: payload.timestamp,
+                    message: `[${payload.hostname}] ${payload.message}`
+                });
+
+                state.messages.sort((a, b) => (a.timestamp > b.timestamp) ? 1 : -1);
+
+                while (state.messages.length > 500) {
+                    state.messages.shift();
+                }
             } else {
-                state.messages.push(message)
+                const parts = payload.message.split("]");
+
+                let timestamp = Date.parse((parts.shift() || "").replace("[", "").trim());
+
+                if (Number.isNaN(timestamp)) {
+                    timestamp = Math.round(Date.parse((parts.shift() || "").replace("[", "").trim()));
+                }
+
+                if (Number.isNaN(timestamp)) {
+                    timestamp = Math.round(Date.parse((parts.shift() || "").replace("[", "").trim()));
+                }
+
+                if (Number.isNaN(timestamp)) {
+                    timestamp = Math.round(state.timestamp || new Date().getTime());
+                }
+
+                timestamp += (state.messages.length / 10);
+
+                state.timestamp = timestamp;
+
+                state.messages.push({
+                    hostname: payload.hostname,
+                    timestamp,
+                    message: `[${payload.hostname}] ${payload.message}`
+                })
+
+                state.messages.sort((a, b) => (a.timestamp > b.timestamp) ? 1 : -1);
 
                 while (state.messages.length > 500) {
                     state.messages.shift();

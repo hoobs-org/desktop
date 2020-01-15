@@ -158,13 +158,20 @@
 
                         switch (message.event) {
                             case "log":
-                                if (message.data === "{CLEAR}") {
-                                    this.$store.commit("updateMessages", `[${hostname}]{{SPLIT}}${message.data}`);
+                                if ((message.data.message || message.data || "") === "{CLEAR}") {
+                                    this.$store.commit("updateMessages", {
+                                        hostname,
+                                        clear: true
+                                    });
                                 } else {
-                                    const lines = (message.data || "").split(/\r?\n/);
+                                    const lines = (message.data.message || message.data || "").split(/\r?\n/);
 
                                     for (let i = 0; i < lines.length; i++) {
-                                        this.$store.commit("updateMessages", `[${hostname}] ${lines[i]}`);
+                                        this.$store.commit("updateMessages", {
+                                            hostname,
+                                            timestamp: message.data.timestamp,
+                                            message: lines[i]
+                                        });
                                     }
                                 }
 

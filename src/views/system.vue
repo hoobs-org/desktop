@@ -442,15 +442,15 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        padding: 7px 20px 20px 20px;
+        padding: 0 20px 20px 20px;
         overflow: hidden;
     }
 
     #system .actions {
         display: flex;
         flex-direction: row;
-        padding: 0 0 10px 0;
-        margin: 0 0 10px 0;
+        padding: 0 0 7px 0;
+        margin: 0 0 6px 0;
         border-bottom: 1px #424242 solid;
     }
 
@@ -478,6 +478,10 @@
         flex-direction: column;
         padding: 0 3px 3px 3px;
         overflow: auto;
+    }
+
+    #system .flow::-webkit-scrollbar {
+        display: none;
     }
 
     #system .section {

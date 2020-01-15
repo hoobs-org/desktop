@@ -113,7 +113,11 @@ Vue.mixin({
                     let response = "unauthorized";
 
                     try {
-                        response = ((await Request.get(`http://${ip}:${port}/api/service`)).data || {}).error;
+                        response = ((await Request.get(`http://${ip}:${port}/api/service`, {
+                            headers: {
+                                "Authorization": settings.get("sessions")[`${ip}:${port}`]
+                            }
+                        })).data || {}).error;
                     } catch {
                         response = "unauthorized";
                     }

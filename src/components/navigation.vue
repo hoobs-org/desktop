@@ -30,7 +30,7 @@
             </router-link>
         </div>
         <div class="routes">
-            <router-link to="/config" @click.native="() => { show.tips = false }">
+            <router-link to="/config/interface" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('config')">settings</span>
             </router-link>
         </div>

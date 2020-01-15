@@ -525,7 +525,7 @@
 
     #app .content {
         flex: 1;
-        padding: 37px 0 0 0;
+        padding: 53px 0 0 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;

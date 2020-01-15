@@ -48,9 +48,10 @@ const routes = () => {
             component: () => import(/* webpackChunkName: "plugins" */ "./views/plugins.vue")
         },
         {
-            path: "/config",
+            path: "/config/:section",
             name: "config",
-            component: () => import(/* webpackChunkName: "config" */ "./views/config.vue")
+            component: () => import(/* webpackChunkName: "config" */ "./views/config.vue"),
+            props: true
         }
     ];
 }

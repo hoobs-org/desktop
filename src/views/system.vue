@@ -447,6 +447,7 @@
     }
 
     #system .actions {
+        height: 23px;
         display: flex;
         flex-direction: row;
         padding: 0 0 7px 0;
@@ -456,7 +457,7 @@
 
     #system .actions .icon {
         font-size: 18px;
-        margin: 0 7px 0 0;
+        margin: 5px 7px 0 0;
         cursor: pointer;
     }
 
@@ -466,7 +467,7 @@
 
     #system .actions .action-seperator {
         display: inline;
-        margin: 0 7px 0 0;
+        margin: 5px 7px 0 0;
         border-right: 1px #5e5e5e solid;
         cursor: default;
     }

@@ -272,7 +272,7 @@
     }
 
     #config .actions {
-        height: 18px;
+        height: 23px;
         display: flex;
         flex-direction: row;
         padding: 0 0 7px 0;
@@ -286,7 +286,7 @@
     #config .actions .icon:visited {
         font-size: 18px;
         color: #999;
-        margin: 0 7px 0 0;
+        margin: 5px 7px 0 0;
         cursor: pointer;
     }
 
@@ -297,13 +297,13 @@
 
     #config .actions .action-seperator {
         display: inline;
-        margin: 0 7px 0 0;
+        margin: 5px 7px 0 0;
         border-right: 1px #5e5e5e solid;
         cursor: default;
     }
 
     #config .tabs {
-        height: 19px;
+        height: 24px;
         display: flex;
         flex-direction: row;
         padding: 0 0 7px 0;
@@ -315,8 +315,8 @@
     }
 
     #config .tabs .tab {
-        height: 26px;
-        line-height: 24px;
+        height: 31px;
+        line-height: 32px;
         padding: 0 14px;
         box-sizing: border-box;
         border-bottom: 1px #424242 solid;
@@ -326,6 +326,7 @@
     }
 
     #config .tabs .tab.active {
+        line-height: 32px;
         background: #262626;
         border-top: 1px #424242 solid;
         border-right: 1px #424242 solid;
@@ -336,7 +337,7 @@
 
     #config .tabs .fill {
         flex: 1;
-        height: 25px;
+        height: 30px;
         border-bottom: 1px #424242 solid;
     }
 

@@ -525,22 +525,10 @@
 
     #app .content {
         flex: 1;
-        padding: 53px 0 0 0;
+        padding: 48px 0 0 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
         font-size: 12pt;
-    }
-
-    #app .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        padding: 44px 20px 20px 20px;
-        display: flex;
-        background: #262626;
-        box-sizing: border-box;
     }
 </style>

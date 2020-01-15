@@ -1,19 +1,18 @@
 <template>
-    <div id="text-field" :class="theme">
+    <div id="integer-field" :class="theme">
         <span class="title">{{ name }}</span>
         <span v-if="description && description !== ''" class="description">{{ description }}</span>
-        <input type="text" ref="field" autocomplete="false" autocorrect="off" autocapitalize="none" :value="value" @input="update()" @change="change" v-bind:required="required" />
+        <input type="number" ref="field" autocomplete="false" step="1" :value="value" @input="update()" @change="change" v-bind:required="required" />
     </div>
 </template>
 
 <script>
     export default {
-        name: "text-field",
-
+        name: "integer-field",
         props: {
             name: String,
             description: String,
-            value: String,
+            value: Number,
             required: {
                 type: Boolean,
                 default: false
@@ -26,7 +25,7 @@
 
         methods: {
             update() {
-                this.$emit("input", this.$refs.field.value);
+                this.$emit("input", parseInt(this.$refs.field.value, 10));
             },
 
             change() {
@@ -37,14 +36,14 @@
 </script>
 
 <style scoped>
-    #text-field {
+    #integer-field {
         display: flex;
         flex-direction: column;
         padding: 0 0 20px 0;
         text-align: left;
     }
 
-    #text-field.dark .title {
+    #integer-field.dark .title {
         font-weight: bold;
         font-size: 14px;
         color: #feb400;
@@ -52,20 +51,20 @@
         cursor: default;
     }
 
-    #text-field.light .title {
+    #integer-field.light .title {
         font-weight: bold;
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field .description {
+    #integer-field .description {
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field.dark input {
+    #integer-field.dark input {
         flex: 1;
         padding: 7px;
         margin: 4px 0 0 0;
@@ -76,12 +75,12 @@
         border-radius: 5px;
     }
 
-    #text-field.dark input:focus {
+    #integer-field.dark input:focus {
         outline: 0 none;
         border-color: #feb400;
     }
 
-    #text-field.light input {
+    #integer-field.light input {
         flex: 1;
         padding: 7px;
         margin: 4px 0 0 0;
@@ -92,7 +91,7 @@
         border-radius: 5px;
     }
 
-    #text-field.light input:focus {
+    #integer-field.light input:focus {
         outline: 0 none;
         border-color: #feb400;
     }

@@ -11,7 +11,7 @@
                 <router-link to="/config/server" :class="section === 'server' ? 'active': ''">Server</router-link>
                 <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">Ports</router-link>
                 <router-link to="/config/bridge" :class="section === 'bridge' ? 'active': ''">Apple Home</router-link>
-                <router-link v-for="(plugin) in plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
+                <router-link v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
                 <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">Advanced</router-link>
             </div>
         </div>
@@ -20,52 +20,80 @@
                 <div class="fill"></div>
             </div>
             <div class="flow">
-
+                <div class="form">
+                    <select-field name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="preferences.locale" :required="true" />
+                    <select-field name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="preferences.tempUnits" :required="true" />
+                    <select-field name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="preferences.countryCode" />
+                    <text-field name="Postal Code" description="This is the postal code used for weather forecasts." v-model="preferences.postalCode" :required="false" />
+                    <text-field name="Latitude" description="Latitude value used for weather forecasts." v-model="preferences.latitude" :required="false" />
+                    <text-field name="Longitude" description="Longitude value used for weather forecasts." v-model="preferences.longitude" :required="false" />
+                </div>
             </div>
         </div>
         <div v-else-if="section === 'server'" class="panels">
             <div class="tabs">
-                <div v-for="(item) in instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
+                <div class="spacer"></div>
+                <div v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === data.instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
                 <div class="fill"></div>
             </div>
             <div class="flow">
-
+                <div class="form">
+                    <port-field name="Server Port" description="This is the port the server runs on." v-model.number="configurations[data.instance].server.port" :required="true" />
+                    <integer-field name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations[data.instance].server.autostart" :required="false" />
+                    <integer-field name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations[data.instance].server.polling_seconds" :required="true" />
+                </div>
             </div>
         </div>
         <div v-else-if="section === 'ports'" class="panels">
             <div class="tabs">
-                <div v-for="(item) in instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
+                <div class="spacer"></div>
+                <div v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === data.instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
                 <div class="fill"></div>
             </div>
             <div class="flow">
-
+                <div class="form">
+                    <text-field name="Range Name" description="A port range description used to identify the port range." v-model="configurations[data.instance].ports.comment" />
+                    <port-field name="Start Port" description="The port range starting number." v-model.number="configurations[data.instance].ports.start" />
+                    <port-field name="End Port" description="The port range ending number." v-model.number="configurations[data.instance].ports.end" />
+                </div>
             </div>
         </div>
         <div v-else-if="section === 'bridge'" class="panels">
             <div class="tabs">
-                <div v-for="(item) in instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
+                <div class="spacer"></div>
+                <div v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === data.instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
                 <div class="fill"></div>
             </div>
             <div class="flow">
-
+                <div class="form">
+                    <text-field name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations[data.instance].bridge.name" :required="true" />
+                    <description-field name="Description" description="Used to identify the bridge on the device." v-model="configurations[data.instance].description" />
+                    <port-field name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations[data.instance].bridge.port" :required="true" />
+                    <hex-field name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations[data.instance].bridge.username" :required="true" />
+                    <text-field name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations[data.instance].bridge.pin" :required="true" />
+                </div>
             </div>
         </div>
         <div v-else-if="section === 'advanced'" class="panels">
             <div class="tabs">
-                <div v-for="(item) in instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
+                <div class="spacer"></div>
+                <div v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === data.instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
                 <div class="fill"></div>
             </div>
-            <div class="flow">
-
+            <div class="editor">
+                <monaco v-model="code" class="monaco" v-on:change="updateConfig" />
             </div>
         </div>
         <div v-else class="panels">
             <div class="tabs">
-                <div v-for="(item) in instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
+                <div class="spacer"></div>
+                <div v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:click="selectinstance(item.key)" :class="`${item.key === data.instance ? 'tab active' : 'tab'}`">{{ item.value }}</div>
                 <div class="fill"></div>
             </div>
             <div class="flow">
+                <div class="form">
 
+                </div>
             </div>
         </div>
     </div>
@@ -76,8 +104,30 @@
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
+    import TextField from "@/components/text-field.vue";
+    import DescriptionField from "@/components/description-field.vue";
+    import IntegerField from "@/components/integer-field.vue";
+    import SelectField from "@/components/select-field.vue";
+    import PortField from "@/components/port-field.vue";
+    import HexField from "@/components/hex-field.vue";
+
+    import Monaco from "../lib/monaco";
+
+    import Languages from "../locals/languages.json";
+    import Countries from "../locals/country-codes.json";
+
     export default {
         name: "config",
+
+        components: {
+            "text-field": TextField,
+            "description-field": DescriptionField,
+            "integer-field": IntegerField,
+            "select-field": SelectField,
+            "port-field": PortField,
+            "hex-field": HexField,
+            "monaco": Monaco
+        },
 
         props: {
             section: String
@@ -88,13 +138,41 @@
                 show: {
                     loading: true
                 },
+                preferences: {
+                    locale: "en",
+                    tempUnits: "fahrenheit",
+                    countryCode: "US",
+                    postalCode: "94040",
+                    latitude: null,
+                    longitude: null
+                },
                 devices: [],
                 configurations: {},
-                plugins: {},
-                instances: [],
-                instance: null,
-                plugin: null,
+                data: {
+                    plugins: {},
+                    instances: [],
+                    instance: null,
+                    plugin: null
+                },
                 errors: []
+            }
+        },
+
+        values: {
+            languages: Languages,
+            countries: Countries,
+            units: [{
+                text: "Celsius",
+                value: "celsius"
+            },{
+                text: "Fahrenheit",
+                value: "fahrenheit"
+            }]
+        },
+
+        computed: {
+            code() {
+                return JSON.toString(this.configurations[this.data.instance]);
             }
         },
 
@@ -111,8 +189,12 @@
         },
 
         watch: {
-            configurations: function () {
-                // RELOAD FIELDS
+            configurations: {
+                deep: true,
+
+                handler() {
+                    // RELOAD FIELDS
+                }
             },
 
              section: async function () {
@@ -177,14 +259,14 @@
 
                 plugins.sort((a, b) => (a.title > b.title) ? 1 : -1);
 
-                this.plugins = plugins;
+                this.data.plugins = plugins;
             },
 
             loadInstances() {
-                this.plugin = null;
+                this.data.plugin = null;
 
-                this.instances = [];
-                this.instance = null;
+                this.data.instances = [];
+                this.data.instance = null;
 
                 if (([
                     "interface",
@@ -193,30 +275,54 @@
                     "bridge",
                     "advanced"
                 ]).indexOf(this.section) === -1) {
-                    this.plugin = this.plugins.filter(p => p.name === this.section)[0];
+                    this.data.plugin = this.data.plugins.filter(p => p.name === this.section)[0];
 
-                    this.instances = this.devices.filter(d => this.plugin.instances.indexOf(`${d.mac}:${d.port}`) > -1).map((device) => {
+                    this.data.instances = this.devices.filter(d => this.data.plugin.instances.indexOf(`${d.mac}:${d.port}`) > -1).map((device) => {
                         return {
                             key: `${device.mac}:${device.port}`,
                             value: device.hostname
                         }
                     });
 
-                    this.instance = this.instances[0].key;
+                    this.data.instance = this.data.instances[0].key;
                 } else if (this.section !== "interface") {
-                    this.instances = this.devices.map((device) => {
+                    this.data.instances = this.devices.map((device) => {
                         return {
                             key: `${device.mac}:${device.port}`,
                             value: device.hostname
                         }
                     });
 
-                    this.instance = this.instances[0].key;
+                    this.data.instance = this.data.instances[0].key;
+                }
+            },
+
+            addError(message) {
+                if (this.errors.indexOf(message) === -1) {
+                    this.errors.push(message);
+                }
+            },
+
+            fixError(message) {
+                const index = this.errors.indexOf(message);
+
+                if (index >= 0) {
+                    this.errors.splice(index, 1);
+                }
+            },
+
+            updateConfig(value) {
+                try {
+                    this.configurations[this.data.instance] = JSON.parse(value);
+
+                    this.fixError("Invalid configuration.");
+                } catch {
+                    this.addError("Invalid configuration.");
                 }
             },
 
             selectinstance(instance) {
-                this.instance = instance;
+                this.data.instance = instance;
             },
 
             pluginTitle(plugin) {
@@ -308,6 +414,7 @@
         flex-direction: row;
         padding: 0 0 7px 0;
         overflow-x: auto;
+        overflow-y: hidden;
     }
 
     #config .tabs::-webkit-scrollbar {
@@ -333,11 +440,19 @@
         border-bottom: 0 none;
         border-left: 1px #424242 solid;
         border-radius: 2px 2px 0 0;
+        color: #feb400;
     }
 
     #config .tabs .fill {
         flex: 1;
         height: 30px;
+        min-width: 20px;
+        border-bottom: 1px #424242 solid;
+    }
+
+    #config .tabs .spacer {
+        height: 30px;
+        width: 20px;
         border-bottom: 1px #424242 solid;
     }
 
@@ -396,6 +511,22 @@
 
     #config .panels .flow::-webkit-scrollbar {
         display: none;
+    }
+
+    #config .form {
+        padding: 10px 20px 0 20px;
+        max-width: 700px;
+    }
+
+    #config .editor {
+        flex: 1;
+        width: 100%;
+        height: 100%;
+    }
+
+    #config .editor .monaco {
+        width: 100%;
+        height: 100%;
     }
 
     #loader {

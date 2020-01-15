@@ -44,7 +44,15 @@
         text-align: left;
     }
 
-    #password-field .title {
+    #password-field.dark .title {
+        font-weight: bold;
+        font-size: 14px;
+        color: #feb400;
+        user-select: none;
+        cursor: default;
+    }
+
+    #password-field.light .title {
         font-weight: bold;
         font-size: 12px;
         user-select: none;

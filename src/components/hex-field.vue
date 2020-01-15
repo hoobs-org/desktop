@@ -1,15 +1,19 @@
 <template>
-    <div id="text-field" :class="theme">
+    <div id="hex-field" :class="theme">
         <span class="title">{{ name }}</span>
         <span v-if="description && description !== ''" class="description">{{ description }}</span>
-        <input type="text" ref="field" autocomplete="false" autocorrect="off" autocapitalize="none" :value="value" @input="update()" @change="change" v-bind:required="required" />
+        <div class="field-container">
+            <input type="text" ref="field" autocomplete="false" :value="value" @input="update()" @change="change" v-bind:required="required" />
+            <div class="regenerate-link" v-on:click="$emit('generate')">
+                <span class="icon">autorenew</span>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
     export default {
-        name: "text-field",
-
+        name: "hex-field",
         props: {
             name: String,
             description: String,
@@ -37,14 +41,14 @@
 </script>
 
 <style scoped>
-    #text-field {
+    #hex-field {
         display: flex;
         flex-direction: column;
         padding: 0 0 20px 0;
         text-align: left;
     }
 
-    #text-field.dark .title {
+    #hex-field.dark .title {
         font-weight: bold;
         font-size: 14px;
         color: #feb400;
@@ -52,20 +56,20 @@
         cursor: default;
     }
 
-    #text-field.light .title {
+    #hex-field.light .title {
         font-weight: bold;
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field .description {
+    #hex-field .description {
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field.dark input {
+    #hex-field.dark input {
         flex: 1;
         padding: 7px;
         margin: 4px 0 0 0;
@@ -76,12 +80,12 @@
         border-radius: 5px;
     }
 
-    #text-field.dark input:focus {
+    #hex-field.dark input:focus {
         outline: 0 none;
         border-color: #feb400;
     }
 
-    #text-field.light input {
+    #hex-field.light input {
         flex: 1;
         padding: 7px;
         margin: 4px 0 0 0;
@@ -92,8 +96,30 @@
         border-radius: 5px;
     }
 
-    #text-field.light input:focus {
+    #hex-field.light input:focus {
         outline: 0 none;
         border-color: #feb400;
+    }
+
+    #hex-field .field-container {
+        display: flex;
+        position: relative;
+    }
+
+    #hex-field .regenerate-link {
+        width: 33px;
+        height: 33px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        align-content: center;
+        justify-content: space-around;
+        cursor: pointer;
+    }
+
+    #hex-field .regenerate-link .icon {
+        font-size: 17px;
     }
 </style>

@@ -44,7 +44,15 @@
         text-align: left;
     }
 
-    #port-field .title {
+    #port-field.dark .title {
+        font-weight: bold;
+        font-size: 14px;
+        color: #feb400;
+        user-select: none;
+        cursor: default;
+    }
+
+    #port-field.light .title {
         font-weight: bold;
         font-size: 12px;
         user-select: none;

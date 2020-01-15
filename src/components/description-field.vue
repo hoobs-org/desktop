@@ -1,15 +1,14 @@
 <template>
-    <div id="text-field" :class="theme">
+    <div id="description-field" :class="theme">
         <span class="title">{{ name }}</span>
         <span v-if="description && description !== ''" class="description">{{ description }}</span>
-        <input type="text" ref="field" autocomplete="false" autocorrect="off" autocapitalize="none" :value="value" @input="update()" @change="change" v-bind:required="required" />
+        <textarea ref="field" autocomplete="false" :value="value" @input="update()" @change="change" v-bind:required="required"></textarea>
     </div>
 </template>
 
 <script>
     export default {
-        name: "text-field",
-
+        name: "description-field",
         props: {
             name: String,
             description: String,
@@ -37,14 +36,14 @@
 </script>
 
 <style scoped>
-    #text-field {
+    #description-field {
         display: flex;
         flex-direction: column;
         padding: 0 0 20px 0;
         text-align: left;
     }
 
-    #text-field.dark .title {
+    #description-field.dark .title {
         font-weight: bold;
         font-size: 14px;
         color: #feb400;
@@ -52,47 +51,49 @@
         cursor: default;
     }
 
-    #text-field.light .title {
+    #description-field.light .title {
         font-weight: bold;
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field .description {
+    #description-field .description {
         font-size: 12px;
         user-select: none;
         cursor: default;
     }
 
-    #text-field.dark input {
+    #description-field.dark textarea {
         flex: 1;
+        min-height: 107px;
         padding: 7px;
-        margin: 4px 0 0 0;
         font-size: 14px;
         background: #444;
         color: #fff;
         border: 1px #333 solid;
         border-radius: 5px;
+        resize: none;
     }
 
-    #text-field.dark input:focus {
+    #description-field.dark textarea:focus {
         outline: 0 none;
         border-color: #feb400;
     }
 
-    #text-field.light input {
+    #description-field.light textarea {
         flex: 1;
+        min-height: 107px;
         padding: 7px;
-        margin: 4px 0 0 0;
         font-size: 14px;
-        background: #fff;
-        color: #000;
-        border: 1px #e5e5e5 solid;
+        background: #444;
+        color: #fff;
+        border: 1px #333 solid;
         border-radius: 5px;
+        resize: none;
     }
 
-    #text-field.light input:focus {
+    #description-field.light textarea:focus {
         outline: 0 none;
         border-color: #feb400;
     }

@@ -93,7 +93,7 @@
             </div>
             <dropdown v-if="menus['system']" class="system-menu">
                 <div class="item" v-on:click="() => { confirm.connection = true }">Reset Connection</div>
-                <div class="item" v-on:click="() => { confirm.username = true }">Generate New Username</div>
+                <div class="item" v-on:click="() => { confirm.username = true }">Generate New Identifier</div>
                 <div class="seperator"></div>
                 <div class="item" v-on:click="systemBackup()">System Backup</div>
                 <div class="item" v-on:click="systemRestore()">System Restore</div>

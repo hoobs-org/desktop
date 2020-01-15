@@ -154,7 +154,7 @@
                     this.sockets[instance].socket.onmessage = (message) => {
                         const now = new Date();
 
-                        message = JSON.parse(message.data);
+                        message = JSON.tryParse(message.data, {});
 
                         switch (message.event) {
                             case "log":

@@ -1,3 +1,5 @@
+import "./lib/extentions";
+
 import Vue from "vue";
 import Request from "axios";
 import FormData from "form-data";

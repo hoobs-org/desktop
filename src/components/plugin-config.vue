@@ -386,7 +386,7 @@
                     0 2px 1px -1px rgba(0, 0, 0, 0.22),
                     0 1px 3px 2px rgba(0, 0, 0, 0.3);
         border-radius: 3px;
-        margin: 7px 0 30px 0;
+        margin: 0 0 30px 0;
     }
 
     #plugin-config .accessory-title {

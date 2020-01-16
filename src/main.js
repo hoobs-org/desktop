@@ -29,8 +29,8 @@ const settings = new Settings({
         geolocation: {
             countryCode: "US",
             postalCode: "94040",
-            latitude: null,
-            longitude: null
+            latitude: "",
+            longitude: ""
         }
     }
 });

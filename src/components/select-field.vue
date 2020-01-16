@@ -20,7 +20,10 @@
             name: String,
             description: String,
             value: [String, Number, Boolean, Object, Date],
-            type: String,
+            type: {
+                type: String,
+                default: "string"
+            },
             options: Array,
             required: {
                 type: Boolean,
@@ -34,9 +37,9 @@
 
         methods: {
             update() {
-                let value = null;
+                let selected = null;
 
-                switch ((this.type || "string").toLowerCase()) {
+                switch (this.type.toLowerCase()) {
                     case "bool":
                     case "boolean":
                         this.$emit("input", (this.$refs.field.value || "").toLowerCase() === "true");
@@ -46,24 +49,24 @@
                     case "double":
                     case "decimal":
                     case "number":
-                        value = parseFloat(this.$refs.field.value);
+                        selected = parseFloat(this.$refs.field.value);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
+                        if (Number.isNaN(selected)) {
+                            selected = null;
                         }
 
-                        this.$emit("input", value);
+                        this.$emit("input", selected);
                         break;
 
                     case "int":
                     case "integer":
-                        value = parseInt(this.$refs.field.value, 10);
+                        selected = parseInt(this.$refs.field.value, 10);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
+                        if (Number.isNaN(selected)) {
+                            selected = null;
                         }
 
-                        this.$emit("input", value);
+                        this.$emit("input", selected);
                         break;
 
                     default:
@@ -73,9 +76,9 @@
             },
 
             change() {
-                let value = null;
+                let selected = null;
 
-                switch ((this.type || "string").toLowerCase()) {
+                switch (this.type.toLowerCase()) {
                     case "bool":
                     case "boolean":
                         this.$emit("change", (this.$refs.field.value || "").toLowerCase() === "true");
@@ -85,24 +88,24 @@
                     case "double":
                     case "decimal":
                     case "number":
-                        value = parseFloat(this.$refs.field.value);
+                        selected = parseFloat(this.$refs.field.value);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
+                        if (Number.isNaN(selected)) {
+                            selected = null;
                         }
 
-                        this.$emit("change", value);
+                        this.$emit("change", selected);
                         break;
 
                     case "int":
                     case "integer":
-                        value = parseInt(this.$refs.field.value, 10);
+                        selected = parseInt(this.$refs.field.value, 10);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
+                        if (Number.isNaN(selected)) {
+                            selected = null;
                         }
 
-                        this.$emit("change", value);
+                        this.$emit("change", selected);
                         break;
 
                     default:

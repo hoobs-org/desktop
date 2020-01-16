@@ -5,6 +5,10 @@ export default {
         value: {
             type: String,
             required: true
+        },
+        theme: {
+            type: String,
+            default: "hoobs"
         }
     },
 
@@ -48,14 +52,27 @@ export default {
                     { token: "attribute.value.hex.css", foreground: "999999" }
                 ],
                 colors: {
-                    "editor.background": "#00000000",
+                    "editor.background": "#262626",
                     "editor.foreground": "#999999"
+                }
+            });
+
+            monaco.editor.defineTheme("hoobs-field", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [
+                    { token: "", foreground: "FFFFFF", background: "444444" },
+                    { token: "attribute.value.hex.css", foreground: "FFFFFF" }
+                ],
+                colors: {
+                    "editor.background": "#444444",
+                    "editor.foreground": "#FFFFFF"
                 }
             });
 
             this.editor = monaco.editor.create(this.$el, {
                 value: this.value,
-                theme: "hoobs",
+                theme: this.theme,
                 language: "json",
                 wordWrap: "on",
                 wrappingIndent: "indent",
@@ -73,11 +90,7 @@ export default {
             });
 
             this.editor.onDidChangeModelContent(event => {
-                const value = this.editor.getValue();
-
-                if (this.value !== value) {
-                    this.$emit("change", value, event);
-                }
+                this.$emit("change", this.editor.getValue(), event);
             })
 
             window.addEventListener("resize", this.resize);

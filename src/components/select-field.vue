@@ -3,7 +3,7 @@
         <span class="title">{{ name }}</span>
         <span v-if="description && description !== ''" class="description">{{ description }}</span>
         <div class="container">
-            <select ref="field" v-model="value" @input="update()" @change="change()" v-bind:required="required">
+            <select ref="field" :value="value" @input="update()" @change="change()" v-bind:required="required">
                 <option v-for="option in options" v-bind:value="option.value" :key="option.value">
                     {{ option.text }}
                 </option>

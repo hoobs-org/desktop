@@ -18,68 +18,68 @@
         <div v-if="section === 'interface'" class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab title="Preferences" :active="true" :dirty="dirty.indexOf('preferences') >= 0" />
+                <tab title="Preferences" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="flow">
                 <div class="form">
-                    <select-field v-on:input="markDirty()" name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="configurations['preferences'].locale" :required="true" />
-                    <select-field v-on:input="markDirty()" name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="configurations['preferences'].tempUnits" :required="true" />
-                    <select-field v-on:input="markDirty()" name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="configurations['preferences'].countryCode" />
-                    <text-field v-on:input="markDirty()" name="Postal Code" description="This is the postal code used for weather forecasts." v-model="configurations['preferences'].postalCode" :required="false" />
-                    <text-field v-on:input="markDirty()" name="Latitude" description="Latitude value used for weather forecasts." v-model="configurations['preferences'].latitude" :required="false" />
-                    <text-field v-on:input="markDirty()" name="Longitude" description="Longitude value used for weather forecasts." v-model="configurations['preferences'].longitude" :required="false" />
+                    <select-field v-on:input="markDirty()" name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
+                    <select-field v-on:input="markDirty()" name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
+                    <select-field v-on:input="markDirty()" name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
+                    <text-field v-on:input="markDirty()" name="Postal Code" description="This is the postal code used for weather forecasts." v-model="configurations.working['preferences'].postalCode" :required="false" />
+                    <text-field v-on:input="markDirty()" name="Latitude" description="Latitude value used for weather forecasts." v-model="configurations.working['preferences'].latitude" :required="false" />
+                    <text-field v-on:input="markDirty()" name="Longitude" description="Longitude value used for weather forecasts." v-model="configurations.working['preferences'].longitude" :required="false" />
                 </div>
             </div>
         </div>
         <div v-else-if="section === 'server'" class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="dirty.indexOf(item.key) >= 0" />
+                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="flow">
                 <div class="form">
-                    <port-field v-on:input="markDirty()" name="Server Port" description="This is the port the server runs on." v-model.number="configurations[data.instance].server.port" :required="true" />
-                    <integer-field v-on:input="markDirty()" name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations[data.instance].server.autostart" :required="false" />
-                    <integer-field v-on:input="markDirty()" name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations[data.instance].server.polling_seconds" :required="true" />
+                    <port-field v-on:input="markDirty()" name="Server Port" description="This is the port the server runs on." v-model.number="configurations.working[data.instance].server.port" :required="true" />
+                    <integer-field v-on:input="markDirty()" name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
+                    <integer-field v-on:input="markDirty()" name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
                 </div>
             </div>
         </div>
         <div v-else-if="section === 'ports'" class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="dirty.indexOf(item.key) >= 0" />
+                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="flow">
                 <div class="form">
-                    <text-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations[data.instance].ports.comment" />
-                    <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations[data.instance].ports.start" />
-                    <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations[data.instance].ports.end" />
+                    <text-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
+                    <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations.working[data.instance].ports.start" />
+                    <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations.working[data.instance].ports.end" />
                 </div>
             </div>
         </div>
         <div v-else-if="section === 'bridge'" class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="dirty.indexOf(item.key) >= 0" />
+                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="flow">
                 <div class="form">
-                    <text-field v-on:input="markDirty()" name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations[data.instance].bridge.name" :required="true" />
-                    <description-field v-on:input="markDirty()" name="Description" description="Used to identify the bridge on the device." v-model="configurations[data.instance].description" />
-                    <port-field v-on:input="markDirty()" name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations[data.instance].bridge.port" :required="true" />
-                    <hex-field v-on:input="markDirty()" name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations[data.instance].bridge.username" :required="true" />
-                    <text-field v-on:input="markDirty()" name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations[data.instance].bridge.pin" :required="true" />
+                    <text-field v-on:input="markDirty()" name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations.working[data.instance].bridge.name" :required="true" />
+                    <description-field v-on:input="markDirty()" name="Description" description="Used to identify the bridge on the device." v-model="configurations.working[data.instance].description" />
+                    <port-field v-on:input="markDirty()" name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
+                    <hex-field v-on:input="markDirty()" name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations.working[data.instance].bridge.username" :required="true" />
+                    <text-field v-on:input="markDirty()" name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations.working[data.instance].bridge.pin" :required="true" />
                 </div>
             </div>
         </div>
         <div v-else-if="section === 'advanced'" class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="dirty.indexOf(item.key) >= 0" />
+                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="editor">
@@ -89,7 +89,7 @@
         <div v-else class="panels">
             <div class="tabs">
                 <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="dirty.indexOf(item.key) >= 0" />
+                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
                 <div class="fill"></div>
             </div>
             <div class="flow">
@@ -142,12 +142,15 @@
                 show: {
                     loading: true
                 },
-                preferences: {},
                 devices: [],
-                configurations: {},
-                originl: {},
-                dirty: [],
-                reboot: [],
+                configurations: {
+                    originl: {},
+                    working: {}
+                },
+                flags: {
+                    dirty: [],
+                    reboot: []
+                },
                 data: {
                     plugins: {},
                     instances: [],
@@ -172,7 +175,7 @@
 
         computed: {
             code() {
-                return JSON.toString(this.configurations[this.data.instance]);         
+                return JSON.toString(this.configurations.working[this.data.instance]);         
             }
         },
 
@@ -206,31 +209,31 @@
 
         methods: {
             markDirty() {
-                const keys = Object.keys(this.configurations);
+                const keys = Object.keys(this.configurations.working);
 
                 for (let i = 0; i < keys.length; i++) {
-                    if (!JSON.equals(this.configurations[keys[i]], this.originl[keys[i]])) {
-                        if (this.dirty.indexOf(keys[i]) === -1) {
-                            this.dirty.push(keys[i]);
+                    if (!this.configurations.originl[keys[i]] || !JSON.equals(this.configurations.working[keys[i]], this.configurations.originl[keys[i]])) {
+                        if (this.flags.dirty.indexOf(keys[i]) === -1) {
+                            this.flags.dirty.push(keys[i]);
                         }
                     } else {
-                        const index = this.dirty.indexOf(keys[i]);
+                        const index = this.flags.dirty.indexOf(keys[i]);
 
                         if (index >= 0) {
-                            this.dirty.splice(index, 1);
+                            this.flags.dirty.splice(index, 1);
                         }
                     }
 
                     if (keys[i] !== "preferences") {
-                        if (!JSON.equals(this.configurations[keys[i]].server, this.originl[keys[i]].server)) {
-                            if (this.reboot.indexOf(keys[i]) === -1) {
-                                this.reboot.push(keys[i]);
+                        if (!JSON.equals(this.configurations.working[keys[i]].server, this.configurations.originl[keys[i]].server)) {
+                            if (this.flags.reboot.indexOf(keys[i]) === -1) {
+                                this.flags.reboot.push(keys[i]);
                             }
                         } else {
-                            const index = this.reboot.indexOf(keys[i]);
+                            const index = this.flags.reboot.indexOf(keys[i]);
 
                             if (index >= 0) {
-                                this.reboot.splice(index, 1);
+                                this.flags.reboot.splice(index, 1);
                             }
                         }
                     }
@@ -238,13 +241,7 @@
             },
 
             updateCode(value) {
-                try {
-                    this.configurations[this.data.instance] = JSON.parse(value);
-
-                    this.fixError("Invalid configuration.");
-                } catch {
-                    this.addError("Invalid configuration.");
-                }
+                this.configurations.working[this.data.instance] = JSON.tryParse(value, this.configurations.working[this.data.instance]);
 
                 this.markDirty();
             },
@@ -266,16 +263,16 @@
                 const units = this.Settings.get("units") || {};
                 const geolocation = this.Settings.get("geolocation") || {};
 
-                this.configurations["preferences"] = {};
+                this.configurations.working["preferences"] = {};
 
-                this.configurations["preferences"].locale = this.Settings.get("locale") || "en";
-                this.configurations["preferences"].tempUnits = units.temperature || "fahrenheit";
-                this.configurations["preferences"].countryCode = geolocation.countryCode || "US";
-                this.configurations["preferences"].postalCode = geolocation.postalCode || "94040";
-                this.configurations["preferences"].latitude = geolocation.latitude || "";
-                this.configurations["preferences"].longitude = geolocation.longitude || "";
+                this.configurations.working["preferences"].locale = this.Settings.get("locale") || "en";
+                this.configurations.working["preferences"].tempUnits = units.temperature || "fahrenheit";
+                this.configurations.working["preferences"].countryCode = geolocation.countryCode || "US";
+                this.configurations.working["preferences"].postalCode = geolocation.postalCode || "94040";
+                this.configurations.working["preferences"].latitude = geolocation.latitude || "";
+                this.configurations.working["preferences"].longitude = geolocation.longitude || "";
 
-                this.originl["preferences"] = JSON.clone(this.configurations["preferences"]);
+                this.configurations.originl["preferences"] = JSON.clone(this.configurations.working["preferences"]);
             },
 
             async loadConfig() {
@@ -285,8 +282,8 @@
 
                     await this.API.login(device.ip, device.port);
 
-                    this.configurations[instance] = await this.API.get(device.ip, device.port, "/config") || {};
-                    this.originl[instance] = JSON.clone(this.configurations[instance]);
+                    this.configurations.working[instance] = await this.API.get(device.ip, device.port, "/config") || {};
+                    this.configurations.originl[instance] = JSON.clone(this.configurations.working[instance]);
                 }
             },
 

@@ -7,7 +7,7 @@
             </div>
             <div class="modal-footer">
                 <div v-if="confirm" class="button" v-on:click="$emit('cancel')">{{ cancelTitle }}</div>
-                <div class="button button-primary" v-on:click="$emit('confirm')">{{ okTitle }}</div>
+                <div v-if="select" class="button button-primary" v-on:click="$emit('confirm')">{{ okTitle }}</div>
             </div>
         </div>
     </div>
@@ -29,6 +29,10 @@
             confirm: {
                 type: Boolean,
                 default: true
+            },
+            select: {
+                type: Boolean,
+                default: false
             },
             "ok-title": {
                 type: String,

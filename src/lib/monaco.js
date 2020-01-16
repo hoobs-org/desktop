@@ -76,6 +76,7 @@ export default {
                 language: "json",
                 wordWrap: "on",
                 wrappingIndent: "indent",
+                renderLineHighlight: "none",
                 scrollBeyondLastLine: false,
                 contextmenu: false,
                 minimap: {

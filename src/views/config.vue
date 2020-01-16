@@ -1,112 +1,121 @@
 <template>
-    <div v-if="!show.loading" id="config">
-        <div class="sections">
-            <div class="actions">
-                <div title="Save Changes" class="icon">save</div>
-                <div class="action-seperator"></div>
-                <div v-on:click="refresh()" title="Refresh Log" class="icon">refresh</div>
+    <div id="config">
+        <monaco v-on:mounted="() => { show.mounting = false }" value="{}" class="monaco-loader" />
+        <div v-if="!show.loading && !show.mounting" class="loaded">
+            <div class="sections">
+                <div class="actions">
+                    <div v-on:click="saveChanges()" title="Save Changes" class="icon">save</div>
+                    <div class="action-seperator"></div>
+                    <div v-on:click="refresh()" title="Refresh Log" class="icon">refresh</div>
+                </div>
+                <div class="flow">
+                    <router-link to="/config/interface" :class="section === 'interface' ? 'active': ''">Interface</router-link>
+                    <router-link to="/config/server" :class="section === 'server' ? 'active': ''">Server</router-link>
+                    <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">Ports</router-link>
+                    <router-link to="/config/bridge" :class="section === 'bridge' ? 'active': ''">Apple Home</router-link>
+                    <router-link v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
+                    <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">Advanced</router-link>
+                </div>
             </div>
-            <div class="flow">
-                <router-link to="/config/interface" :class="section === 'interface' ? 'active': ''">Interface</router-link>
-                <router-link to="/config/server" :class="section === 'server' ? 'active': ''">Server</router-link>
-                <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">Ports</router-link>
-                <router-link to="/config/bridge" :class="section === 'bridge' ? 'active': ''">Apple Home</router-link>
-                <router-link v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
-                <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">Advanced</router-link>
+            <div v-if="section === 'interface'" class="panels">
+                <div class="tabs">
+                    <div class="spacer"></div>
+                    <tab title="Preferences" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
+                    <div class="fill"></div>
+                </div>
+                <div class="flow">
+                    <div class="form">
+                        <select-field v-on:input="markDirty()" name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
+                        <select-field v-on:input="markDirty()" name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
+                        <select-field v-on:input="markDirty()" name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
+                        <text-field v-on:input="markDirty()" name="Postal Code" description="This is the postal code used for weather forecasts." v-model="configurations.working['preferences'].postalCode" :required="false" />
+                        <text-field v-on:input="markDirty()" name="Latitude" description="Latitude value used for weather forecasts." v-model="configurations.working['preferences'].latitude" :required="false" />
+                        <text-field v-on:input="markDirty()" name="Longitude" description="Longitude value used for weather forecasts." v-model="configurations.working['preferences'].longitude" :required="false" />
+                    </div>
+                </div>
             </div>
-        </div>
-        <div v-if="section === 'interface'" class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab title="Preferences" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
-                <div class="fill"></div>
+            <div v-if="section === 'server'" class="panels">
+                <div class="tabs">
+                    <div class="spacer"></div>
+                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
+                    <div class="fill"></div>
+                </div>
+                <div class="flow">
+                    <div class="form">
+                        <port-field v-on:input="markDirty()" name="Server Port" description="This is the port the server runs on." v-model.number="configurations.working[data.instance].server.port" :required="true" />
+                        <integer-field v-on:input="markDirty()" name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
+                        <integer-field v-on:input="markDirty()" name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
+                    </div>
+                </div>
             </div>
-            <div class="flow">
-                <div class="form">
-                    <select-field v-on:input="markDirty()" name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
-                    <select-field v-on:input="markDirty()" name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
-                    <select-field v-on:input="markDirty()" name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
-                    <text-field v-on:input="markDirty()" name="Postal Code" description="This is the postal code used for weather forecasts." v-model="configurations.working['preferences'].postalCode" :required="false" />
-                    <text-field v-on:input="markDirty()" name="Latitude" description="Latitude value used for weather forecasts." v-model="configurations.working['preferences'].latitude" :required="false" />
-                    <text-field v-on:input="markDirty()" name="Longitude" description="Longitude value used for weather forecasts." v-model="configurations.working['preferences'].longitude" :required="false" />
+            <div v-if="section === 'ports'" class="panels">
+                <div class="tabs">
+                    <div class="spacer"></div>
+                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
+                    <div class="fill"></div>
+                </div>
+                <div class="flow">
+                    <div class="form">
+                        <text-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
+                        <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations.working[data.instance].ports.start" />
+                        <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations.working[data.instance].ports.end" />
+                    </div>
+                </div>
+            </div>
+            <div v-if="section === 'bridge'" class="panels">
+                <div class="tabs">
+                    <div class="spacer"></div>
+                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
+                    <div class="fill"></div>
+                </div>
+                <div class="flow">
+                    <div class="form">
+                        <text-field v-on:input="markDirty()" name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations.working[data.instance].bridge.name" :required="true" />
+                        <description-field v-on:input="markDirty()" name="Description" description="Used to identify the bridge on the device." v-model="configurations.working[data.instance].description" />
+                        <port-field v-on:input="markDirty()" name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
+                        <hex-field v-on:input="markDirty()" name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations.working[data.instance].bridge.username" :required="true" />
+                        <text-field v-on:input="markDirty()" name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations.working[data.instance].bridge.pin" :required="true" />
+                    </div>
+                </div>
+            </div>
+            <div v-if="section === 'advanced'" class="panels">
+                <div class="tabs">
+                    <div class="spacer"></div>
+                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
+                    <div class="fill"></div>
+                </div>
+                <div class="editor">
+                    <monaco v-on:change="updateCode" :value="code" class="monaco" />
+                </div>
+            </div>
+            <div v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" class="loop">
+                <div v-if="section === plugin.name" class="panels">
+                    <div class="tabs">
+                        <div class="spacer"></div>
+                        <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
+                        <div class="fill"></div>
+                    </div>
+                    <div v-for="(instance) in data.instances" :key="`plugin_${plugin.name}_instance_${instance.key}`" class="loop">
+                        <div v-if="instance.key === data.instance" class="flow">
+                            <div class="form">
+                                <plugin-config v-on:input="updateConfig" :plugin="plugin" :instance="instance.key" v-model="configurations.working[data.instance]" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div v-else-if="section === 'server'" class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                <div class="fill"></div>
-            </div>
-            <div class="flow">
-                <div class="form">
-                    <port-field v-on:input="markDirty()" name="Server Port" description="This is the port the server runs on." v-model.number="configurations.working[data.instance].server.port" :required="true" />
-                    <integer-field v-on:input="markDirty()" name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
-                    <integer-field v-on:input="markDirty()" name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
-                </div>
-            </div>
-        </div>
-        <div v-else-if="section === 'ports'" class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                <div class="fill"></div>
-            </div>
-            <div class="flow">
-                <div class="form">
-                    <text-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
-                    <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations.working[data.instance].ports.start" />
-                    <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations.working[data.instance].ports.end" />
-                </div>
-            </div>
-        </div>
-        <div v-else-if="section === 'bridge'" class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                <div class="fill"></div>
-            </div>
-            <div class="flow">
-                <div class="form">
-                    <text-field v-on:input="markDirty()" name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations.working[data.instance].bridge.name" :required="true" />
-                    <description-field v-on:input="markDirty()" name="Description" description="Used to identify the bridge on the device." v-model="configurations.working[data.instance].description" />
-                    <port-field v-on:input="markDirty()" name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
-                    <hex-field v-on:input="markDirty()" name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations.working[data.instance].bridge.username" :required="true" />
-                    <text-field v-on:input="markDirty()" name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations.working[data.instance].bridge.pin" :required="true" />
-                </div>
-            </div>
-        </div>
-        <div v-else-if="section === 'advanced'" class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                <div class="fill"></div>
-            </div>
-            <div class="editor">
-                <monaco v-on:change="updateCode" :value="code" class="monaco" />
-            </div>
-        </div>
-        <div v-else class="panels">
-            <div class="tabs">
-                <div class="spacer"></div>
-                <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                <div class="fill"></div>
-            </div>
-            <div class="flow">
-                <div class="form">
-
-                </div>
-            </div>
-        </div>
+        <loader v-else id="loader" value="Loading..." :initilized="true" />
     </div>
-    <loader v-else id="loader" value="Loading..." />
 </template>
 
 <script>
     import Decamelize from "decamelize";
     import Inflection from "inflection";
 
+    import PluginConfig from "@/components/plugin-config.vue";
     import Tab from "@/components/tab.vue";
+
     import TextField from "@/components/text-field.vue";
     import DescriptionField from "@/components/description-field.vue";
     import IntegerField from "@/components/integer-field.vue";
@@ -123,6 +132,7 @@
         name: "config",
 
         components: {
+            "plugin-config": PluginConfig,
             "tab": Tab,
             "text-field": TextField,
             "description-field": DescriptionField,
@@ -140,7 +150,8 @@
         data() {
             return {
                 show: {
-                    loading: true
+                    loading: true,
+                    mounting: true
                 },
                 devices: [],
                 configurations: {
@@ -240,6 +251,12 @@
                 }
             },
 
+            updateConfig(value) {
+                this.configurations.working[this.data.instance] = value;
+
+                this.markDirty();
+            },
+
             updateCode(value) {
                 this.configurations.working[this.data.instance] = JSON.tryParse(value, this.configurations.working[this.data.instance]);
 
@@ -302,10 +319,9 @@
                         let index = plugins.findIndex(p => p.name === response[j].name && p.name === response[j].name);
 
                         if (index === -1) {
+                            index = plugins.length;
                             plugins.push(response[j]);
                         }
-
-                        index = plugins.length - 1;
 
                         plugins[index].title = this.pluginTitle(plugins[index]);
 
@@ -411,6 +427,10 @@
                 value = value.replace(/webostv/gi, "webOS");
 
                 return value;
+            },
+
+            saveChanges() {
+                // SAVE CONFIG
             }
         }
     };
@@ -418,6 +438,13 @@
 
 <style scoped>
     #config {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #config .loaded {
         flex: 1;
         display: flex;
         position: relative;
@@ -524,6 +551,17 @@
         color: #feb400 !important;
     }
 
+    #config .loop {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #config .loop:empty {
+        display: none;
+    }
+
     #config .panels {
         flex: 1;
         display: flex;
@@ -550,6 +588,15 @@
         flex: 1;
         width: 100%;
         height: 100%;
+    }
+
+    #config .monaco-loader {
+        width: 5px;
+        height: 5px;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        opacity: 0;
     }
 
     #config .editor .monaco {

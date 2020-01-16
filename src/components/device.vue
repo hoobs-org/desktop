@@ -41,7 +41,7 @@
             <confirm v-if="show.remove" value="Remove Device" icon="delete_outline" title="Are you sure you want to remove this device?" v-on:start="toggleFields(false, false, false, true, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="$emit('remove')" />
         </div>
         <div v-if="!joined" class="service">
-            <span class="title">HOOBS</span>
+            <span class="title">{{ value.product }}</span>
             <div class="version">{{ value.version }}</div>
         </div>
     </div>

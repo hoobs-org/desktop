@@ -276,7 +276,7 @@
                 if (errors.length === 0) {
                     const test = await this.scanner.detect(this.values.ip, this.values.port);
 
-                    if (!test || test === "") {
+                    if (!test || !test.version || test.version === "") {
                         errors.push("HOOBS is not available on this device.");
                     }
 

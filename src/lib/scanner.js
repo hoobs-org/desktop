@@ -27,7 +27,7 @@ export default class Scanner extends EventEmitter {
 
         interval = interval || 10000;
 
-        if (test && test !== "") {
+        if (test && test.version && test.version !== "") {
             this.timer = setTimeout(() => {
                 this.heartbeat(ip, port, callback, interval);
             }, interval);
@@ -49,7 +49,7 @@ export default class Scanner extends EventEmitter {
 
         interval = interval || 5000;
 
-        if (test && test !== "") {
+        if (test && test.version && test.version !== "") {
             if (this.timer) {
                 clearTimeout(this.timer);
             }
@@ -97,14 +97,15 @@ export default class Scanner extends EventEmitter {
                 if (left.alive && await this.alive(left.ip, this.port)) {
                     const response = await this.detect(left.ip, this.port);
 
-                    if (response) {
+                    if (response && response.version) {
                         this.emit("device", {
                             ip: left.ip,
                             mac: left.mac,
                             hostname: left.hostname,
                             port: this.port,
                             service: this.service,
-                            version: response
+                            product: response.product || "HOOBS Core",
+                            version: response.version
                         });
                     }
                 }
@@ -112,14 +113,15 @@ export default class Scanner extends EventEmitter {
                 if (right.alive && await this.alive(right.ip, this.port)) {
                     const response = await this.detect(right.ip, this.port);
 
-                    if (response) {
+                    if (response && response.version) {
                         this.emit("device", {
                             ip: right.ip,
                             mac: right.mac,
                             hostname: right.hostname,
                             port: this.port,
                             service: this.service,
-                            version: response
+                            product: response.product || "HOOBS Core",
+                            version: response.version
                         });
                     }
                 }
@@ -198,7 +200,12 @@ export default class Scanner extends EventEmitter {
                             url: `http://${ip}:${port}/api/status`,
                             timeout: this.timeout
                         }).then((response) => {
-                            results = ((response || {}).data || {}).hoobs_version;
+                            if (response && response.data && response.data.hoobs_version) {
+                                results = {
+                                    product: response.data.product,
+                                    version: response.data.hoobs_version
+                                };
+                            }
                         }).catch(() => {
                             results = null;
                         }).finally(() => {

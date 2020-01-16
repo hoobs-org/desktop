@@ -9,7 +9,7 @@
             <div class="section">
                 <div class="software">
                     <div class="details">
-                        <b>HOOBS Server</b>
+                        <b>{{ status["product"] || "HOOBS Core" }}</b>
                         <span v-if="status">Current Version: {{ status["hoobs_version"] }}</span>
                         <div v-if="show.working" class="working">
                             <marquee :height="3" color="#feb400" background="#856a3b" />

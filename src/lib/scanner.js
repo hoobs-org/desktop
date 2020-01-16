@@ -25,7 +25,7 @@ export default class Scanner extends EventEmitter {
     async heartbeat(ip, port, callback, interval) {
         const test = await this.detect(ip, port);
 
-        interval = interval || 5000;
+        interval = interval || 10000;
 
         if (test && test !== "") {
             this.timer = setTimeout(() => {

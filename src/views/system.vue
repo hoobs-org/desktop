@@ -397,7 +397,7 @@
             },
 
             getTemp(value) {
-                if (this.Settings.get("units").temperature === "celsius") {
+                if (((this.Settings.get("units") || {}).temperature || "fahrenheit") === "celsius") {
                     return Math.round(value);
                 }
 

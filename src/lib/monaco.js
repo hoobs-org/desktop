@@ -45,20 +45,7 @@ export default {
                 inherit: true,
                 rules: [
                     { token: "", foreground: "999999", background: "262626" },
-                    { token: "attribute.value.hex.css", foreground: "999999" },
-
-                    { token: "variable", foreground: "FEB400" },
-                    { token: "variable.parameter", foreground: "FEB400" },
-                    { token: "metatag.content.html", foreground: "FEB400" },
-                    { token: "key", foreground: "FEB400" },
-                    { token: "string.key.json", foreground: "FEB400" },
-                    { token: "attribute.name", foreground: "FEB400" },
-
-                    { token: "meta.tag", foreground: "ED4F0E" },
-                    { token: "string.value.json", foreground: "ED4F0E" },
-                    { token: "attribute.value", foreground: "ED4F0E" },
-                    { token: "string", foreground: "ED4F0E" },
-                    { token: "keyword.json", foreground: "ED4F0E" },
+                    { token: "attribute.value.hex.css", foreground: "999999" }
                 ],
                 colors: {
                     "editor.background": "#00000000",

@@ -22,8 +22,15 @@ const settings = new Settings({
     defaults: {
         devices: [],
         sessions: {},
+        locale: "en",
         units: {
             temperature: "fahrenheit"
+        },
+        geolocation: {
+            countryCode: "US",
+            postalCode: "94040",
+            latitude: null,
+            longitude: null
         }
     }
 });

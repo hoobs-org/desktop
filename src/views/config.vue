@@ -138,14 +138,7 @@
                 show: {
                     loading: true
                 },
-                preferences: {
-                    locale: "en",
-                    tempUnits: "fahrenheit",
-                    countryCode: "US",
-                    postalCode: "94040",
-                    latitude: null,
-                    longitude: null
-                },
+                preferences: {},
                 devices: [],
                 configurations: {},
                 data: {
@@ -180,6 +173,16 @@
             this.devices = this.Settings.get("devices");
             this.show.loading = true;
 
+            const units = this.Settings.get("units") || {};
+            const geolocation = this.Settings.get("geolocation") || {};
+
+            this.preferences.locale = this.Settings.get("locale") || "en";
+            this.preferences.tempUnits = units.temperature || "fahrenheit";
+            this.preferences.countryCode = geolocation.countryCode || "US";
+            this.preferences.postalCode = geolocation.postalCode || "94040";
+            this.preferences.latitude = geolocation.latitude;
+            this.preferences.longitude = geolocation.longitude;
+
             await this.loadConfig();
             await this.loadPlugins();
 
@@ -197,7 +200,26 @@
                 }
             },
 
-             section: async function () {
+            preferences: {
+                deep: true,
+
+                handler() {
+                    const units = this.Settings.get("units");
+                    const geolocation = this.Settings.get("geolocation");
+
+                    units.temperature = this.preferences.tempUnits;
+                    geolocation.countryCode = this.preferences.countryCode;
+                    geolocation.postalCode = this.preferences.postalCode;
+                    geolocation.latitude = this.preferences.latitude;
+                    geolocation.longitude = this.preferences.longitude;
+
+                    this.Settings.set("locale", this.preferences.locale);
+                    this.Settings.set("units", units);
+                    this.Settings.set("geolocation", geolocation);
+                }
+            },
+
+            section: async function () {
                 this.loadInstances();
             } 
         },

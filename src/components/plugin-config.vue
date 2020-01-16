@@ -18,14 +18,14 @@
                 <div v-if="accessory.plugin_map && accessories.schemas[accessoryKey(accessory)]">
                     <div class="accessory-title">
                         <h3>{{ accessories.schemas[accessoryKey(accessory)].title || "Accessory" }}</h3>
-                        <confirm value="Delete" v-on:confirm="() => { removeAccessory(index) }" />
+                        <confirm value="Remove" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
                     </div>
                     <schema-form v-on:input="markDirty()" :schema="accessories.schemas[accessoryKey(accessory)].properties || {}" v-model="accessories.working[index]" />
                 </div>
                 <div v-else>
                     <div class="accessory-title">
                         <h3>Accessory</h3>
-                        <confirm value="Delete" v-on:confirm="() => { removeAccessory(index) }" />
+                        <confirm value="Remove" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
                     </div>
                     <div class="monaco-field">
                         <monaco v-on:change="(code) => { updateJson('accessory', code, index) }" theme="hoobs-field" :value="accessoryCode(index)" class="monaco" />
@@ -381,12 +381,19 @@
 <style scoped>
     #plugin-config .accessory-card {
         padding: 20px;
+        position: relative;
         background: #262626;
         box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.24),
                     0 2px 1px -1px rgba(0, 0, 0, 0.22),
                     0 1px 3px 2px rgba(0, 0, 0, 0.3);
         border-radius: 3px;
-        margin: 0 0 30px 0;
+        margin: 0 0 20px 0;
+    }
+
+    #plugin-config .accessory-card .confirm-float {
+        position: absolute;
+        top: 20px;
+        right: 20px;
     }
 
     #plugin-config .accessory-title {

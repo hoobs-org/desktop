@@ -1,4 +1,5 @@
 import "./lib/extentions";
+import "./lib/dates";
 
 import Vue from "vue";
 import Request from "axios";

@@ -1,47 +1,205 @@
-export default class Dates {
-    static today() {
-        const date = new Date();
+Date.Millisecond = 0;
+Date.Second = 1;
+Date.Minute = 2;
+Date.Hour = 3;
+Date.Day = 4;
+Date.Year = 5;
 
-        date.setHours(0);
-        date.setMinutes(0);
-        date.setSeconds(0);
-        date.setMilliseconds(0);
+Date.today = function () {
+    const date = new Date();
 
-        return date;
-    }
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
 
-    static formatDate(value) {
-        value = new Date(value);
+    return date;
+};
 
-        return `${value.getMonth() + 1}/${value.getDate()}/${value.getFullYear()}`;
-    }
+Date.latest = function(date1, date2) {
+    date1 = new Date(date1);
+    date2 = new Date(date2);
 
-    static formatTime(value, seconds) {
-        value = new Date(value);
+    if (date2 && date2 !== "") {
+        const latest = new Date(date2);
 
-        if (seconds) {
-            return `${value.getHours() % 12 ? value.getHours() % 12 : 12}:${value.getMinutes() < 10 ? `0${value.getMinutes()}` : value.getMinutes()}:${value.getSeconds() < 10 ? `0${value.getSeconds()}` : value.getSeconds()} ${value.getHours() >= 12 ? "PM" : "AM"}`;
-        } else {
-            return `${value.getHours() % 12 ? value.getHours() % 12 : 12}:${value.getMinutes() < 10 ? `0${value.getMinutes()}` : value.getMinutes()} ${value.getHours() >= 12 ? "PM" : "AM"}`;
+        if (!date1 || latest > date1) {
+            return new Date(latest);
         }
     }
 
-    static timePeriod(date) {
-        date = new Date(date);
+    return date1;
+}
 
-        if (date.getHours() < 12) {
+Object.defineProperty(Date.prototype, "date", {
+    get: function () {
+        return `${this.getMonth() + 1}/${this.getDate()}/${this.getFullYear()}`;
+    }
+});
+
+Object.defineProperty(Date.prototype, "time", {
+    get: function () {
+        return `${this.getHours() % 12 ? this.getHours() % 12 : 12}:${this.getMinutes() < 10 ? `0${this.getMinutes()}` : this.getMinutes()} ${this.getHours() >= 12 ? "PM" : "AM"}`;
+    }
+});
+
+Object.defineProperty(Date.prototype, "first", {
+    get: function () {
+        return new Date(this.getFullYear(), this.getMonth(), 1);
+    }
+});
+
+Object.defineProperty(Date.prototype, "last", {
+    get: function () {
+        const value = new Date(this);
+
+        value.setMonth(value.getMonth() + 1);
+
+        return value.first.add(Date.Day, -1);
+    }
+});
+
+Object.defineProperty(Date.prototype, "sunday", {
+    get: function () {
+        return new Date(this.setDate(this.getDate() - this.getDay() + (this.getDay() === 0 ? -6 : 1) - 1));
+    }
+});
+
+Object.defineProperty(Date.prototype, "month", {
+    get: function () {
+        switch (this.getMonth() % 12) {
+            case 1:
+                return "February";
+
+            case 2:
+                return "March";
+
+            case 3:
+                return "April";
+
+            case 4:
+                return "May";
+
+            case 5:
+                return "June";
+
+            case 6:
+                return "July";
+
+            case 7:
+                return "August";
+
+            case 8:
+                return "September";
+
+            case 9:
+                return "October";
+
+            case 10:
+                return "November";
+
+            case 11:
+                return "December";
+
+            default:
+                return "January";
+        }
+    }
+});
+
+Object.defineProperty(Date.prototype, "day", {
+    get: function () {
+        switch (this.getDay() % 7) {
+            case 1:
+                return "Monday";
+
+            case 2:
+                return "Tuesday";
+
+            case 3:
+                return "Wednesday";
+
+            case 4:
+                return "Thursday";
+
+            case 5:
+                return "Friday";
+
+            case 6:
+                return "Saturday";
+
+            default:
+                return "Sunday";
+        }
+    }
+});
+
+Object.defineProperty(Date.prototype, "display", {
+    get: function () {
+        if (new Date().getFullYear() === this.getFullYear()) {
+            return `${this.month} ${this.getDate().ordinal}`;
+        }
+
+        return `${this.month} ${this.getDate().ordinal}, ${this.getFullYear()}`;
+    }
+});
+
+Object.defineProperty(Date.prototype, "age", {
+    get: function () {
+        const age = new Date() - this;
+        const future = age < 0;
+
+        if (Math.abs(age) < 2000) {
+            return "Now";
+        }
+
+        if (Math.abs(age) < 60000) {
+            return "A few seconds ago";
+        }
+
+        if (Math.abs(age) < 3600000 && Math.abs(age) >= 120000) {
+            return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 60000)} minutes${future ? "" : " ago"}`;
+        }
+
+        if (Math.abs(age) < 3600000) {
+            return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 60000)} minute${future ? "" : " ago"}`;
+        }
+
+        if (Math.abs(age) < 86400000 && Math.abs(age) >= 7200000) {
+            return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 3600000)} hours${future ? "" : " ago"}`;
+        }
+
+        if (Math.abs(age) < 86400000) {
+            return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 3600000)} hour${future ? "" : " ago"}`;
+        }
+
+        if (age > 0 && age < 604800000 && age >= 172800000) {
+            return `${Math.floor(Math.abs(age) / 86400000)} days ago`;
+        }
+
+        if (age > 0 && age < 604800000) {
+            return `${Math.floor(Math.abs(age) / 86400000)} day ago`;
+        }
+
+        return "";
+    }
+});
+
+Object.defineProperty(Date.prototype, "period", {
+    get: function () {
+        if (this.getHours() < 12) {
             return "morning";
-        } else if (date.getHours() < 18) {
+        } else if (this.getHours() < 18) {
             return "afternoon";
         } else {
             return "evening";
         }
     }
+});
 
-    static season(date) {
-        date = new Date(date);
-
-        switch(date.getMonth() + 1) {
+Object.defineProperty(Date.prototype, "season", {
+    get: function () {
+        switch(this.getMonth() + 1) {
             case 12:
             case 1:
             case 2:
@@ -61,220 +219,58 @@ export default class Dates {
                 return "fall";
         }
     }
+});
 
-    static ordinal(value) {
-        value = parseInt(value, 10);
+Object.defineProperty(Date.prototype, "add", {
+    enumerable: false,
+    writable: true,
 
-        if (Number.isNaN(value) || value <= 0) {
-            return "";
+    value: function (interval, number) {
+        const value = new Date(this);
+
+        switch(interval) {
+            case Date.Second:
+                value.setTime(value.getTime() + (number * 1000));
+                break;
+
+            case Date.Minute:
+                value.setTime(value.getTime() + (number * 60 * 1000));
+                break;
+
+            case Date.Hour:
+                value.setTime(value.getTime() + (number * 60 * 60 * 1000));
+                break;
+
+            case Date.Day:
+                value.setTime(value.getTime() + (number * 24 * 60 * 60 * 1000));
+                break;
+                
+            case Date.Year:
+                value.setTime(value.getTime() + (number * 365 * 24 * 60 * 60 * 1000));
+                break;
+
+            default:
+                value.setTime(value.getTime() + number);
+                break;
         }
-
-        if (value % 10 === 1 && value % 100 !== 11) {
-            return "st";
-        }
-
-        if (value % 10 === 2 && value % 100 !== 12) {
-            return "nd";
-        }
-
-        if (value % 10 === 3 && value % 100 !== 13) {
-            return "rd";
-        }
-
-        return "th";
-    }
-
-    static addHours(date, hours) {
-        const value = new Date(date);
-
-        value.setTime(value.getTime() + (hours * 60 * 60 * 1000));
 
         return value;
     }
+});
 
-    static addDays(date, days) {
-        return Dates.addHours(date, (days * 24));
-    }
+Object.defineProperty(Date.prototype, "range", {
+    enumerable: false,
+    writable: true,
 
-    static firstOfTheMonth(date) {
-        date = new Date(date);
-
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    }
-
-    static lastOfTheMonth(date) {
-        const value = new Date(date);
-
-        value.setMonth(value.getMonth() + 1);
-
-        return Dates.addDays(this.first(value), -1);
-    }
-
-    static getSunday(date) {
-        const day = new Date(date);
-
-        return new Date(day.setDate(day.getDate() - day.getDay() + (day.getDay() === 0 ? -6 : 1) - 1));
-    }
-
-    static dayName(value) {
-        value = new Date(value);
-
-        let day = null;
-
-        if (Object.prototype.toString.call(value) === "[object Date]") {
-            day = value.getDay();
-        } else if (Number.isInteger(parseInt(value, 10))) {
-            day = parseInt(value, 10);
-        }
-
-        if (!Number.isInteger(day)) {
-            return "";
-        }
-
-        switch (day % 7) {
-            case 1:
-                return "monday";
-
-            case 2:
-                return "tuesday";
-
-            case 3:
-                return "wednesday";
-
-            case 4:
-                return "thursday";
-
-            case 5:
-                return "friday";
-
-            case 6:
-                return "saturday";
-
-            default:
-                return "sunday";
-        }
-    }
-
-    static monthName(value) {
-        value = new Date(value);
-
-        let month = null;
-
-        if (Object.prototype.toString.call(value) === "[object Date]") {
-            month = value.getMonth();
-        } else if (Number.isInteger(parseInt(value, 10))) {
-            month = parseInt(value, 10);
-        }
-
-        if (!Number.isInteger(month)) {
-            return "";
-        }
-
-        switch (month % 12) {
-            case 1:
-                return "february";
-
-            case 2:
-                return "march";
-
-            case 3:
-                return "april";
-
-            case 4:
-                return "may";
-
-            case 5:
-                return "june";
-
-            case 6:
-                return "july";
-
-            case 7:
-                return "august";
-
-            case 8:
-                return "september";
-
-            case 9:
-                return "october";
-
-            case 10:
-                return "november";
-
-            case 11:
-                return "december";
-
-            default:
-                return "january";
-        }
-    }
-
-    static display(date) {
-        date = new Date(date);
-
-        const now = new Date();
-
-        if (now.getFullYear() === date.getFullYear()) {
-            return `${Dates.monthName(date)} ${date.getDate()}`;
-        }
-
-        return `${Dates.monthName(date)} ${date.getDate()} ${date.getFullYear()}`;
-    }
-
-    static age(date) {
-        date = new Date(date);
-
-        if (date && date instanceof Date) {
-            const age = new Date() - date;
-            const future = age < 0;
-
-            if (Math.abs(age) < 2000) {
-                return "Now";
-            }
-
-            if (Math.abs(age) < 60000) {
-                return "A few seconds ago";
-            }
-
-            if (Math.abs(age) < 3600000 && Math.abs(age) >= 120000) {
-                return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 60000)} minutes${future ? "" : " ago"}`;
-            }
-
-            if (Math.abs(age) < 3600000) {
-                return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 60000)} minute${future ? "" : " ago"}`;
-            }
-
-            if (Math.abs(age) < 86400000 && Math.abs(age) >= 7200000) {
-                return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 3600000)} hours${future ? "" : " ago"}`;
-            }
-
-            if (Math.abs(age) < 86400000) {
-                return `${future ? "In " : ""}${Math.floor(Math.abs(age) / 3600000)} hour${future ? "" : " ago"}`;
-            }
-
-            if (age > 0 && age < 604800000 && age >= 172800000) {
-                return `${Math.floor(Math.abs(age) / 86400000)} days ago`;
-            }
-
-            if (age > 0 && age < 604800000) {
-                return `${Math.floor(Math.abs(age) / 86400000)} day ago`;
-            }
-        }
-
-        return "";
-    }
-
-    static range(date, hours) {
-        date = new Date(date);
-
+    value: function (interval, number) {
         const now = new Date().getTime();
 
-        let start = Dates.addHours(date, hours * -1);
-        let end = new Date(date);
+        let start = this.add(interval, number * -1);
+        let end = new Date(this);
 
-        if (date > now) {
-            start = Dates.addHours(now, hours * -1);
-            end = new Date(now);
+        if (this > now) {
+            start = now.add(interval, number * -1);
+            end = now;
         }
 
         return {
@@ -282,19 +278,4 @@ export default class Dates {
             end
         };
     }
-
-    static latest(date1, date2) {
-        date1 = new Date(date1);
-        date2 = new Date(date2);
-
-        if (date2 && date2 !== "") {
-            const latest = new Date(date2);
-
-            if (!date1 || latest > date1) {
-                return new Date(latest);
-            }
-        }
-
-        return date1;
-    }
-}
+});

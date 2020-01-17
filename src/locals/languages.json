@@ -1,64 +1,137 @@
 [{
-    "text": "English",
-    "value": "en"
+    "local": "English (United States)",
+    "text": "English (United States)",
+    "value": "en-us",
+    "base": "en",
+    "path": "@/locals/en-us"
 },{
-    "text": "عربى",
-    "value": "ar"
+    "local": "Arabic (UAE)",
+    "text": "الأمارات العربية المتحدة",
+    "value": "ar-ae",
+    "base": "ar",
+    "path": "@/locals/ar-ae"
 },{
+    "local": "Arabic (Egypt)",
+    "text": "مصري",
+    "value": "ar-eg",
+    "base": "ar",
+    "path": "@/locals/ar-eg"
+},{
+    "local": "Bulgarian",
     "text": "български",
-    "value": "bg"
+    "value": "bg",
+    "path": "@/locals/bg"
 },{
+    "local": "Czech",
     "text": "čeština",
-    "value": "cs"
+    "value": "cs",
+    "path": "@/locals/cs"
 },{
+    "local": "German",
     "text": "Deutsch",
-    "value": "de"
+    "value": "de",
+    "path": "@/locals/de"
 },{
+    "local": "Greek",
     "text": "Ελληνικά",
-    "value": "el"
+    "value": "el",
+    "path": "@/locals/el"
 },{
-    "text": "Español",
-    "value": "es"
+    "local": "English (United Kingdom)",
+    "text": "English (United Kingdom)",
+    "value": "en-gb",
+    "base": "en",
+    "path": "@/locals/en-gb"
 },{
+    "local": "Spanish (Spain)",
+    "text": "Español (España)",
+    "value": "es-es",
+    "base": "es",
+    "path": "@/locals/es-es"
+},{
+    "local": "Spanish (Mexico)",
+    "text": "Español (Mexico)",
+    "value": "es-mx",
+    "base": "es",
+    "path": "@/locals/es-mx"
+},{
+    "local": "French",
     "text": "Français",
-    "value": "fr"
+    "value": "fr",
+    "path": "@/locals/fr"
 },{
+    "local": "Hebrew",
     "text": "עברית",
-    "value": "he"
+    "value": "he",
+    "path": "@/locals/he"
 },{
+    "local": "Hungarian",
+    "text": "Magyar",
+    "value": "hu",
+    "path": "@/locals/hu"
+},{
+    "local": "Italian",
     "text": "Italiano",
-    "value": "it"
+    "value": "it",
+    "path": "@/locals/it"
 },{
+    "local": "Japanese",
     "text": "日本人",
-    "value": "ja"
+    "value": "ja",
+    "path": "@/locals/ja"
 },{
+    "local": "Korean",
     "text": "한국어",
-    "value": "ko"
+    "value": "ko",
+    "path": "@/locals/ko"
 },{
+    "local": "Dutch",
     "text": "Nederlands",
-    "value": "nl"
+    "value": "nl",
+    "path": "@/locals/nl"
 },{
+    "local": "Norwegian",
     "text": "norsk",
-    "value": "no"
+    "value": "no",
+    "path": "@/locals/no"
 },{
+    "local": "Polish",
     "text": "Polskie",
-    "value": "pl"
+    "value": "pl",
+    "path": "@/locals/pl"
 },{
+    "local": "Portuguese",
     "text": "Português",
-    "value": "pt"
+    "value": "pt",
+    "path": "@/locals/pt"
 },{
+    "local": "Romanian",
     "text": "Română",
-    "value": "ro"
+    "value": "ro",
+    "path": "@/locals/ro"
 },{
+    "local": "Russian",
     "text": "русский",
-    "value": "ru"
+    "value": "ru",
+    "path": "@/locals/ru"
 },{
+    "local": "Swedish",
     "text": "svenska",
-    "value": "sv"
+    "value": "sv",
+    "path": "@/locals/sv"
 },{
+    "local": "Turkish",
+    "text": "Türk",
+    "value": "tr",
+    "path": "@/locals/tr"
+},{
+    "local": "Vietnamese",
     "text": "Tiếng Việt",
-    "value": "vi"
+    "value": "vi",
+    "path": "@/locals/vi"
 },{
+    "local": "Chinese",
     "text": "中文",
-    "value": "zh"
+    "value": "zh",
+    "path": "@/locals/zh"
 }]

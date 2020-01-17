@@ -5,6 +5,10 @@ Date.Hour = 3;
 Date.Day = 4;
 Date.Year = 5;
 
+Date.now = function () {
+    return new Date();
+};
+
 Date.today = function () {
     const date = new Date();
 
@@ -61,7 +65,9 @@ Object.defineProperty(Date.prototype, "last", {
 
 Object.defineProperty(Date.prototype, "sunday", {
     get: function () {
-        return new Date(this.setDate(this.getDate() - this.getDay() + (this.getDay() === 0 ? -6 : 1) - 1));
+        const value = new Date(this);
+
+        return new Date(value.setDate(value.getDate() - value.getDay() + (value.getDay() === 0 ? -6 : 1) - 1));
     }
 });
 
@@ -181,7 +187,7 @@ Object.defineProperty(Date.prototype, "age", {
             return `${Math.floor(Math.abs(age) / 86400000)} day ago`;
         }
 
-        return "";
+        return this.display;
     }
 });
 

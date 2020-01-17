@@ -3,29 +3,58 @@ Object.defineProperty(Object.prototype, "getValue", {
     writable: true,
 
     value: function () {
-        let value = this;
+        let values = this;
         let search = ([...arguments] || []).map(a => Array.isArray(a) ? a.join(".") : a).join(".");
-
-        if (!search || search === "") {
-            return value;
-        }
 
         search = search.replace(/\[(\w+)\]/g, ".$1");
         search = search.replace(/^\./, '');
+        search = search.split(".");
 
-        const keys = search.split(".");
+        for (var i = 0, n = search.length; i < n; ++i) {
+            const key = search[i];
 
-        for (var i = 0, n = keys.length; i < n; ++i) {
-            const key = keys[i];
-
-            if (key in value) {
-                value = value[key];
+            if (key in values) {
+                values = values[key];
             } else {
                 return;
             }
         }
 
-        return value;
+        return values;
+    }
+});
+
+Object.defineProperty(Object.prototype, "setValue", {
+    enumerable: false,
+    writable: true,
+
+    value: function () {
+        let args = [...arguments] || [];
+
+        let values = this;
+
+        let value = args.pop();
+        let search = args.map(a => Array.isArray(a) ? a.join(".") : a).join(".");
+
+        search = search.replace(/\[(\w+)\]/g, ".$1");
+        search = search.replace(/^\./, '');
+        search = search.split(".");
+
+        for (var i = 0, n = search.length; i < n; ++i) {
+            const key = search[i];
+
+            if (key in values) {
+                if (i === search.length - 1) {
+                    values[key] = value;
+                } else {
+                    values = values[key];
+                }
+            } else {
+                return;
+            }
+        }
+
+        return;
     }
 });
 

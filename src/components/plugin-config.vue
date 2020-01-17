@@ -10,7 +10,7 @@
                 <schema-form v-on:input="markDirty()" :schema="plugin.schema.platform.schema.properties || {}" v-model="platform" />
             </div>
             <div v-else class="monaco-field-large">
-                <monaco v-on:change="(code) => { updateJson('platform', code) }" theme="hoobs-field" :value="platformCode()" class="monaco" />
+                <monaco v-on:change="(code) => { updateJson('platform', code) }" theme="hoobs" :value="platformCode()" class="monaco" />
             </div>
         </div>
         <div v-if="type.accessory">
@@ -28,7 +28,7 @@
                         <confirm value="Remove" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
                     </div>
                     <div class="monaco-field">
-                        <monaco v-on:change="(code) => { updateJson('accessory', code, index) }" theme="hoobs-field" :value="accessoryCode(index)" class="monaco" />
+                        <monaco v-on:change="(code) => { updateJson('accessory', code, index) }" theme="hoobs" :value="accessoryCode(index)" class="monaco" />
                     </div>
                 </div>
             </div>
@@ -453,10 +453,12 @@
 
     #plugin-config .monaco-field-large {
         height: 350px;
-        padding: 7px;
-        background: #444;
-        border: 1px #333 solid;
-        border-radius: 5px;
+        padding: 7px 0 0 0;
+        border-bottom: 1px #424242 solid;
+    }
+
+    #plugin-config .monaco-field-large:focus-within {
+        border-color: #feb400;
     }
 
     #plugin-config .monaco {

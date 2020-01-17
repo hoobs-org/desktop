@@ -150,18 +150,14 @@
         flex: 1;
         padding: 5px 5px 5px 5px;
         height: 33px !important;
-        background: #444;
-        border: 1px #333 solid;
-        border-radius: 5px;
+        border-bottom: 1px #424242 solid;
     }
 
     #select-field.light .container {
         flex: 1;
         padding: 5px 5px 6px 5px;
         height: 33px !important;
-        background: #fff;
-        border: 1px #e5e5e5 solid;
-        border-radius: 5px;
+        border-bottom: 1px #e5e5e5 solid;
     }
 
     #select-field.dark .container:focus-within {

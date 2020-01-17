@@ -752,7 +752,7 @@
 
     #config .tabs .spacer {
         height: 30px;
-        width: 20px;
+        width: 4px;
         border-bottom: 1px #424242 solid;
     }
 

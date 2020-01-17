@@ -16,7 +16,7 @@
                 <div class="field">
                     <span class="title">{{ field.title || humanize(field.name) }}</span>
                     <div class="monaco-field">
-                        <monaco v-on:change="(value) => { updateJson(field.name, value) }" theme="hoobs-field" :value="getJson(field)" class="monaco" />
+                        <monaco v-on:change="(value) => { updateJson(field.name, value) }" theme="hoobs" :value="getJson(field)" class="monaco" />
                     </div>
                 </div>
             </div>

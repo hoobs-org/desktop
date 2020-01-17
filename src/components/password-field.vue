@@ -70,10 +70,11 @@
         padding: 7px;
         margin: 4px 0 0 0;
         font-size: 14px;
-        background: #444;
+        background: transparent;
         color: #fff;
-        border: 1px #333 solid;
-        border-radius: 5px;
+        border-width: 0 0 1px 0;
+        border-style: solid;
+        border-color: #424242;
     }
 
     #password-field.dark input:focus {
@@ -86,10 +87,11 @@
         padding: 7px;
         margin: 4px 0 0 0;
         font-size: 14px;
-        background: #fff;
+        background: transparent;
         color: #000;
-        border: 1px #e5e5e5 solid;
-        border-radius: 5px;
+        border-width: 0 0 1px 0;
+        border-style: solid;
+        border-color: #e5e5e5;
     }
 
     #password-field.light input:focus {

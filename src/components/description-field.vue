@@ -66,13 +66,14 @@
 
     #description-field.dark textarea {
         flex: 1;
-        min-height: 107px;
+        min-height: 37px;
         padding: 7px;
         font-size: 14px;
-        background: #444;
+        background: transparent;
         color: #fff;
-        border: 1px #333 solid;
-        border-radius: 5px;
+        border-width: 0 0 1px 0;
+        border-style: solid;
+        border-color: #424242;
         resize: none;
     }
 
@@ -83,13 +84,14 @@
 
     #description-field.light textarea {
         flex: 1;
-        min-height: 107px;
+        min-height: 37px;
         padding: 7px;
         font-size: 14px;
-        background: #444;
-        color: #fff;
-        border: 1px #333 solid;
-        border-radius: 5px;
+        background: transparent;
+        color: #000;
+        border-width: 0 0 1px 0;
+        border-style: solid;
+        border-color: #e5e5e5;
         resize: none;
     }
 

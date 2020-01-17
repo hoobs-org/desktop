@@ -63,23 +63,6 @@ export default {
                 }
             });
 
-            monaco.editor.defineTheme("hoobs-field", {
-                base: "vs-dark",
-                inherit: true,
-                rules: [
-                    { token: "", foreground: "FFFFFF", background: "444444" },
-                    { token: "attribute.value.hex.css", foreground: "FFFFFF" },
-                    { token: "string.value.json", foreground: "FEB400" },
-                    { token: "attribute.value", foreground: "FEB400" },
-                    { token: "string.yaml", foreground: "FEB400" },
-                    { token: "keyword.json", foreground: "FEB400" }
-                ],
-                colors: {
-                    "editor.background": "#444444",
-                    "editor.foreground": "#FFFFFF"
-                }
-            });
-
             this.editor = monaco.editor.create(this.$el, {
                 value: this.value,
                 theme: this.theme,

@@ -66,7 +66,7 @@
 
     #number-field.dark input {
         flex: 1;
-        padding: 7px;
+        padding: 7px 1px;
         margin: 4px 0 0 0;
         font-size: 14px;
         background: transparent;
@@ -83,7 +83,7 @@
 
     #number-field.light input {
         flex: 1;
-        padding: 7px;
+        padding: 7px 1px;
         margin: 4px 0 0 0;
         font-size: 14px;
         background: transparent;

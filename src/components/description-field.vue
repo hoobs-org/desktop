@@ -67,7 +67,7 @@
     #description-field.dark textarea {
         flex: 1;
         min-height: 37px;
-        padding: 7px;
+        padding: 7px 1px;
         font-size: 14px;
         background: transparent;
         color: #fff;
@@ -85,7 +85,7 @@
     #description-field.light textarea {
         flex: 1;
         min-height: 37px;
-        padding: 7px;
+        padding: 7px 1px;
         font-size: 14px;
         background: transparent;
         color: #000;

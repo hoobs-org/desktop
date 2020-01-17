@@ -148,14 +148,14 @@
 
     #select-field.dark .container {
         flex: 1;
-        padding: 5px 5px 5px 5px;
+        padding: 5px 1px;
         height: 33px !important;
         border-bottom: 1px #424242 solid;
     }
 
     #select-field.light .container {
         flex: 1;
-        padding: 5px 5px 6px 5px;
+        padding: 5px 1px;
         height: 33px !important;
         border-bottom: 1px #e5e5e5 solid;
     }
@@ -174,6 +174,8 @@
         outline: 0 none !important;
         background: transparent;
         border: 0 none;
+        padding: 0;
+        margin: 0 -16px 0 -8px;
     }
 
     #select-field.dark .container select {

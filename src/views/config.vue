@@ -56,7 +56,7 @@
                 </div>
                 <div class="flow">
                     <div class="form">
-                        <text-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
+                        <description-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
                         <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations.working[data.instance].ports.start" />
                         <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations.working[data.instance].ports.end" />
                     </div>

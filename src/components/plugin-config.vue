@@ -196,7 +196,7 @@
             addAccessory() {
                 const keys = Object.keys(this.accessories.schemas);
 
-                if (keys.length > 0) {
+                if (keys.length > 1) {
                     this.show.accessories = true;
                 } else if (keys.length === 1) {
                     this.insertAccessory(keys[0]);

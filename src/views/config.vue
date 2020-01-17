@@ -371,6 +371,7 @@
                 if (this.flags.dirty.length === 0 || this.confirm.discard) {
                     (async () => {
                         this.show.loading = true;
+                        this.confirm.discard = false;
 
                         this.loadPreferences();
 

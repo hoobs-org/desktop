@@ -4,9 +4,6 @@
         <span v-if="description && description !== ''" class="description">{{ description }}</span>
         <div class="field-container">
             <input type="text" ref="field" autocomplete="false" :value="value" @input="update()" @change="change" v-bind:required="required" />
-            <div class="regenerate-link" v-on:click="$emit('generate')">
-                <span class="icon">autorenew</span>
-            </div>
         </div>
     </div>
 </template>
@@ -104,22 +101,5 @@
     #hex-field .field-container {
         display: flex;
         position: relative;
-    }
-
-    #hex-field .regenerate-link {
-        width: 33px;
-        height: 33px;
-        position: absolute;
-        top: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        align-content: center;
-        justify-content: space-around;
-        cursor: pointer;
-    }
-
-    #hex-field .regenerate-link .icon {
-        font-size: 17px;
     }
 </style>

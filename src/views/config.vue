@@ -115,6 +115,18 @@
                 Are you sure you want to refresh?
             </p>
         </modal>
+        <modal v-if="confirm.reboot" v-on:cancel="() => { confirm.reboot = false }" v-on:confirm="rebootDevice()" cancel-title="Cancel" ok-title="Reboot" width="350px">
+            <b>You will need to reboot the device for these changes to take affect.</b>
+            <p>
+                Are you sure you want to reboot {{ data.reboot.length }} device(s)?
+            </p>
+        </modal>
+        <modal v-if="confirm.errors" v-on:confirm="() => { confirm.errors = false }" :cancel-button="false" width="350px">
+            <b>You have errors in your configuration.</b>
+            <p>
+                <span v-for="(error, index) in errors" :key="`error_${index}`">{{ error }}</span>
+            </p>
+        </modal>
     </div>
 </template>
 
@@ -161,6 +173,7 @@
                 confirm: {
                     save: false,
                     refresh: false,
+                    reboot: false,
                     discard: false
                 },
                 show: {
@@ -180,6 +193,7 @@
                     plugins: {},
                     instances: [],
                     instance: "preferences",
+                    reboot: [],
                     plugin: null
                 },
                 errors: [],
@@ -200,6 +214,10 @@
         },
 
         computed: {
+            running() {
+                return this.$store.state.running;
+            },
+
             code() {
                 return JSON.toString(this.configurations.working[this.data.instance]);         
             }
@@ -281,6 +299,28 @@
                         }
                     }
                 }
+            },
+
+            async rebootDevice() {
+                this.show.loading = true;
+
+                for (let i = 0; i < this.data.reboot.length; i++) {
+                    await this.API.login(this.data.reboot[i].ip, this.data.reboot[i].port);
+                    await this.API.post(this.data.reboot[i].ip, this.data.reboot[i].port, "/service/stop");
+                    await this.API.put(this.data.reboot[i].ip, this.data.reboot[i].port, "/reboot");
+                }
+
+                setTimeout(async () => {
+                    for (let i = 0; i < this.data.reboot.length; i++) {
+                        this.Device.wait.start(this.data.reboot[i].ip, this.data.reboot[i].port, () => {
+                            this.data.reboot.pop();
+
+                            if (this.data.reboot.length === 0) {
+                                this.refresh();
+                            }
+                        });
+                    }
+                }, 5000);
             },
 
             navigationCancel() {
@@ -444,14 +484,6 @@
                 }
             },
 
-            fixError(message) {
-                const index = this.errors.indexOf(message);
-
-                if (index >= 0) {
-                    this.errors.splice(index, 1);
-                }
-            },
-
             selectinstance(instance) {
                 this.data.instance = instance;
             },
@@ -494,8 +526,126 @@
                 return value;
             },
 
-            saveChanges() {
-                console.log("Save Config");
+            async saveChanges() {
+                this.errors = [];
+                this.data.reboot = [];
+
+                if (this.flags.dirty.length > 0) {
+                    this.show.loading = true;
+
+                    for (let i = 0; i < this.flags.dirty.length; i++) {
+                        if (this.flags.dirty[i] === "preferences") {
+                            let locale = this.Settings.get("locale") || "en";
+                            let units = this.Settings.get("units") || {};
+                            let geolocation = this.Settings.get("geolocation") || {};
+
+                            locale = this.configurations.working["preferences"].locale;
+                            units.temperature = this.configurations.working["preferences"].tempUnits;
+                            geolocation.countryCode = this.configurations.working["preferences"].countryCode;
+                            geolocation.postalCode = this.configurations.working["preferences"].postalCode;
+                            geolocation.latitude = this.configurations.working["preferences"].latitude;
+                            geolocation.longitude = this.configurations.working["preferences"].longitude;
+
+                            this.Settings.set("locale", locale);
+                            this.Settings.set("units", units);
+                            this.Settings.set("geolocation", geolocation);
+                        } else {
+                            const device = this.devices.filter(d => this.flags.dirty[i] === `${d.mac}:${d.port}`)[0];
+                            
+                            if (device) {
+                                const data = {
+                                    server: this.configurations.working[this.flags.dirty[i]].server,
+                                    bridge: this.configurations.working[this.flags.dirty[i]].bridge,
+                                    description: this.configurations.working[this.flags.dirty[i]].description,
+                                    ports: this.configurations.working[this.flags.dirty[i]].ports,
+                                    accessories: this.configurations.working[this.flags.dirty[i]].accessories || [],
+                                    platforms: this.configurations.working[this.flags.dirty[i]].platforms || []
+                                }
+
+                                if (!data.server.port || Number.isNaN(parseInt(data.server.port, 10)) || data.server.port < 1 || data.server.port > 65535) {
+                                    this.addError("Invalid server port.");
+                                }
+
+                                if (!data.server.polling_seconds || data.server.polling_seconds < 1 || data.server.polling_seconds > 1800) {
+                                    this.addError("Invalid refresh interval.");
+                                }
+
+                                if (!data.bridge.name || data.bridge.name === "") {
+                                    this.addError("Apple Home bridge name is required.");
+                                }
+
+                                if (!data.bridge.port || Number.isNaN(parseInt(data.bridge.port, 10)) || data.bridge.port < 1 || data.bridge.port > 65535) {
+                                    this.addError("Invalid Apple Home bridge port.");
+                                }
+
+                                if (!data.bridge.username || data.bridge.username === "") {
+                                    this.addError("Apple Home unique identifier is required.");
+                                }
+
+                                if (!data.bridge.pin || data.bridge.pin === "") {
+                                    this.addError("Apple Home PIN is required.");
+                                }
+
+                                if (data.ports && (!Number.isNaN(parseInt(data.ports.start)) || !Number.isNaN(parseInt(data.ports.end)))) {
+                                    if (Number.isNaN(parseInt(data.ports.start, 10)) || data.ports.start < 1 || data.ports.start > 65535) {
+                                        this.addError("Invalid start port.");
+                                    }
+
+                                    if (Number.isNaN(parseInt(data.ports.end, 10)) || data.ports.end < 1 || data.ports.end > 65535) {
+                                        this.addError("Invalid end port.");
+                                    }
+
+                                    if (!Number.isNaN(parseInt(data.ports.start, 10)) && !Number.isNaN(parseInt(data.ports.end, 10)) && data.ports.start > data.ports.end) {
+                                        this.addError("The start port must be lower than or equal to the end port.");
+                                    }
+                                } else {
+                                    data.ports = {};
+                                }
+
+                                if (this.errors.length > 0) {
+                                    break;
+                                } else {
+                                    await this.API.login(device.ip, device.port);
+
+                                    await this.API.post(device.ip, device.port, "/config", {
+                                        server: data.server,
+                                        bridge: data.bridge,
+                                        description: data.description,
+                                        ports: data.ports,
+                                        accessories: data.accessories || [],
+                                        platforms: data.platforms || []
+                                    });
+
+                                    if (this.flags.reboot.indexOf(this.flags.dirty[i]) > -1) {
+                                        this.data.reboot.push(device);
+                                    } else {
+                                        if (this.running) {
+                                            await this.API.post(device.ip, device.port, "/service/restart");
+                                        } else {
+                                            await this.API.post(device.ip, device.port, "/service/start");
+                                        }
+                                    }
+                                }
+                            } else {
+                                this.addError("Device missing.");
+                            }
+                        }
+                    }
+
+                    if (this.errors.length === 0) {
+                        this.flags.dirty = [];
+                        this.flags.reboot = [];
+                        this.errors = [];
+
+                        if (this.data.reboot.length > 0) {
+                            this.confirm.reboot = true;
+                        } else {
+                            this.refresh();
+                        }
+                    } else {
+                        this.show.loading = false;
+                    }
+                }
             }
         }
     };

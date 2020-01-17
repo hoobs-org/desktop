@@ -37,6 +37,14 @@ export default new Vuex.Store({
             state.notifications = [];
         },
 
+        accept(state) {
+            state.trigger = new Date().getTime();
+        },
+
+        cancel(state) {
+            state.trigger = new Date().getTime();
+        },
+
         saveChanges(state) {
             state.trigger = new Date().getTime();
         },

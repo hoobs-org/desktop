@@ -97,8 +97,21 @@
             });
 
             window.addEventListener("keydown", (event) => {
-                if ((event.ctrlKey || event.metaKey) && event.which === 83) {
-                    this.$store.commit("saveChanges");
+                switch (event.which) {
+                    case 83:
+                        if (process.platform === "darwin" ? event.metaKey : event.ctrlKey) {
+                            this.$store.commit("saveChanges");
+                        }
+
+                        break;
+
+                    case 13:
+                        this.$store.commit("accept");
+                        break;
+
+                    case 27:
+                        this.$store.commit("cancel");
+                        break;
                 }
             });
         },

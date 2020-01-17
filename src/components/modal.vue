@@ -43,6 +43,32 @@
                 default: "Cancel"
             },
             title: String
+        },
+
+        created() {
+            this.watcher = this.$store.subscribe((mutation) => {
+                switch (mutation.type) {
+                    case "accept":
+                        if (this.okButton) {
+                            this.$emit("confirm");
+                        }
+
+                        break;
+
+                    case "cancel":
+                        if (this.cancelButton) {
+                            this.$emit("cancel");
+                        }
+
+                        break;
+                }
+            });
+        },
+
+        beforeDestroy() {
+            if (this.watcher) {
+                this.watcher();
+            }
         }
     };
 </script>

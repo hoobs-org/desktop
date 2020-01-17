@@ -115,15 +115,15 @@
                 Are you sure you want to refresh?
             </p>
         </modal>
-        <modal v-if="confirm.reboot" v-on:cancel="() => { confirm.reboot = false }" v-on:confirm="rebootDevice()" cancel-title="Cancel" ok-title="Reboot" width="350px">
+        <modal v-if="confirm.reboot" v-on:cancel="cancelReboot()" v-on:confirm="rebootDevice()" cancel-title="Cancel" ok-title="Reboot" width="450px">
             <b>You will need to reboot the device for these changes to take affect.</b>
             <p>
                 Are you sure you want to reboot {{ data.reboot.length }} device(s)?
             </p>
         </modal>
-        <modal v-if="confirm.errors" v-on:confirm="() => { confirm.errors = false }" :cancel-button="false" width="350px">
+        <modal v-if="confirm.errors" v-on:confirm="() => { confirm.errors = false }" :cancel-button="false" width="550px">
             <b>You have errors in your configuration.</b>
-            <p>
+            <p class="errors">
                 <span v-for="(error, index) in errors" :key="`error_${index}`">{{ error }}</span>
             </p>
         </modal>
@@ -174,6 +174,7 @@
                     save: false,
                     refresh: false,
                     reboot: false,
+                    errors: false,
                     discard: false
                 },
                 show: {
@@ -301,7 +302,13 @@
                 }
             },
 
+            cancelReboot() {
+                this.confirm.reboot = false;
+                this.show.loading = false;
+            },
+
             async rebootDevice() {
+                this.confirm.reboot = false;
                 this.show.loading = true;
 
                 for (let i = 0; i < this.data.reboot.length; i++) {
@@ -478,12 +485,6 @@
                 }
             },
 
-            addError(message) {
-                if (this.errors.indexOf(message) === -1) {
-                    this.errors.push(message);
-                }
-            },
-
             selectinstance(instance) {
                 this.data.instance = instance;
             },
@@ -526,12 +527,84 @@
                 return value;
             },
 
+            validateConfig(device) {
+                if (device) {
+                    const instance = `${device.mac}:${device.port}`;
+                    const config = this.configurations.working[instance];
+
+                    const results = {
+                        server: config.server,
+                        bridge: config.bridge,
+                        description: config.description,
+                        ports: config.ports,
+                        accessories: config.accessories || [],
+                        platforms: config.platforms || []
+                    }
+
+                    const messages = [];
+
+                    if (!results.server.port || Number.isNaN(parseInt(results.server.port, 10)) || results.server.port < 1 || results.server.port > 65535) {
+                        messages.push(`${device.hostname} - Invalid server port.`);
+                    }
+
+                    if (!results.server.polling_seconds || results.server.polling_seconds < 1 || results.server.polling_seconds > 1800) {
+                        messages.push(`${device.hostname} - Invalid refresh interval.`);
+                    }
+
+                    if (!results.bridge.name || results.bridge.name === "") {
+                        messages.push(`${device.hostname} - Apple Home bridge name is required.`);
+                    }
+
+                    if (!results.bridge.port || Number.isNaN(parseInt(results.bridge.port, 10)) || results.bridge.port < 1 || results.bridge.port > 65535) {
+                        messages.push(`${device.hostname} - Invalid Apple Home bridge port.`);
+                    }
+
+                    if (!results.bridge.username || results.bridge.username === "") {
+                        messages.push(`${device.hostname} - Apple Home unique identifier is required.`);
+                    }
+
+                    if (!results.bridge.pin || results.bridge.pin === "") {
+                        messages.push(`${device.hostname} - Apple Home PIN is required.`);
+                    }
+
+                    if (results.ports && (!Number.isNaN(parseInt(results.ports.start)) || !Number.isNaN(parseInt(results.ports.end)))) {
+                        if (Number.isNaN(parseInt(results.ports.start, 10)) || results.ports.start < 1 || results.ports.start > 65535) {
+                            messages.push(`${device.hostname} - Invalid start port.`);
+                        }
+
+                        if (Number.isNaN(parseInt(results.ports.end, 10)) || results.ports.end < 1 || results.ports.end > 65535) {
+                            messages.push(`${device.hostname} - Invalid end port.`);
+                        }
+
+                        if (!Number.isNaN(parseInt(results.ports.start, 10)) && !Number.isNaN(parseInt(results.ports.end, 10)) && results.ports.start > results.ports.end) {
+                            messages.push(`${device.hostname} - The start port must be lower than or equal to the end port.`);
+                        }
+                    } else {
+                        results.ports = {};
+                    }
+
+                    if (messages.length === 0) {
+                        return results;
+                    } else {
+                        for (let i = 0; i < messages.length; i++) {
+                            if (this.errors.indexOf(messages[i]) === -1) {
+                                this.errors.push(messages[i]);
+                            }
+                        }
+                    }
+                }
+
+                return null;
+            },
+
             async saveChanges() {
                 this.errors = [];
                 this.data.reboot = [];
 
                 if (this.flags.dirty.length > 0) {
                     this.show.loading = true;
+
+                    const jobs = [];
 
                     for (let i = 0; i < this.flags.dirty.length; i++) {
                         if (this.flags.dirty[i] === "preferences") {
@@ -551,88 +624,43 @@
                             this.Settings.set("geolocation", geolocation);
                         } else {
                             const device = this.devices.filter(d => this.flags.dirty[i] === `${d.mac}:${d.port}`)[0];
-                            
-                            if (device) {
-                                const data = {
-                                    server: this.configurations.working[this.flags.dirty[i]].server,
-                                    bridge: this.configurations.working[this.flags.dirty[i]].bridge,
-                                    description: this.configurations.working[this.flags.dirty[i]].description,
-                                    ports: this.configurations.working[this.flags.dirty[i]].ports,
-                                    accessories: this.configurations.working[this.flags.dirty[i]].accessories || [],
-                                    platforms: this.configurations.working[this.flags.dirty[i]].platforms || []
-                                }
+                            const config = this.validateConfig(device);
 
-                                if (!data.server.port || Number.isNaN(parseInt(data.server.port, 10)) || data.server.port < 1 || data.server.port > 65535) {
-                                    this.addError("Invalid server port.");
-                                }
-
-                                if (!data.server.polling_seconds || data.server.polling_seconds < 1 || data.server.polling_seconds > 1800) {
-                                    this.addError("Invalid refresh interval.");
-                                }
-
-                                if (!data.bridge.name || data.bridge.name === "") {
-                                    this.addError("Apple Home bridge name is required.");
-                                }
-
-                                if (!data.bridge.port || Number.isNaN(parseInt(data.bridge.port, 10)) || data.bridge.port < 1 || data.bridge.port > 65535) {
-                                    this.addError("Invalid Apple Home bridge port.");
-                                }
-
-                                if (!data.bridge.username || data.bridge.username === "") {
-                                    this.addError("Apple Home unique identifier is required.");
-                                }
-
-                                if (!data.bridge.pin || data.bridge.pin === "") {
-                                    this.addError("Apple Home PIN is required.");
-                                }
-
-                                if (data.ports && (!Number.isNaN(parseInt(data.ports.start)) || !Number.isNaN(parseInt(data.ports.end)))) {
-                                    if (Number.isNaN(parseInt(data.ports.start, 10)) || data.ports.start < 1 || data.ports.start > 65535) {
-                                        this.addError("Invalid start port.");
-                                    }
-
-                                    if (Number.isNaN(parseInt(data.ports.end, 10)) || data.ports.end < 1 || data.ports.end > 65535) {
-                                        this.addError("Invalid end port.");
-                                    }
-
-                                    if (!Number.isNaN(parseInt(data.ports.start, 10)) && !Number.isNaN(parseInt(data.ports.end, 10)) && data.ports.start > data.ports.end) {
-                                        this.addError("The start port must be lower than or equal to the end port.");
-                                    }
-                                } else {
-                                    data.ports = {};
-                                }
-
-                                if (this.errors.length > 0) {
-                                    break;
-                                } else {
-                                    await this.API.login(device.ip, device.port);
-
-                                    await this.API.post(device.ip, device.port, "/config", {
-                                        server: data.server,
-                                        bridge: data.bridge,
-                                        description: data.description,
-                                        ports: data.ports,
-                                        accessories: data.accessories || [],
-                                        platforms: data.platforms || []
-                                    });
-
-                                    if (this.flags.reboot.indexOf(this.flags.dirty[i]) > -1) {
-                                        this.data.reboot.push(device);
-                                    } else {
-                                        if (this.running) {
-                                            await this.API.post(device.ip, device.port, "/service/restart");
-                                        } else {
-                                            await this.API.post(device.ip, device.port, "/service/start");
-                                        }
-                                    }
-                                }
-                            } else {
-                                this.addError("Device missing.");
+                            if (device && config) {
+                                jobs.push({
+                                    device,
+                                    config
+                                });
                             }
                         }
                     }
 
                     if (this.errors.length === 0) {
+                        for (let i = 0; i < jobs.length; i++) {
+                            const job = jobs[i];
+
+                            await this.API.login(job.device.ip, job.device.port);
+
+                            await this.API.post(job.device.ip, job.device.port, "/config", {
+                                server: job.config.server,
+                                bridge: job.config.bridge,
+                                description: job.config.description,
+                                ports: job.config.ports,
+                                accessories: job.config.accessories || [],
+                                platforms: job.config.platforms || []
+                            });
+
+                            if (this.flags.reboot.indexOf(this.flags.dirty[i]) > -1) {
+                                this.data.reboot.push(job.device);
+                            } else {
+                                if (this.running) {
+                                    await this.API.post(job.device.ip, job.device.port, "/service/restart");
+                                } else {
+                                    await this.API.post(job.device.ip, job.device.port, "/service/start");
+                                }
+                            }
+                        }
+
                         this.flags.dirty = [];
                         this.flags.reboot = [];
                         this.errors = [];
@@ -644,6 +672,7 @@
                         }
                     } else {
                         this.show.loading = false;
+                        this.confirm.errors = true;
                     }
                 }
             }
@@ -817,6 +846,11 @@
     #config .editor .monaco {
         width: 100%;
         height: 100%;
+    }
+
+    #config .errors {
+        display: flex;
+        flex-direction: column;
     }
 
     #loader {

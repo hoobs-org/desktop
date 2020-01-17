@@ -106,10 +106,13 @@
             </div>
         </div>
         <loader v-else id="loader" value="Loading..." :initilized="true" />
-        <modal v-if="confirm.save" v-on:cancel="discardChanges()" v-on:confirm="() => { confirm.save = false }" cancel-title="Discard" ok-title="Cancel" width="350px">
+        <modal v-if="confirm.save || confirm.refresh" v-on:cancel="discardChanges()" v-on:confirm="navigationCancel()" cancel-title="Discard" ok-title="Cancel" width="350px">
             <b>You have unsaved changes.</b>
-            <p>
+            <p v-if="confirm.save">
                 Are you sure you want to leave?
+            </p>
+            <p v-if="confirm.refresh">
+                Are you sure you want to refresh?
             </p>
         </modal>
     </div>
@@ -157,6 +160,7 @@
             return {
                 confirm: {
                     save: false,
+                    refresh: false,
                     discard: false
                 },
                 show: {
@@ -279,14 +283,28 @@
                 }
             },
 
+            navigationCancel() {
+                this.confirm.save = false;
+                this.confirm.refresh = false;
+            },
+
             discardChanges() {
-                if (this.url) {
+                if (this.confirm.save && this.url) {
                     this.confirm.save = false;
                     this.confirm.discard = true;
 
                     this.$router.push({
                         path: this.url
                     });
+                } else if (this.confirm.refresh) {
+                    this.confirm.refresh = false;
+                    this.confirm.discard = true;
+
+                    this.refresh()
+                } else {
+                    this.confirm.save = false;
+                    this.confirm.refresh = false;
+                    this.confirm.discard = false;
                 }
             },
 
@@ -302,17 +320,23 @@
                 this.markDirty();
             },
 
-            async refresh() {
-                this.show.loading = true;
+            refresh() {
+                if (this.flags.dirty.length === 0 || this.confirm.discard) {
+                    (async () => {
+                        this.show.loading = true;
 
-                this.loadPreferences();
+                        this.loadPreferences();
 
-                await this.loadConfig();
-                await this.loadPlugins();
+                        await this.loadConfig();
+                        await this.loadPlugins();
 
-                this.loadInstances();
+                        this.loadInstances();
 
-                this.show.loading = false;
+                        this.show.loading = false;
+                    })();
+                } else {
+                    this.confirm.refresh = true;
+                }
             },
 
             loadPreferences() {
@@ -335,6 +359,8 @@
                 for (let i = 0; i < this.devices.length; i++) {
                     const device = this.devices[i];
                     const instance = `${device.mac}:${device.port}`;
+
+                    this.flags.dirty = [];
 
                     await this.API.login(device.ip, device.port);
 

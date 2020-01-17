@@ -148,7 +148,7 @@
 
     #select-field.dark .container {
         flex: 1;
-        padding: 5px 5px 6px 5px;
+        padding: 5px 5px 5px 5px;
         height: 33px !important;
         background: #444;
         border: 1px #333 solid;

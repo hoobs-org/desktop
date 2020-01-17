@@ -825,7 +825,7 @@
     }
 
     #config .form {
-        padding: 10px 20px 0 20px;
+        padding: 15px 20px 0 20px;
         max-width: 700px;
     }
 

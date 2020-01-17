@@ -36,7 +36,7 @@
                 <div v-on:click="addAccessory()" class="button">Add accessory</div>
             </div>
         </div>
-        <modal v-if="show.accessories" title="Add Accessory" v-on:cancel="() => { show.accessories = false }" :select="true"  width="450px">
+        <modal v-if="show.accessories" title="Add Accessory" v-on:cancel="() => { show.accessories = false }" :ok-button="false"  width="450px">
             <div v-for="(key) in Object.keys(accessories.schemas)" :key="`available_${key}`" class="button button-primary add-accessory-button" v-on:click="insertAccessory(key)">
                 {{ accessories.schemas[key].title }} <span class="icon">chevron_right</span>
             </div>
@@ -196,7 +196,7 @@
             addAccessory() {
                 const keys = Object.keys(this.accessories.schemas);
 
-                if (keys.length > 1) {
+                if (keys.length > 0) {
                     this.show.accessories = true;
                 } else if (keys.length === 1) {
                     this.insertAccessory(keys[0]);

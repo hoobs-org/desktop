@@ -1,5 +1,5 @@
 <template>
-    <div v-if="initilized" id="loader">
+    <div v-if="initilized || loading" id="loader">
         <div class="message">{{ value }}</div>
         <marquee :height="3" color="#feb400" background="#856a3b" />
     </div>
@@ -11,7 +11,8 @@
 
         data() {
             return {
-                timer: null
+                timer: null,
+                loading: false
             }
         },
 
@@ -25,7 +26,7 @@
 
         mounted() {
             this.timer = setTimeout(() => {
-                this.initilized = true;
+                this.loading = true;
             }, 250);
         },
 

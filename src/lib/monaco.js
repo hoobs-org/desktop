@@ -35,7 +35,9 @@ export default {
     },
 
     beforeDestroy() {
-        window.removeEventListener("resize", this.resize);
+        if (this.watcher) {
+            this.watcher();
+        }
 
         this.editor && this.editor.dispose();
     },
@@ -94,7 +96,11 @@ export default {
                 this.$emit("change", this.editor.getValue(), event);
             })
 
-            window.addEventListener("resize", this.resize);
+            this.watcher = this.$store.subscribe((mutation) => {
+                if (mutation.type === "resizeWindow") {
+                    this.resize();
+                }
+            });
 
             this.$emit("mounted", this.editor);
         },

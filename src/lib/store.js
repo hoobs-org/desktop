@@ -10,6 +10,7 @@ export default new Vuex.Store({
             system: false,
             logFilter: false
         },
+        trigger: null,
         messages: [],
         timestamp: null,
         version: {},
@@ -34,6 +35,14 @@ export default new Vuex.Store({
             state.memory = {};
             state.temp = {};
             state.notifications = [];
+        },
+
+        saveChanges(state) {
+            state.trigger = new Date().getTime();
+        },
+
+        resizeWindow(state) {
+            state.trigger = new Date().getTime();
         },
 
         toggleMenu(state, name) {

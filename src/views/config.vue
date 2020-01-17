@@ -106,6 +106,12 @@
             </div>
         </div>
         <loader v-else id="loader" value="Loading..." :initilized="true" />
+        <modal v-if="confirm.save" v-on:cancel="discardChanges()" v-on:confirm="() => { confirm.save = false }" cancel-title="Discard" ok-title="Cancel" width="350px">
+            <b>You have unsaved changes.</b>
+            <p>
+                Are you sure you want to leave?
+            </p>
+        </modal>
     </div>
 </template>
 
@@ -149,6 +155,10 @@
 
         data() {
             return {
+                confirm: {
+                    save: false,
+                    discard: false
+                },
                 show: {
                     loading: true,
                     mounting: true
@@ -168,7 +178,8 @@
                     instance: "preferences",
                     plugin: null
                 },
-                errors: []
+                errors: [],
+                url: null
             }
         },
 
@@ -204,15 +215,32 @@
             this.show.loading = false;
         },
 
-        watch: {
-            configurations: {
-                deep: true,
-
-                handler: function () {
-                    // TRACK
+        created() {
+            this.watcher = this.$store.subscribe((mutation) => {
+                if (mutation.type === "saveChanges") {
+                    this.saveChanges();
                 }
-            },
+            });
+        },
 
+        beforeDestroy() {
+            if (this.watcher) {
+                this.watcher();
+            }
+        },
+
+        beforeRouteLeave (to, from, next) {
+            if (this.flags.dirty.length === 0 || this.confirm.discard) {
+                next();
+            } else {
+                this.url = to.path;
+                this.confirm.save = true;
+
+                next(false);
+            }
+        },
+
+        watch: {
             section: async function () {
                 this.loadInstances();
             } 
@@ -248,6 +276,17 @@
                             }
                         }
                     }
+                }
+            },
+
+            discardChanges() {
+                if (this.url) {
+                    this.confirm.save = false;
+                    this.confirm.discard = true;
+
+                    this.$router.push({
+                        path: this.url
+                    });
                 }
             },
 
@@ -430,7 +469,7 @@
             },
 
             saveChanges() {
-                // SAVE CONFIG
+                console.log("Save Config");
             }
         }
     };

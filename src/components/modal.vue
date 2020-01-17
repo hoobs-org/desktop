@@ -6,8 +6,8 @@
                 <slot />
             </div>
             <div class="modal-footer">
-                <div v-if="confirm" class="button" v-on:click="$emit('cancel')">{{ cancelTitle }}</div>
-                <div v-if="select" class="button button-primary" v-on:click="$emit('confirm')">{{ okTitle }}</div>
+                <div v-if="cancelButton" class="button" v-on:click="$emit('cancel')">{{ cancelTitle }}</div>
+                <div v-if="okButton" class="button button-primary" v-on:click="$emit('confirm')">{{ okTitle }}</div>
             </div>
         </div>
     </div>
@@ -26,13 +26,13 @@
                 type: String,
                 default: "auto"
             },
-            confirm: {
+            "cancel-button": {
                 type: Boolean,
                 default: true
             },
-            select: {
+            "ok-button": {
                 type: Boolean,
-                default: false
+                default: true
             },
             "ok-title": {
                 type: String,

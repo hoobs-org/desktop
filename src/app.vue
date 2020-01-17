@@ -32,7 +32,7 @@
         <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" cancel-title="Donate" width="450px">
             <about />
         </modal>
-        <modal v-if="show.help" v-on:confirm="() => { show.help = false }" title="Help" :confirm="false" width="550px">
+        <modal v-if="show.help" v-on:confirm="() => { show.help = false }" title="Help" :cancel-button="false" width="550px">
             <help />
         </modal>
     </div>
@@ -89,6 +89,18 @@
 
             this.devices = this.Settings.get("devices");
             this.sessions = this.Settings.get("sessions");
+        },
+
+        created() {
+            window.addEventListener("resize", () => {
+                this.$store.commit("resizeWindow");
+            });
+
+            window.addEventListener("keydown", (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.which === 83) {
+                    this.$store.commit("saveChanges");
+                }
+            });
         },
 
         destroyed() {

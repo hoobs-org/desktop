@@ -113,6 +113,8 @@
         "temp_units_message": "设置要显示温度传感器的单位。",
         "temperature": "溫度",
         "terminal": "终奌站",
+        "time_format": "Time Format",
+        "time_format_message": "This only affects times in the interface.",
         "unsaved_changes": "You have unsaved changes.",
         "up_to_date": "最新",
         "update": "日期",

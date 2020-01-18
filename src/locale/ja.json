@@ -113,6 +113,8 @@
         "temp_units_message": "あなたは温度センサが表示する単位を設定します。",
         "temperature": "温度",
         "terminal": "ターミナル",
+        "time_format": "Time Format",
+        "time_format_message": "This only affects times in the interface.",
         "unsaved_changes": "You have unsaved changes.",
         "up_to_date": "最新の",
         "update": "更新",

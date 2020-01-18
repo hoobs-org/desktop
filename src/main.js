@@ -27,7 +27,8 @@ const settings = new Settings({
         sessions: {},
         locale: "en",
         units: {
-            temperature: "fahrenheit"
+            temperature: "fahrenheit",
+            timeFormat: "12hour"
         },
         geolocation: {
             countryCode: "US",

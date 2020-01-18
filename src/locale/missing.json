@@ -35,6 +35,8 @@
     "remove": "Remove",
     "system_backup": "System Backup",
     "system_restore": "System Restore",
+    "time_format": "Time Format",
+    "time_format_message": "This only affects times in the interface.",
     "unsaved_changes": "You have unsaved changes.",
     "version": "Version"
 }

@@ -112,6 +112,8 @@
     "temp_units_message": "Set the units you want temprature sensors to display.",
     "temperature": "Temperature",
     "terminal": "Terminal",
+    "time_format": "Time Format",
+    "time_format_message": "This only affects times in the interface.",
     "unsaved_changes": "You have unsaved changes.",
     "up_to_date": "Up to Date",
     "update": "Update",

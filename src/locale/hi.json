@@ -113,6 +113,8 @@
         "temp_units_message": "उन इकाइयों को सेट करें जिन्हें आप तापमान सेंसर प्रदर्शित करना चाहते हैं।",
         "temperature": "तापमान",
         "terminal": "Terminal",
+        "time_format": "Time Format",
+        "time_format_message": "This only affects times in the interface.",
         "unsaved_changes": "You have unsaved changes.",
         "up_to_date": "Up to Date",
         "update": "Update",

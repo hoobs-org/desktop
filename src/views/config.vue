@@ -27,6 +27,7 @@
                     <div class="form">
                         <select-field v-on:input="markDirty()" :name="$t('language')" :description="$t('language_message')" :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
                         <select-field v-on:input="markDirty()" :name="$t('temp_units')" :description="$t('temp_units_message')" :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
+                        <select-field v-on:input="markDirty()" :name="$t('time_format')" :description="$t('time_format_message')" :options="$options.values.times" v-model="configurations.working['preferences'].timeFormat" :required="true" />
                         <select-field v-on:input="markDirty()" :name="$t('country_code')" :description="$t('country_code_message')" :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
                         <text-field v-on:input="markDirty()" :name="$t('postal_code')" :description="$t('postal_code_message')" v-model="configurations.working['preferences'].postalCode" :required="false" />
                         <text-field v-on:input="markDirty()" :name="$t('latitude')" :description="$t('latitude_message')" v-model="configurations.working['preferences'].latitude" :required="false" />
@@ -208,9 +209,18 @@
             units: [{
                 text: "Celsius",
                 value: "celsius"
-            },{
+            },
+            {
                 text: "Fahrenheit",
                 value: "fahrenheit"
+            }],
+            times: [{
+                text: "12 Hour",
+                value: "12hour"
+            },
+            {
+                text: "24 Hour",
+                value: "24hour"
             }]
         },
 
@@ -395,6 +405,7 @@
 
                 this.configurations.working["preferences"].locale = this.Settings.get("locale") || "en";
                 this.configurations.working["preferences"].tempUnits = units.temperature || "fahrenheit";
+                this.configurations.working["preferences"].timeFormat = units.timeFormat || "12hour";
                 this.configurations.working["preferences"].countryCode = geolocation.countryCode || "US";
                 this.configurations.working["preferences"].postalCode = geolocation.postalCode || "94040";
                 this.configurations.working["preferences"].latitude = geolocation.latitude || "";
@@ -621,6 +632,7 @@
 
                             locale = this.configurations.working["preferences"].locale;
                             units.temperature = this.configurations.working["preferences"].tempUnits;
+                            units.timeFormat = this.configurations.working["preferences"].timeFormat;
                             geolocation.countryCode = this.configurations.working["preferences"].countryCode;
                             geolocation.postalCode = this.configurations.working["preferences"].postalCode;
                             geolocation.latitude = this.configurations.working["preferences"].latitude;

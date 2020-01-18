@@ -113,6 +113,8 @@
         "temp_units_message": "Nastavte jednotky teploty jaké mají být zobrazeny v senzorech.",
         "temperature": "Teplota",
         "terminal": "Terminál",
+        "time_format": "Time Format",
+        "time_format_message": "This only affects times in the interface.",
         "unsaved_changes": "You have unsaved changes.",
         "up_to_date": "Aktuální",
         "update": "Aktualizovat",

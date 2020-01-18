@@ -8,9 +8,9 @@ export const i18n = new VueI18n({
     locale: "en",
     fallbackLocale: "en",
     messages: Messages
-})
+});
 
-const loadedLanguages = ["en"]
+const loadedLanguages = ["en"];
 
 function setLanguage (lang) {
     i18n.locale = lang;
@@ -34,6 +34,5 @@ export function LoadLanguage(lang) {
         loadedLanguages.push(lang);
 
         return setLanguage(lang)
-    }
-  )
+    });
 }

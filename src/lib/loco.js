@@ -16,7 +16,40 @@ const locale = join(root, "locale");
     keys = Object.keys(source);
     keys.sort();
 
-    const used = [];
+    const used = [
+        "bridge_name",
+        "hoobs_version",
+        "node_version",
+        "homebridge_port",
+        "home_setup_id",
+        "home_setup_pin",
+        "configuration_path",
+        "plugins_path",
+        "product",
+        "manufacturer",
+        "model",
+        "serial",
+        "uuid",
+        "sku",
+        "platform",
+        "distro",
+        "release",
+        "codename",
+        "kernel",
+        "arch",
+        "hostname",
+        "codepage",
+        "logofile",
+        "build",
+        "servicepack",
+        "homebridge_version",
+        "application_path",
+        "local_modules_path",
+        "global_modules_path",
+        "operating_system",
+        "system",
+        "file_system"
+    ];
 
     let entries = null;
 
@@ -112,6 +145,12 @@ const locale = join(root, "locale");
 
     keys = Object.keys(sorted);
 
+    const unused = [];
+
+    if (File.existsSync(join(locale, "unused.json"))) {
+        File.unlinkSync(join(locale, "unused.json"));
+    }
+
     const missing = {};
 
     if (File.existsSync(join(locale, "missing.json"))) {
@@ -119,45 +158,70 @@ const locale = join(root, "locale");
     }
 
     for (let i = 0; i < locales.length; i++) {
-        const local = locales[i].code.split("-")[0];
+        const lang = locales[i].code.split("-")[0];
 
-        if (local === "en") {
-            if (File.existsSync(join(locale, `${local}.json`))) {
-                File.unlinkSync(join(locale, `${local}.json`));
+        if (lang === "en") {
+            if (File.existsSync(join(locale, `${lang}.json`))) {
+                File.unlinkSync(join(locale, `${lang}.json`));
             }
 
             const output = {};
 
-            output[local] = {};
+            output[lang] = {};
 
             for (let j = 0; j < keys.length; j++) {
-                output[local][keys[j]] = (sorted[keys[j]] || "").trim();
+                output[lang][keys[j]] = (sorted[keys[j]] || "").trim();
             }
 
-            File.appendFileSync(join(locale, `${local}.json`), JSON.stringify(output, null, 4));
+            File.appendFileSync(join(locale, `${lang}.json`), JSON.stringify(output, null, 4));
         } else {
-            if (File.existsSync(join(locale, `${local}.json`))) {
-                File.unlinkSync(join(locale, `${local}.json`));
+            if (File.existsSync(join(locale, `${lang}.json`))) {
+                File.unlinkSync(join(locale, `${lang}.json`));
             }
 
             const resource = (await loco.exportLocale(locales[i].code));
             const output = {};
 
-            output[local] = {};
+            output[lang] = {};
 
             for (let j = 0; j < keys.length; j++) {
                 if (resource[keys[j]] === undefined && resource.en[keys[j]] === undefined) {
                     missing[keys[j]] = (sorted[keys[j]] || "").trim();
                 }
 
-                output[local][keys[j]] = (resource[keys[j]] || resource.en[keys[j]] || sorted[keys[j]] || "").trim();
+                output[lang][keys[j]] = (resource[keys[j]] || resource.en[keys[j]] || sorted[keys[j]] || "").trim();
             }
 
-            File.appendFileSync(join(locale, `${local}.json`), JSON.stringify(output, null, 4));
+            let available = null;
+
+            available = Object.keys(resource);
+
+            if (available) {
+                for (let j = 0; j < available.length; j++) {
+                    if (available[j] !== "en" && keys.indexOf(available[j]) === -1 && unused.indexOf(available[j]) === -1) {
+                        unused.push(available[j]);
+                    }
+                }
+            }
+
+            if (resource.en) {
+                available = Object.keys(resource.en);
+
+                if (available) {
+                    for (let j = 0; j < available.length; j++) {
+                        if (available[j] !== "en" && keys.indexOf(available[j]) === -1 && unused.indexOf(available[j]) === -1) {
+                            unused.push(available[j]);
+                        }
+                    }
+                }
+            }
+
+            File.appendFileSync(join(locale, `${lang}.json`), JSON.stringify(output, null, 4));
         }
 
-        console.log(`Complete '${local}.json'`);
+        console.log(`Complete '${lang}.json'`);
     }
 
+    File.appendFileSync(join(locale, "unused.json"), JSON.stringify(unused, null, 4));
     File.appendFileSync(join(locale, "missing.json"), JSON.stringify(missing, null, 4));
 })();

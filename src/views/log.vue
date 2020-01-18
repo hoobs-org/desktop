@@ -10,7 +10,7 @@
                 <div class="loading-message">{{ $t("loading") }}...</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
-            <span class="message" v-for="(entry, midx) in messages.filter(m => expression.test(m.message))" :key="midx" v-html="colorCodeDevice(entry.message)"></span>
+            <span class="message" v-for="(entry, midx) in messages.filter(m => expression.test(m.message))" :key="midx" v-html="colorCodeDevice(entry.timestamp, entry.message)"></span>
         </div>
         <dropdown v-if="menus['logFilter']" v-on:click.stop.prevent class="filter-menu">
             <div v-on:click.stop v-for="(device) in devices" :key="`${device.mac}:${device.port}`" class="item">
@@ -32,6 +32,7 @@
                 },
                 devices: [],
                 filters: [],
+                timeFormat: "12hour",
                 expression: new RegExp("^\\[\\]")
             }
         },
@@ -52,6 +53,7 @@
 
         mounted() {
             if (this.connected > 0) {
+                this.timeFormat = this.Settings.get("units").timeFormat || "12hour";
                 this.devices = this.Settings.get("devices");
                 this.filters = this.devices.map(d => `^\\[${d.hostname}\\]`);
                 this.expression = new RegExp(`^\\[\\]${this.filters.length > 0 ? `|${this.filters.join("|")}` : ""}`);
@@ -95,22 +97,43 @@
                 this.$emit("refresh");
             },
 
-            colorCodeDevice(line) {
-                const parts = line.split("]");
+            colorCodeDevice(timestamp, line) {
+                timestamp = new Date(timestamp);
 
-                let value = parts.shift();
+                let parts = line.split("]");
+                let hostname = parts.shift().replace("[", "");
                 let hash = 0;
+                let hex = null;
 
-                value = value.replace("[", "");
-                line = parts.join("]");
+                line = parts.join("]").trim();
 
-                for (let i = 0; i < value.length; i++) {
-                    hash = value.charCodeAt(i) + ((hash << 6) - hash); /* eslint-disable-line */
+                for (let i = 0; i < hostname.length; i++) {
+                    hash = hostname.charCodeAt(i) + ((hash << 6) - hash);
                 }
 
-                const hex = (hash & 0x00FFFFFF).toString(16).toLowerCase(); /* eslint-disable-line */
+                hex = (hash & 0x00FFFFFF).toString(16).toLowerCase();
 
-                return `[<span style="color: #${"000000".substring(0, 6 - hex.length) + hex};">${value}</span>]${line}`;
+                const hostnameColor = `#${"000000".substring(0, 6 - hex.length) + hex}`;
+
+                if (line.startsWith("[")) {
+                    parts = line.split("]");
+
+                    let plugin = parts.shift().replace("[", "");
+
+                    hash = 0;
+                    line = parts.join("]").trim();
+
+                    const sample = `${plugin}${plugin}`;
+
+                    for (let i = sample.length - 1; i >= 0; i--) {
+                        hash = sample.charCodeAt(i) + ((hash << 6) - hash);
+                    }
+
+                    hex = (hash & 0x00FFFFFF).toString(16).toLowerCase()
+                    line = `[<span style="color: #${"000000".substring(0, 6 - hex.length) + hex};">${plugin}</span>] ${line}`;
+                }
+
+                return `[<span style="color: ${hostnameColor};">${hostname}</span>] <span style="color: #808080;">${timestamp.format(this.timeFormat)}</span> ${line}`;
             }
         }
     }

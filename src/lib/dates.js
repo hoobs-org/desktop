@@ -47,6 +47,24 @@ Object.defineProperty(Date.prototype, "time", {
     }
 });
 
+Object.defineProperty(Date.prototype, "format", {
+    enumerable: false,
+    writable: true,
+
+    value: function (timeFormat) {
+        switch (timeFormat) {
+            case "12hour":
+                return `${this.date} ${this.getHours() % 12 ? this.getHours() % 12 : 12}:${this.getMinutes() < 10 ? `0${this.getMinutes()}` : this.getMinutes()}:${this.getSeconds() < 10 ? `0${this.getSeconds()}` : this.getSeconds()} ${this.getHours() >= 12 ? "PM" : "AM"}`;
+
+            case "24hour":
+                return `${this.date} ${this.getHours() < 10 ? `0${this.getHours()}` : this.getHours()}:${this.getMinutes() < 10 ? `0${this.getMinutes()}` : this.getMinutes()}:${this.getSeconds() < 10 ? `0${this.getSeconds()}` : this.getSeconds()}`;
+
+            default:
+                return this.date;
+        }
+    }
+});
+
 Object.defineProperty(Date.prototype, "first", {
     get: function () {
         return new Date(this.getFullYear(), this.getMonth(), 1);

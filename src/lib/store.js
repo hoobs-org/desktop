@@ -115,14 +115,20 @@ export default new Vuex.Store({
 
                 if (Number.isNaN(timestamp)) {
                     timestamp = Math.round(Date.parse((parts.shift() || "").replace("[", "").trim()));
+                } else {
+                    payload.message = parts.join("]").trim();
                 }
 
                 if (Number.isNaN(timestamp)) {
                     timestamp = Math.round(Date.parse((parts.shift() || "").replace("[", "").trim()));
+                } else {
+                    payload.message = parts.join("]").trim();
                 }
 
                 if (Number.isNaN(timestamp)) {
                     timestamp = Math.round(state.timestamp || new Date().getTime());
+                } else {
+                    payload.message = parts.join("]").trim();
                 }
 
                 timestamp += (state.messages.length / 10);

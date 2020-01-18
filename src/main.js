@@ -14,7 +14,7 @@ import Settings from "./lib/settings";
 import Encryption from "./lib/encryption";
 import Components from "./lib/components";
 
-import { i18n, LoadLanguage } from "./locals/localization";
+import { i18n, LoadLanguage } from "./locale/localization";
 
 import { basename } from "path";
 import { existsSync, readFileSync } from "fs";

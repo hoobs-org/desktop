@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueI18n from "vue-i18n";
-import Messages from "@/locals/en.json";
+import Messages from "@/locale/en.json";
 
 Vue.use(VueI18n);
 
@@ -29,7 +29,7 @@ export function LoadLanguage(lang) {
         return Promise.resolve(setLanguage(lang))
     }
 
-    return import(/* webpackChunkName: "lang-[request]" */ `@/locals/${lang}.json`).then((messages) => {
+    return import(/* webpackChunkName: "lang-[request]" */ `@/locale/${lang}.json`).then((messages) => {
         i18n.setLocaleMessage(lang, messages.default[lang]);
         loadedLanguages.push(lang);
 

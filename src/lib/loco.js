@@ -5,13 +5,13 @@ const { dirname, join } = require("path");
 
 const loco = new Loco("5pxDtjXTzMLg3tFZ3EdDTEslro-AjMyBC");
 const root = join(dirname(File.realpathSync(__filename)), "../");
-const locals = join(root, "locals");
+const locale = join(root, "locale");
 
 (async () => {
     let keys = [];
 
     const locales = await loco.getLocales();
-    const source = JSON.parse(File.readFileSync(join(locals, "source.json")));
+    const source = JSON.parse(File.readFileSync(join(locale, "source.json")));
 
     keys = Object.keys(source);
     keys.sort();
@@ -104,26 +104,26 @@ const locals = join(root, "locals");
         }
     }
 
-    if (File.existsSync(join(locals, "source.json"))) {
-        File.unlinkSync(join(locals, "source.json"));
+    if (File.existsSync(join(locale, "source.json"))) {
+        File.unlinkSync(join(locale, "source.json"));
     }
 
-    File.appendFileSync(join(locals, "source.json"), JSON.stringify(sorted, null, 4));
+    File.appendFileSync(join(locale, "source.json"), JSON.stringify(sorted, null, 4));
 
     keys = Object.keys(sorted);
 
     const missing = {};
 
-    if (File.existsSync(join(locals, "missing.json"))) {
-        File.unlinkSync(join(locals, "missing.json"));
+    if (File.existsSync(join(locale, "missing.json"))) {
+        File.unlinkSync(join(locale, "missing.json"));
     }
 
     for (let i = 0; i < locales.length; i++) {
         const local = locales[i].code.split("-")[0];
 
         if (local === "en") {
-            if (File.existsSync(join(locals, `${local}.json`))) {
-                File.unlinkSync(join(locals, `${local}.json`));
+            if (File.existsSync(join(locale, `${local}.json`))) {
+                File.unlinkSync(join(locale, `${local}.json`));
             }
 
             const output = {};
@@ -134,10 +134,10 @@ const locals = join(root, "locals");
                 output[local][keys[j]] = (sorted[keys[j]] || "").trim();
             }
 
-            File.appendFileSync(join(locals, `${local}.json`), JSON.stringify(output, null, 4));
+            File.appendFileSync(join(locale, `${local}.json`), JSON.stringify(output, null, 4));
         } else {
-            if (File.existsSync(join(locals, `${local}.json`))) {
-                File.unlinkSync(join(locals, `${local}.json`));
+            if (File.existsSync(join(locale, `${local}.json`))) {
+                File.unlinkSync(join(locale, `${local}.json`));
             }
 
             const resource = (await loco.exportLocale(locales[i].code));
@@ -153,11 +153,11 @@ const locals = join(root, "locals");
                 output[local][keys[j]] = (resource[keys[j]] || resource.en[keys[j]] || sorted[keys[j]] || "").trim();
             }
 
-            File.appendFileSync(join(locals, `${local}.json`), JSON.stringify(output, null, 4));
+            File.appendFileSync(join(locale, `${local}.json`), JSON.stringify(output, null, 4));
         }
 
         console.log(`Complete '${local}.json'`);
     }
 
-    File.appendFileSync(join(locals, "missing.json"), JSON.stringify(missing, null, 4));
+    File.appendFileSync(join(locale, "missing.json"), JSON.stringify(missing, null, 4));
 })();

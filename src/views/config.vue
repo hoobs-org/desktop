@@ -146,8 +146,8 @@
 
     import Monaco from "../lib/monaco";
 
-    import Languages from "../locals/languages.json";
-    import Countries from "../locals/country-codes.json";
+    import Languages from "../locale/languages.json";
+    import Countries from "../locale/country-codes.json";
 
     export default {
         name: "config",

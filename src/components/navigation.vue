@@ -20,10 +20,6 @@
                 <span v-bind:class="routeIcon('log')">subject</span>
                 <span v-if="show.tips" v-bind:class="activeRoute('log')">{{ $t("log") }}</span>
             </router-link>
-            <router-link to="/users" @click.native="() => { show.tips = false }">
-                <span v-bind:class="routeIcon('users')">people</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('users')">{{ $t("users") }}</span>
-            </router-link>
             <router-link to="/plugins" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
                 <span v-if="show.tips" v-bind:class="activeRoute('plugins', 'plugin', 'search')">{{ $t("plugins") }}</span>

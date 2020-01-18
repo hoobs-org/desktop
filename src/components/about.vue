@@ -10,7 +10,7 @@
             <div class="version">
                 <b class="application">HOOBS Desktop</b>
                 <br>
-                Version {{ $version() }}
+                {{ $t("version") }} {{ $version() }}
             </div>
         </div>
         <br>

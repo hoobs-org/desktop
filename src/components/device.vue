@@ -4,10 +4,10 @@
             <div class="icon">router</div>
         </div>
         <div v-if="joined" class="action-cell">
-            <router-link :to="`/devices/${value.mac}/${value.port}`" class="button">Details</router-link>
+            <router-link :to="`/devices/${value.mac}/${value.port}`" class="button">{{ $t("details") }}</router-link>
         </div>
         <div v-else class="action-cell">
-            <div v-on:click="$emit('join')" class="button button-primary">Join</div>
+            <div v-on:click="$emit('join')" class="button button-primary">{{ $t("join") }}</div>
         </div>
         <div v-if="joined" class="info">
             <span v-if="value.hostname !== value.ip" class="title">{{ value.hostname }}</span>
@@ -23,22 +23,22 @@
             <span v-else class="title">{{ value.ip }}</span>
         </div>
         <div v-if="joined" class="action-cell">
-            <router-link v-if="show.terminal" :to="`/terminal/${value.mac}/${value.port}`" title="Terminal" class="icon action-icon">code</router-link>
+            <router-link v-if="show.terminal" :to="`/terminal/${value.mac}/${value.port}`" :title="$t('terminal')" class="icon action-icon">code</router-link>
         </div>
         <div v-if="joined">
             <div v-if="show.terminal && show.seperators" class="action-seperator"></div>
         </div>
         <div v-if="joined" class="action-cell">
-            <confirm v-if="show.restart" value="Restart Bridge" icon="cached" title="Are you sure you want to restart the bridge?" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
+            <confirm v-if="show.restart" :value="$t('restart_service')" icon="cached" :title="$t('confirm_restart')" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
         </div>
         <div v-if="joined" class="action-cell">
-            <confirm v-if="show.reboot" value="Reboot Device" icon="power_settings_new" title="Are you sure you want to reboot this device?" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
+            <confirm v-if="show.reboot" :value="$t('reboot_device')" icon="power_settings_new" :title="$t('confirm_reboot')" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
         </div>
         <div v-if="joined">
             <div v-if="(show.restart || show.reboot) && show.seperators" class="action-seperator"></div>
         </div>
         <div v-if="joined" class="action-cell">
-            <confirm v-if="show.remove" value="Remove Device" icon="delete_outline" title="Are you sure you want to remove this device?" v-on:start="toggleFields(false, false, false, true, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="$emit('remove')" />
+            <confirm v-if="show.remove" :value="$t('remove')" icon="delete_outline" :title="$t('confirm_remove')" v-on:start="toggleFields(false, false, false, true, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="$emit('remove')" />
         </div>
         <div v-if="!joined" class="service">
             <span class="title">{{ value.product }}</span>

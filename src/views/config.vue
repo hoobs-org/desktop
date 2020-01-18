@@ -4,33 +4,33 @@
         <div v-if="!show.loading && !show.mounting" class="loaded">
             <div class="sections">
                 <div class="actions">
-                    <div v-on:click="saveChanges()" title="Save Changes" class="icon">save</div>
+                    <div v-on:click="saveChanges()" :title="$t('save_changes')" class="icon">save</div>
                     <div class="action-seperator"></div>
-                    <div v-on:click="refresh()" title="Refresh Log" class="icon">refresh</div>
+                    <div v-on:click="refresh()" :title="$t('refresh')" class="icon">refresh</div>
                 </div>
                 <div class="flow">
-                    <router-link to="/config/interface" :class="section === 'interface' ? 'active': ''">Interface</router-link>
-                    <router-link to="/config/server" :class="section === 'server' ? 'active': ''">Server</router-link>
-                    <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">Ports</router-link>
+                    <router-link to="/config/interface" :class="section === 'interface' ? 'active': ''">{{ $t("interface_settings") }}</router-link>
+                    <router-link to="/config/server" :class="section === 'server' ? 'active': ''">{{ $t("server_settings") }}</router-link>
+                    <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">{{ $t("port_ranges") }}</router-link>
                     <router-link to="/config/bridge" :class="section === 'bridge' ? 'active': ''">Apple Home</router-link>
                     <router-link v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
-                    <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">Advanced</router-link>
+                    <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">{{ $t("advanced") }}</router-link>
                 </div>
             </div>
             <div v-if="section === 'interface'" class="panels">
                 <div class="tabs">
                     <div class="spacer"></div>
-                    <tab title="Preferences" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
+                    <tab :title="$t('preferences')" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
                     <div class="fill"></div>
                 </div>
                 <div class="flow">
                     <div class="form">
-                        <select-field v-on:input="markDirty()" name="Language" description="This changes the language of this interface." :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
-                        <select-field v-on:input="markDirty()" name="Temperature Units" description="Termprature units used for weather forecasts and system sensors." :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
-                        <select-field v-on:input="markDirty()" name="Country Code" description="This is the country code used for weather forecasts." :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
-                        <text-field v-on:input="markDirty()" name="Postal Code" description="This is the postal code used for weather forecasts." v-model="configurations.working['preferences'].postalCode" :required="false" />
-                        <text-field v-on:input="markDirty()" name="Latitude" description="Latitude value used for weather forecasts." v-model="configurations.working['preferences'].latitude" :required="false" />
-                        <text-field v-on:input="markDirty()" name="Longitude" description="Longitude value used for weather forecasts." v-model="configurations.working['preferences'].longitude" :required="false" />
+                        <select-field v-on:input="markDirty()" :name="$t('language')" :description="$t('language_message')" :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
+                        <select-field v-on:input="markDirty()" :name="$t('temp_units')" :description="$t('temp_units_message')" :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
+                        <select-field v-on:input="markDirty()" :name="$t('country_code')" :description="$t('country_code_message')" :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
+                        <text-field v-on:input="markDirty()" :name="$t('postal_code')" :description="$t('postal_code_message')" v-model="configurations.working['preferences'].postalCode" :required="false" />
+                        <text-field v-on:input="markDirty()" :name="$t('latitude')" :description="$t('latitude_message')" v-model="configurations.working['preferences'].latitude" :required="false" />
+                        <text-field v-on:input="markDirty()" :name="$t('longitude')" :description="$t('longitude_message')" v-model="configurations.working['preferences'].longitude" :required="false" />
                     </div>
                 </div>
             </div>
@@ -42,9 +42,9 @@
                 </div>
                 <div class="flow">
                     <div class="form">
-                        <port-field v-on:input="markDirty()" name="Server Port" description="This is the port the server runs on." v-model.number="configurations.working[data.instance].server.port" :required="true" />
-                        <integer-field v-on:input="markDirty()" name="Bridge Auto Start" description="Automatically start the bridge service, in seconds." v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
-                        <integer-field v-on:input="markDirty()" name="Refresh Interval" description="Refresh the accessory states interval in seconds." v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
+                        <port-field v-on:input="markDirty()" :name="$t('server_port')" :description="$t('server_port_message')" v-model.number="configurations.working[data.instance].server.port" :required="true" />
+                        <integer-field v-on:input="markDirty()" :name="$t('autostart_after')" :description="$t('autostart_after_message')" v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
+                        <integer-field v-on:input="markDirty()" :name="$t('polling_seconds')" :description="$t('polling_seconds_message')" v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
                     </div>
                 </div>
             </div>
@@ -56,9 +56,9 @@
                 </div>
                 <div class="flow">
                     <div class="form">
-                        <description-field v-on:input="markDirty()" name="Range Name" description="A port range description used to identify the port range." v-model="configurations.working[data.instance].ports.comment" />
-                        <port-field v-on:input="markDirty()" name="Start Port" description="The port range starting number." v-model.number="configurations.working[data.instance].ports.start" />
-                        <port-field v-on:input="markDirty()" name="End Port" description="The port range ending number." v-model.number="configurations.working[data.instance].ports.end" />
+                        <description-field v-on:input="markDirty()" :name="$t('range_name')" :description="$t('range_name_message')" v-model="configurations.working[data.instance].ports.comment" />
+                        <port-field v-on:input="markDirty()" :name="$t('start_port')" :description="$t('start_port_message')" v-model.number="configurations.working[data.instance].ports.start" />
+                        <port-field v-on:input="markDirty()" :name="$t('end_port')" :description="$t('end_port_message')" v-model.number="configurations.working[data.instance].ports.end" />
                     </div>
                 </div>
             </div>
@@ -70,11 +70,11 @@
                 </div>
                 <div class="flow">
                     <div class="form">
-                        <text-field v-on:input="markDirty()" name="Bridge Name" description="Used to identify the bridge in Apple Home." v-model="configurations.working[data.instance].bridge.name" :required="true" />
-                        <description-field v-on:input="markDirty()" name="Description" description="Used to identify the bridge on the device." v-model="configurations.working[data.instance].description" />
-                        <port-field v-on:input="markDirty()" name="Bridge Port" description="This is the bridge communication port." v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
-                        <hex-field v-on:input="markDirty()" name="Unique Identifier" description="Unique identifier for this bridge." v-model="configurations.working[data.instance].bridge.username" :required="true" />
-                        <text-field v-on:input="markDirty()" name="Apple Home PIN" description="The PIN used when adding HOOBS to Apple Home." v-model="configurations.working[data.instance].bridge.pin" :required="true" />
+                        <text-field v-on:input="markDirty()" :name="$t('service_name')" :description="$t('service_name_message')" v-model="configurations.working[data.instance].bridge.name" :required="true" />
+                        <description-field v-on:input="markDirty()" :name="$t('service_description')" :description="$t('service_description_message')" v-model="configurations.working[data.instance].description" />
+                        <port-field v-on:input="markDirty()" :name="$t('service_port')" :description="$t('service_port_message')" v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
+                        <hex-field v-on:input="markDirty()" :name="$t('home_username')" :description="$t('home_username_message')" v-model="configurations.working[data.instance].bridge.username" :required="true" />
+                        <text-field v-on:input="markDirty()" :name="$t('home_pin')" :description="$t('home_pin_message')" v-model="configurations.working[data.instance].bridge.pin" :required="true" />
                     </div>
                 </div>
             </div>
@@ -105,24 +105,24 @@
                 </div>
             </div>
         </div>
-        <loader v-else id="loader" value="Loading..." :initilized="true" />
-        <modal v-if="confirm.save || confirm.refresh" v-on:cancel="discardChanges()" v-on:confirm="navigationCancel()" cancel-title="Discard" ok-title="Cancel" width="350px">
-            <b>You have unsaved changes.</b>
+        <loader v-else id="loader" :value="`${$t('loading')}...`" :initilized="true" />
+        <modal v-if="confirm.save || confirm.refresh" v-on:cancel="discardChanges()" v-on:confirm="navigationCancel()" :cancel-title="$t('discard')" :ok-title="$t('cancel')" width="350px">
+            <b>{{ $t("unsaved_changes") }}</b>
             <p v-if="confirm.save">
-                Are you sure you want to leave?
+                {{ $t("confirm_exit") }}
             </p>
             <p v-if="confirm.refresh">
-                Are you sure you want to refresh?
+                {{ $t("confirm_refresh") }}
             </p>
         </modal>
-        <modal v-if="confirm.reboot" v-on:cancel="cancelReboot()" v-on:confirm="rebootDevice()" cancel-title="Cancel" ok-title="Reboot" width="450px">
-            <b>You will need to reboot the device for these changes to take affect.</b>
+        <modal v-if="confirm.reboot" v-on:cancel="cancelReboot()" v-on:confirm="rebootDevice()" :cancel-title="$t('cancel')" :ok-title="$t('reboot_device')" width="450px">
+            <b>{{ $t("config_reboot_confirm") }}</b>
             <p>
-                Are you sure you want to reboot {{ data.reboot.length }} device(s)?
+                {{ $t("confirm_reboot") }}
             </p>
         </modal>
         <modal v-if="confirm.errors" v-on:confirm="() => { confirm.errors = false }" :cancel-button="false" width="550px">
-            <b>You have errors in your configuration.</b>
+            <b>{{ $t("save_validation") }}</b>
             <p class="errors">
                 <span v-for="(error, index) in errors" :key="`error_${index}`">{{ error }}</span>
             </p>
@@ -545,40 +545,40 @@
                     const messages = [];
 
                     if (!results.server.port || Number.isNaN(parseInt(results.server.port, 10)) || results.server.port < 1 || results.server.port > 65535) {
-                        messages.push(`${device.hostname} - Invalid server port.`);
+                        messages.push(`${device.hostname} - ${this.$t("server_port_invalid")}`);
                     }
 
                     if (!results.server.polling_seconds || results.server.polling_seconds < 1 || results.server.polling_seconds > 1800) {
-                        messages.push(`${device.hostname} - Invalid refresh interval.`);
+                        messages.push(`${device.hostname} - ${this.$t("polling_seconds_invalid")}`);
                     }
 
                     if (!results.bridge.name || results.bridge.name === "") {
-                        messages.push(`${device.hostname} - Apple Home bridge name is required.`);
+                        messages.push(`${device.hostname} - ${this.$t("service_name_required")}`);
                     }
 
                     if (!results.bridge.port || Number.isNaN(parseInt(results.bridge.port, 10)) || results.bridge.port < 1 || results.bridge.port > 65535) {
-                        messages.push(`${device.hostname} - Invalid Apple Home bridge port.`);
+                        messages.push(`${device.hostname} - ${this.$t("service_port_invalid")}`);
                     }
 
                     if (!results.bridge.username || results.bridge.username === "") {
-                        messages.push(`${device.hostname} - Apple Home unique identifier is required.`);
+                        messages.push(`${device.hostname} - ${this.$t("homebridge_username_required")}`);
                     }
 
                     if (!results.bridge.pin || results.bridge.pin === "") {
-                        messages.push(`${device.hostname} - Apple Home PIN is required.`);
+                        messages.push(`${device.hostname} - ${this.$t("pin_required")}`);
                     }
 
                     if (results.ports && (!Number.isNaN(parseInt(results.ports.start)) || !Number.isNaN(parseInt(results.ports.end)))) {
                         if (Number.isNaN(parseInt(results.ports.start, 10)) || results.ports.start < 1 || results.ports.start > 65535) {
-                            messages.push(`${device.hostname} - Invalid start port.`);
+                            messages.push(`${device.hostname} - ${this.$t("start_port_invalid")}`);
                         }
 
                         if (Number.isNaN(parseInt(results.ports.end, 10)) || results.ports.end < 1 || results.ports.end > 65535) {
-                            messages.push(`${device.hostname} - Invalid end port.`);
+                            messages.push(`${device.hostname} - ${this.$t("end_port_invalid")}`);
                         }
 
                         if (!Number.isNaN(parseInt(results.ports.start, 10)) && !Number.isNaN(parseInt(results.ports.end, 10)) && results.ports.start > results.ports.end) {
-                            messages.push(`${device.hostname} - The start port must be lower than or equal to the end port.`);
+                            messages.push(`${device.hostname} - ${this.$t("invalid_port_range")}`);
                         }
                     } else {
                         results.ports = {};
@@ -602,6 +602,8 @@
                 this.errors = [];
                 this.data.reboot = [];
 
+                let localize = false;
+
                 if (this.flags.dirty.length > 0) {
                     this.show.loading = true;
 
@@ -612,6 +614,10 @@
                             let locale = this.Settings.get("locale") || "en";
                             let units = this.Settings.get("units") || {};
                             let geolocation = this.Settings.get("geolocation") || {};
+
+                            if (locale !== this.configurations.working["preferences"].locale) {
+                                localize = true;
+                            }
 
                             locale = this.configurations.working["preferences"].locale;
                             units.temperature = this.configurations.working["preferences"].tempUnits;
@@ -674,6 +680,10 @@
                     } else {
                         this.show.loading = false;
                         this.confirm.errors = true;
+                    }
+
+                    if (localize) {
+                        await this.$localize();
                     }
                 }
             }

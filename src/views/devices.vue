@@ -1,33 +1,33 @@
 <template>
     <div id="devices">
         <div class="actions">
-            <div v-if="devices.length > 0" v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
+            <div v-if="devices.length > 0" v-on:click="$router.back()" :title="$t('back')" class="icon">arrow_back</div>
             <div v-if="devices.length > 0" class="action-seperator"></div>
-            <div v-on:click="scanNetwork()" title="Scan Network" class="icon">refresh</div>
-            <div v-on:click="addDevice()" title="Add Device" class="icon">add</div>
+            <div v-on:click="scanNetwork()" :title="$t('refresh')" class="icon">refresh</div>
+            <div v-on:click="addDevice()" :title="$t('add_device')" class="icon">add</div>
         </div>
         <div class="flow">
             <device v-for="(device) in devices" :key="`${device.mac}:${device.port}`" :joined="true" :value="device" v-on:remove="removeDevice(device.mac, device.ip, device.port)" />
             <device v-for="(device) in available" :key="`${device.mac}:${device.port}`" :joined="false" :value="device" v-on:join="addDevice(device.mac, device.ip, device.port, device.hostname)" />
             <div v-if="loaded && !show.scanning && available.length === 0 && devices.length === 0" class="empty">
                 <div class="message">
-                    <span>No Devices Found</span>
-                    <div v-on:click="addDevice()" class="button">Add Manually</div>
+                    <span>{{ $t("no_devices") }}</span>
+                    <div v-on:click="addDevice()" class="button">{{ $t("manual_add") }}</div>
                 </div>
             </div>
             <div v-if="show.scanning" class="scanning">
-                <div class="message">Searching for Devices ({{ show.progress.toFixed(1) }}%)</div>
+                <div class="message">{{ $t("device_search") }} ({{ show.progress.toFixed(1) }}%)</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
         </div>
-        <modal v-if="show.add || show.join" v-on:confirm="saveDevice()" v-on:cancel="closeAddDevice()" title="Add Device" ok-title="Add Device" width="350px">
+        <modal v-if="show.add || show.join" v-on:confirm="saveDevice()" v-on:cancel="closeAddDevice()" :title="$t('add_device')" :ok-title="$t('add_device')" width="350px">
             <form class="form" method="post" action="/" autocomplete="false" v-on:submit.prevent="saveDevice()">
                 <div v-if="errors.add && errors.add !== ''" class="error" v-html="errors.add"></div>
-                <text-field v-if="show.add || show.join" name="Name" description="Assign a name for this device" theme="light" v-model="values.hostname" :required="false" />
-                <text-field v-if="show.add" name="IP Address" description="Enter the IP address your HOOBS device" theme="light" v-model="values.ip" :required="true" />
-                <port-field v-if="show.add" name="Port" description="Enter the configured port number" theme="light" v-model.number="values.port" :required="true" />
-                <text-field v-if="show.add || show.join" name="Username" description="Enter your HOOBS username" theme="light" v-model="values.username" :required="true" />
-                <password-field v-if="show.add || show.join" name="Password" description="Enter your HOOBS password" theme="light" v-model="values.password" :required="true" />
+                <text-field v-if="show.add || show.join" :name="$t('name')" :description="$t('device_hostname')" theme="light" v-model="values.hostname" :required="false" />
+                <text-field v-if="show.add" :name="$t('ip_address')" :description="$t('device_address')" theme="light" v-model="values.ip" :required="true" />
+                <port-field v-if="show.add" :name="$t('port')" :description="$t('device_port')" theme="light" v-model.number="values.port" :required="true" />
+                <text-field v-if="show.add || show.join" :name="$t('username')" :description="$t('device_username')" theme="light" v-model="values.username" :required="true" />
+                <password-field v-if="show.add || show.join" :name="$t('password')" :description="$t('device_password')" theme="light" v-model="values.password" :required="true" />
             </form>
         </modal>
     </div>
@@ -250,15 +250,15 @@
                 }
 
                 if (!this.validatePort(this.values.port)) {
-                    errors.push("Invalid IP port number.");
+                    errors.push(this.$t("service_port_invalid"));
                 }
 
                 if (!this.values.username || this.values.username === "") {
-                    errors.push("Username is required.");
+                    errors.push(this.$t("username_required"));
                 }
 
                 if (!this.values.password || this.values.password === "") {
-                    errors.push("Password is required.");
+                    errors.push(this.$t("password_required"));
                 }
 
                 if ((!this.values.mac || this.values.mac === "") && this.validateIpAddress(this.values.ip)) {
@@ -266,18 +266,18 @@
                 }
 
                 if (!this.values.mac || this.values.mac === "") {
-                    errors.push("This device doesn't have a valid MAC address.");
+                    errors.push(this.$t("invalid_mac_address"));
                 }
 
                 if (this.values.mac && this.values.mac !== "" && this.devices.findIndex(d => d.mac === this.values.mac && d.port === this.values.port) >= 0) {
-                    errors.push("This device has already been paired.");
+                    errors.push(this.$t("already_paired"));
                 }
 
                 if (errors.length === 0) {
                     const test = await this.scanner.detect(this.values.ip, this.values.port);
 
                     if (!test || !test.version || test.version === "") {
-                        errors.push("HOOBS is not available on this device.");
+                        errors.push(this.$t("hoobs_unavailable"));
                     }
 
                     if (errors.length === 0) {

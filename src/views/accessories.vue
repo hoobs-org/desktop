@@ -1,6 +1,6 @@
 <template>
     <div v-if="connected > 0" class="accessories"></div>
-    <loader v-else id="loader" value="Connecting..." />
+    <loader v-else id="loader" :value="`${$t('connecting')}...`" />
 </template>
 
 <script>

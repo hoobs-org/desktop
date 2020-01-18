@@ -8,11 +8,13 @@ import FormData from "form-data";
 import App from "./app.vue";
 import Router from "./router";
 
-import Components from "./lib/components";
 import Store from "./lib/store";
-import Settings from "./lib/settings";
 import Scanner from "./lib/scanner";
+import Settings from "./lib/settings";
 import Encryption from "./lib/encryption";
+import Components from "./lib/components";
+
+import { i18n, LoadLanguage } from "./locals/localization";
 
 import { basename } from "path";
 import { existsSync, readFileSync } from "fs";
@@ -35,6 +37,8 @@ const settings = new Settings({
         }
     }
 });
+
+const router = Router();
 
 const scanners = {};
 const persistant = {};
@@ -259,6 +263,10 @@ Vue.mixin({
             return remote.app.getVersion();
         },
 
+        async $localize() {
+            await LoadLanguage(settings.get("locale") || "en");
+        },
+
         $window() {
             return remote.getCurrentWindow();
         },
@@ -326,8 +334,6 @@ Vue.mixin({
 
 Components();
 
-const router = Router();
-
 router.beforeEach(async (to, _from, next) => {
     if (to.path !== "/devices" && to.path !== "/etcher" && settings.get("devices").length === 0) {
         router.push({
@@ -343,10 +349,13 @@ router.beforeEach(async (to, _from, next) => {
     next();
 });
 
-Vue.config.productionTip = false;
+LoadLanguage(settings.get("locale") || "en").then(() => {
+    Vue.config.productionTip = false;
 
-new Vue({
-    router,
-    store: Store,
-    render: h => h(App)
-}).$mount("#app");
+    new Vue({
+        router,
+        i18n,
+        store: Store,
+        render: h => h(App)
+    }).$mount("#app");
+});

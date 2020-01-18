@@ -18,14 +18,14 @@
                 <div v-if="accessory.plugin_map && accessories.schemas[accessoryKey(accessory)]">
                     <div class="accessory-title">
                         <h3>{{ accessories.schemas[accessoryKey(accessory)].title || "Accessory" }}</h3>
-                        <confirm value="Remove" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
+                        <confirm :value="$t('remove')" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
                     </div>
                     <schema-form v-on:input="markDirty()" :schema="accessories.schemas[accessoryKey(accessory)].properties || {}" v-model="accessories.working[index]" />
                 </div>
                 <div v-else>
                     <div class="accessory-title">
-                        <h3>Accessory</h3>
-                        <confirm value="Remove" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
+                        <h3>{{ $t("accessory") }}</h3>
+                        <confirm :value="$t('remove')" icon="delete_outline" v-on:confirm="() => { removeAccessory(index) }" class="confirm-float" />
                     </div>
                     <div class="monaco-field">
                         <monaco v-on:change="(code) => { updateJson('accessory', code, index) }" theme="hoobs" :value="accessoryCode(index)" class="monaco" />
@@ -33,10 +33,10 @@
                 </div>
             </div>
             <div class="action">
-                <div v-on:click="addAccessory()" class="button">Add accessory</div>
+                <div v-on:click="addAccessory()" class="button">{{ $t("add_accessory") }}</div>
             </div>
         </div>
-        <modal v-if="show.accessories" title="Add Accessory" v-on:cancel="() => { show.accessories = false }" :ok-button="false"  width="450px">
+        <modal v-if="show.accessories" :title="$t('add_accessory')" v-on:cancel="() => { show.accessories = false }" :ok-button="false"  width="450px">
             <div v-for="(key) in Object.keys(accessories.schemas)" :key="`available_${key}`" class="button button-primary add-accessory-button" v-on:click="insertAccessory(key)">
                 {{ accessories.schemas[key].title }} <span class="icon">chevron_right</span>
             </div>

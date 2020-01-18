@@ -1,41 +1,41 @@
 <template>
     <div id="system">
         <div class="actions">
-            <div v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
+            <div v-on:click="$router.back()" :title="$t('back')" class="icon">arrow_back</div>
             <div class="action-seperator"></div>
-            <div v-on:click="reload()" title="Refresh Device Details" class="icon">refresh</div>
+            <div v-on:click="reload()" :title="$t('refresh')" class="icon">refresh</div>
         </div>
         <div class="flow">
             <div class="section">
                 <div class="software">
                     <div class="details">
                         <b>{{ status["product"] || "HOOBS Core" }}</b>
-                        <span v-if="status">Current Version: {{ status["hoobs_version"] }}</span>
+                        <span v-if="status">{{ $t("current_version")}}: {{ status["hoobs_version"] }}</span>
                         <div v-if="show.working" class="working">
                             <marquee :height="3" color="#feb400" background="#856a3b" />
                         </div>
                         <div v-else-if="updates.length > 0" class="updates">
-                            <b>{{ updates[0].version }} Update Available</b>
+                            <b>{{ updates[0].version }} {{ $t("update_available") }}</b>
                             <br>
-                            <div class="button button-primary" v-on:click="updateSystem()">Update</div>
+                            <div class="button button-primary" v-on:click="updateSystem()">{{ $t("update") }}</div>
                         </div>
                         <div v-else class="updates">
-                            <b>Up to Date</b>
+                            <b>{{ $t("up_to_date") }}</b>
                             <br>
-                            <div class="button" v-on:click="$browse('https://github.com/hoobs-org/hoobs-core')">Details</div>
+                            <div class="button" v-on:click="$browse('https://github.com/hoobs-org/hoobs-core')">{{ $t("details") }}</div>
                         </div>
                     </div>
                     <div class="action-cell">
-                        <router-link v-if="show.terminal" :to="`/terminal/${device.mac}/${device.port}`" title="Terminal" class="icon action-icon">code</router-link>
+                        <router-link v-if="show.terminal" :to="`/terminal/${device.mac}/${device.port}`" :title="$t('terminal')" class="icon action-icon">code</router-link>
                     </div>
                     <div>
                         <div v-if="(show.restart || show.reboot) && show.seperators" class="action-seperator"></div>
                     </div>
                     <div class="action-cell">
-                        <confirm v-if="show.restart" value="Restart Bridge" icon="cached" title="Are you sure you want to restart the bridge?" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
+                        <confirm v-if="show.restart" :value="$t('restart_service')" icon="cached" :title="$t('confirm_restart')" v-on:start="toggleFields(false, true, false, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="restartDevice()" />
                     </div>
                     <div class="action-cell">
-                        <confirm v-if="show.reboot" value="Reboot Device" icon="power_settings_new" title="Are you sure you want to reboot this device?" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
+                        <confirm v-if="show.reboot" :value="$t('reboot_device')" icon="power_settings_new" :title="$t('confirm_reboot')" v-on:start="toggleFields(false, false, true, false, false)" v-on:cancel="toggleFields(true, true, true, true, true)" v-on:confirm="rebootDevice()" />
                     </div>
                     <div>
                         <div v-if="show.extra && show.seperators" class="action-seperator"></div>
@@ -44,7 +44,7 @@
                         <div v-if="show.extra" v-on:click.stop="$store.commit('toggleMenu', 'system')" class="icon action-icon">menu</div>
                     </div>
                 </div>
-                <h2 v-if="status">Software</h2>
+                <h2 v-if="status">{{ $t("software") }}</h2>
                 <table v-if="status">
                     <tbody>
                         <tr v-for="(value, name) in status" :key="name">
@@ -71,51 +71,51 @@
                     <tbody>
                         <tr v-for="(item, index) in filesystem" :key="index">
                             <td style="min-width: 250px;">{{ item.mount }}</td>
-                            <td style="width: 100%;">Used {{ formatSize(item.used) }} ({{ item.use }}%)</td>
+                            <td style="width: 100%;">{{ $t("used") }} {{ formatSize(item.used) }} ({{ item.use }}%)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div v-if="temp && (temp || {}).main >= 0" class="section">
-                <h2>Temperature</h2>
+                <h2>{{ $t("temperature") }}</h2>
                 <table>
                     <tbody>
                         <tr>
-                            <td style="min-width: 250px;">Current</td>
+                            <td style="min-width: 250px;">{{ $t("current") }}</td>
                             <td style="width: 100%;">{{ getTemp(temp.main) }}°</td>
                         </tr>
                         <tr>
-                            <td style="min-width: 250px;">Max</td>
+                            <td style="min-width: 250px;">{{ $t("max") }}</td>
                             <td style="width: 100%;">{{ getTemp(temp.max) }}°</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <dropdown v-if="menus['system']" class="system-menu">
-                <div class="item" v-on:click="() => { confirm.connection = true }">Reset Connection</div>
-                <div class="item" v-on:click="() => { confirm.username = true }">Generate New Identifier</div>
+                <div class="item" v-on:click="() => { confirm.connection = true }">{{ $t("reset_connection") }}</div>
+                <div class="item" v-on:click="() => { confirm.username = true }">{{ $t("generate_new_username") }}</div>
                 <div class="seperator"></div>
-                <div class="item" v-on:click="systemBackup()">System Backup</div>
-                <div class="item" v-on:click="systemRestore()">System Restore</div>
+                <div class="item" v-on:click="systemBackup()">{{ $t("system_backup") }}</div>
+                <div class="item" v-on:click="systemRestore()">{{ $t("system_restore") }}</div>
                 <div class="seperator"></div>
-                <div class="item" v-on:click="() => { confirm.reset = true }">Factory Reset</div>
+                <div class="item" v-on:click="() => { confirm.reset = true }">{{ $t("factory_reset") }}</div>
             </dropdown>
             <modal v-if="confirm.connection" v-on:confirm="resetConnection()" v-on:cancel="() => { confirm.connection = false }" width="350px">
-                <b>Are you sure you want to reset the connection?</b>
+                <b>{{ $t("homekit_disconnect") }}</b>
                 <p>
-                    This will disconnect this device from Apple Home. It will also remove all cached devices and connections. This action can not be reversed.
+                    {{ $t("confirm_action") }}
                 </p>
             </modal>
             <modal v-if="confirm.username" v-on:confirm="generateUsername()" v-on:cancel="() => { confirm.username = false }" width="350px">
-                <b>Are you sure you want to rgenerate the bridge username?</b>
+                <b>{{ $t("homekit_disconnect") }}</b>
                 <p>
-                    This will disconnect this device from Apple Home.
+                    {{ $t("confirm_action") }}
                 </p>
             </modal>
             <modal v-if="confirm.reset" v-on:confirm="factoryReset()" v-on:cancel="() => { confirm.reset = false }" width="350px">
-                <b>Are you sure you want to factory reset this device?</b>
+                <b>{{ $t("factory_reset_message") }}</b>
                 <p>
-                    This will remove all configurations and plugins. This action can not be reversed.
+                    {{ $t("confirm_factory_reset") }}
                 </p>
             </modal>
         </div>
@@ -431,6 +431,15 @@
             },
 
             humanize(string) {
+                let results = string;
+
+                results = (results || "").replace(/-/gi, "_");
+                results = this.$t(results);
+
+                if (results !== string) {
+                    return results;
+                }
+
                 return Inflection.titleize(Decamelize((string || "").split(".")[0].replace(/-/gi, " ").replace(/_/gi, " ").trim())).replace(/hoobs/gi, "HOOBS");
             }
         }

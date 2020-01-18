@@ -1,13 +1,13 @@
 <template>
     <div v-if="connected > 0" id="log">
         <div class="actions">
-            <div v-on:click.stop="$store.commit('toggleMenu', 'logFilter')" title="Filters" class="icon">router</div>
+            <div v-on:click.stop="$store.commit('toggleMenu', 'logFilter')" :title="$t('filters')" class="icon">router</div>
             <div class="action-seperator"></div>
-            <div v-on:click="refresh()" title="Refresh Configuration" class="icon">refresh</div>
+            <div v-on:click="refresh()" :title="$t('refresh')" class="icon">refresh</div>
         </div>
         <div class="messages" ref="messages">
             <div v-if="show.loading && messages.length === 0" class="loading">
-                <div class="loading-message">Loading...</div>
+                <div class="loading-message">{{ $t("loading") }}...</div>
                 <marquee :height="3" color="#feb400" background="#856a3b" />
             </div>
             <span class="message" v-for="(entry, midx) in messages.filter(m => expression.test(m.message))" :key="midx" v-html="colorCodeDevice(entry.message)"></span>
@@ -18,7 +18,7 @@
             </div>
         </dropdown>
     </div>
-    <loader v-else id="loader" value="Connecting..." />
+    <loader v-else id="loader" :value="`${$t('connecting')}...`" />
 </template>
 
 <script>

@@ -3,8 +3,8 @@
         <div v-if="!confirming && !icon" class="button" v-on:click="start()">{{ value }}</div>
         <div v-if="!confirming && icon" :title="value" class="icon" v-on:click="start()">{{ icon }}</div>
         <div v-if="confirming && title" class="title">{{ title }}</div>
-        <div v-if="confirming" class="button" v-on:click="cancel()">Cancel</div>
-        <div v-if="confirming" class="button button-warning" v-on:click="confirm()">Confirm</div>
+        <div v-if="confirming" class="button" v-on:click="cancel()">{{ $t("cancel") }}</div>
+        <div v-if="confirming" class="button button-warning" v-on:click="confirm()">{{ $t("confirm") }}</div>
     </div>
 </template>
 

@@ -1,9 +1,9 @@
 <template>
     <div id="terminal">
         <div class="actions">
-            <div v-on:click="$router.back()" title="Back" class="icon">arrow_back</div>
+            <div v-on:click="$router.back()" :title="$t('back')" class="icon">arrow_back</div>
             <div class="action-seperator"></div>
-            <div v-on:click="refreshTerminal()" title="Reload Terminal" class="icon">refresh</div>
+            <div v-on:click="refreshTerminal()" :title="$t('refresh')" class="icon">refresh</div>
         </div>
         <div class="flow">
             <div ref="terminal" class="shell"></div>

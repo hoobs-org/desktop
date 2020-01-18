@@ -24,15 +24,15 @@
             <notification v-for="(notification, nidx) in notifications" :key="nidx" :value="notification"></notification>
         </div>
         <dropdown v-if="menus['header']" class="header-menu">
-            <div class="item" v-on:click="() => { show.about = true }">About HOOBS</div>
-            <div class="item" v-on:click="() => { show.help = true }">Help</div>
+            <div class="item" v-on:click="() => { show.about = true }">{{ $t("about") }}</div>
+            <div class="item" v-on:click="() => { show.help = true }">{{ $t("help") }}</div>
             <div v-if="!serviceRoute() && devices.length > 0" class="seperator"></div>
-            <router-link v-if="!serviceRoute() && devices.length > 0" to="/devices" class="item">Manage Devices</router-link>
+            <router-link v-if="!serviceRoute() && devices.length > 0" to="/devices" class="item">{{ $t("manage_devices") }}</router-link>
         </dropdown>
-        <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" cancel-title="Donate" width="450px">
+        <modal v-if="show.about" v-on:confirm="() => { show.about = false }" v-on:cancel="$browse('https://www.paypal.me/hoobsofficial')" :cancel-title="$t('donate')" width="450px">
             <about />
         </modal>
-        <modal v-if="show.help" v-on:confirm="() => { show.help = false }" title="Help" :cancel-button="false" width="550px">
+        <modal v-if="show.help" v-on:confirm="() => { show.help = false }" :title="$t('help')" :cancel-button="false" width="550px">
             <help />
         </modal>
     </div>

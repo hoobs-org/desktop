@@ -10,23 +10,23 @@
             </div>
             <router-link to="/" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('home')">dashboard</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('home')">{{ routeName('home') }}</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('home')">{{ $t("dashboard") }}</span>
             </router-link>
             <router-link to="/accessories" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('accessories', 'layout')">{{ routeName('accessories') }}</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('accessories', 'layout')">{{ $t("accessories") }}</span>
             </router-link>
             <router-link to="/log" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('log')">subject</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('log')">{{ routeName('log') }}</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('log')">{{ $t("log") }}</span>
             </router-link>
             <router-link to="/users" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('users')">people</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('users')">{{ routeName('users') }}</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('users')">{{ $t("users") }}</span>
             </router-link>
             <router-link to="/plugins" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('plugins', 'plugin', 'search')">{{ routeName('plugins') }}</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('plugins', 'plugin', 'search')">{{ $t("plugins") }}</span>
             </router-link>
         </div>
         <div class="routes">
@@ -68,49 +68,6 @@
 
                     default:
                         return false;
-                }
-            },
-
-            routeName(value) {
-                switch (value) {
-                    case "login":
-                        return "";
-
-                    case "help":
-                        return "Help";
-
-                    case "system":
-                    case "terminal":
-                        return "System";
-
-                    case "profile":
-                        return "Profile";
-
-                    case "home":
-                        return "Dashboard";
-
-                    case "log":
-                        return "Log";
-
-                    case "users":
-                        return "Users";
-
-                    case "plugin":
-                    case "plugins":
-                    case "search":
-                    case "browse":
-                        return "Plugins";
-
-                    case "config":
-                    case "config-advanced":
-                        return "Configuration";
-
-                    case "accessories":
-                    case "layout":
-                        return "Accessories";
-
-                    default:
-                        return "";
                 }
             },
 

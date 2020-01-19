@@ -31,6 +31,7 @@
                 device: null,
                 socket: null,
                 screen: null,
+                initilize: true,
                 closing: false,
                 opening: true,
                 rows: 0,
@@ -122,24 +123,7 @@
                     if (this.opening) {
                         this.term.clear();
 
-                        this.term.write(`HOOBS ${this.status.hoobs_version}\r\n`);
-
-                        this.term.write(" _    _  ____   ____  ____   _____   \r\n");
-                        this.term.write("| |  | |/ __ \\ / __ \\|  _ \\ / ____|  \r\n");
-                        this.term.write("| |__| | |  | | |  | | |_) | (___    \r\n");
-                        this.term.write("|  __  | |  | | |  | |  _ < \\___ \\   \r\n");
-                        this.term.write("| |  | | |__| | |__| | |_) |____) |  \r\n");
-                        this.term.write("|_|  |_|\\____/ \\____/|____/|_____/   \r\n");
-                        this.term.write("\r\n");
-
-                        this.term.write("This terminal is here to help manage this\r\n");
-                        this.term.write("device. If you need to install a plugn\r\n");
-                        this.term.write("please use the interface.\r\n");
-
-                        this.term.write("\r\n");
-
-                        this.socket.send("");
-
+                        this.motd();
                         this.resizeTerminal();
 
                         this.opening = false;
@@ -155,6 +139,34 @@
                 this.socket.onerror = () => {
                     this.socket.close();
                 };
+            },
+
+            motd() {
+                this.term.clear();
+
+                if (this.initilize) {
+                    this.term.write("    __  ______  ____  ____ _____\r\n");
+                    this.term.write("   / / / / __ \\/ __ \\/ __ ) ___/\r\n");
+                    this.term.write("  / /_/ / / / / / / / __  \\__ \\ \r\n");
+                    this.term.write(" / __  / /_/ / /_/ / /_/ /__/ / \r\n");
+                    this.term.write("/_/ /_/\\____/\\____/_____/____/\r\n");
+
+                    this.term.write("\r\n");
+                    this.term.write(`${this.status.product || "HOOBS Core"} ${this.status.hoobs_version}\r\n`);
+                    this.term.write("\r\n");
+
+                    this.term.write("This terminal is here to help manage this\r\n");
+                    this.term.write("device. If you need to install a plugn\r\n");
+                    this.term.write("please use the interface.\r\n");
+
+                    this.term.write("\r\n");
+
+                    this.socket.send("");
+                } else {
+                    this.socket.send("{CLEAR}");
+                }
+
+                this.initilize = false;
             },
 
             resizeTerminal() {

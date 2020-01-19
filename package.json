@@ -17,6 +17,7 @@
         "@vue/cli-service": "^4.1.2",
         "axios": "^0.19.1",
         "babel-eslint": "^10.0.3",
+        "compare-versions": "^3.5.1",
         "core-js": "^3.6.2",
         "decamelize": "^3.2.0",
         "electron": "^7.1.8",

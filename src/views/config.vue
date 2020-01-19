@@ -855,6 +855,8 @@
         flex: 1;
         width: 100%;
         height: 100%;
+        box-sizing: border-box;
+        padding: 7px 0 0 0;
     }
 
     #config .monaco-loader {

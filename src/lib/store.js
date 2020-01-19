@@ -20,6 +20,7 @@ export default new Vuex.Store({
         cpu: {},
         memory: {},
         temp: {},
+        dimensions: {},
         notifications: [],
         connected: 0
     },
@@ -47,6 +48,10 @@ export default new Vuex.Store({
 
         saveChanges(state) {
             state.trigger = new Date().getTime();
+        },
+
+        setDimensions(state, payload) {
+            state.dimensions = payload;
         },
 
         resizeWindow(state) {

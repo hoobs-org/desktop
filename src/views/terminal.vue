@@ -5,13 +5,17 @@
             <div class="action-seperator"></div>
             <div v-on:click="refreshTerminal()" :title="$t('refresh')" class="icon">refresh</div>
         </div>
-        <div class="flow">
-            <div ref="terminal" class="shell"></div>
+        <div class="flow" ref="flow">
+            <div class="container" ref="container">
+                <div ref="terminal" class="shell"></div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+    import Semver from "compare-versions";
+
     import { Terminal } from "xterm";
     import { AttachAddon } from "xterm-addon-attach";
     import { FitAddon } from "xterm-addon-fit";
@@ -22,12 +26,21 @@
 
         data() {
             return {
+                status: null,
                 term: null,
                 device: null,
                 socket: null,
                 screen: null,
                 closing: false,
-                opening: true
+                opening: true,
+                rows: 0,
+                cols: 0
+            }
+        },
+
+        computed: {
+            dimensions() {
+                return this.$store.state.dimensions;
             }
         },
 
@@ -40,6 +53,10 @@
 
             if (index > -1) {
                 this.device = devices[index];
+
+                await this.API.login(this.device.ip, this.device.port);
+
+                this.status = await this.API.get(this.device.ip, this.device.port, "/status");
 
                 this.term = new Terminal({
                     cursorBlink: false,
@@ -56,15 +73,22 @@
                 this.term.loadAddon(new WebLinksAddon());
                 this.term.open(this.$refs.terminal);
 
-                this.screen.fit();
                 this.connectTerminal();
             }
+        },
 
-            window.addEventListener("resize", this.resizeTerminal);
+        created() {
+            this.watcher = this.$store.subscribe((mutation) => {
+                if (mutation.type === "resizeWindow") {
+                    this.resizeTerminal();
+                }
+            });
         },
 
         destroyed() {
-            window.removeEventListener("resize", this.resizeTerminal);
+            if (this.watcher) {
+                this.watcher();
+            }
 
             this.term = null;
             this.screen = null;
@@ -97,9 +121,26 @@
 
                     if (this.opening) {
                         this.term.clear();
-                        this.term.focus();
 
-                        this.socket.send("{CLEAR}");
+                        this.term.write(`HOOBS ${this.status.hoobs_version}\r\n`);
+
+                        this.term.write(" _    _  ____   ____  ____   _____   \r\n");
+                        this.term.write("| |  | |/ __ \\ / __ \\|  _ \\ / ____|  \r\n");
+                        this.term.write("| |__| | |  | | |  | | |_) | (___    \r\n");
+                        this.term.write("|  __  | |  | | |  | |  _ < \\___ \\   \r\n");
+                        this.term.write("| |  | | |__| | |__| | |_) |____) |  \r\n");
+                        this.term.write("|_|  |_|\\____/ \\____/|____/|_____/   \r\n");
+                        this.term.write("\r\n");
+
+                        this.term.write("This terminal is here to help manage this\r\n");
+                        this.term.write("device. If you need to install a plugn\r\n");
+                        this.term.write("please use the interface.\r\n");
+
+                        this.term.write("\r\n");
+
+                        this.socket.send("");
+
+                        this.resizeTerminal();
 
                         this.opening = false;
                     }
@@ -117,7 +158,23 @@
             },
 
             resizeTerminal() {
-                this.screen.fit();
+                this.$refs.container.style.display = "none";
+
+                this.cols = Math.floor((this.$refs.flow.clientWidth + 1) / this.dimensions.width);
+                this.rows = Math.floor((this.$refs.flow.clientHeight + 1) / this.dimensions.height) + 3;
+
+                setTimeout(() => {
+                    this.$refs.container.style.display = "block";
+
+                    this.screen.fit();
+                    this.term.resize(this.cols, this.rows);
+
+                    if (Semver.compare(this.status.hoobs_version, "3.1.21", ">=")) {
+                        this.socket.send(`{RESIZE}:${this.cols}:${this.rows}`);
+                    }
+
+                    this.term.focus();
+                }, 10);
             }
         }
     }
@@ -290,10 +347,16 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
+    }
+
+    #terminal .flow .container {
+        width: 100%;
+        height: 100%;
         overflow: auto;
     }
 
-    #terminal .flow ::-webkit-scrollbar {
+    #terminal .flow .container ::-webkit-scrollbar {
         display: none;
     }
 </style>

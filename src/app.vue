@@ -8,6 +8,9 @@
                 <h1>HOOBS</h1>
             </div>
         </div>
+        <div class="measure" ref="measure">
+            abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+        </div>
         <div class="chrome">
             <button v-on:click.stop="$store.commit('toggleMenu', 'header')" class="title-action icon">menu</button>
             <div class="seperator"></div>
@@ -85,6 +88,11 @@
         },
 
         async mounted() {
+            this.$store.commit("setDimensions", {
+                width: Math.floor((this.$refs.measure.clientWidth + 1) / 52),
+                height: Math.floor(this.$refs.measure.clientHeight + 1)
+            });
+
             this.maximized = this.$maximized();
 
             this.devices = this.Settings.get("devices");
@@ -455,6 +463,16 @@
 
     #app a:hover {
         text-decoration: underline;
+    }
+
+    #app .measure {
+        position: absolute;
+        visibility: hidden;
+        font-family: courier-new, courier, monospace;
+        font-size: 12px;
+        height: auto;
+        width: auto;
+        white-space: nowrap;
     }
 
     #app .header {

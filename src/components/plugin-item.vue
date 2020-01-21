@@ -5,7 +5,7 @@
         <span v-if="value.installed" class="version">{{ versionCompare(value.installed, value.version) ? `${value.installed} - Published ${new Date(value.date.replace(/\s/, "T")).date}` : `${value.installed} - ${value.version} Update Available` }}</span>
         <span v-else class="version">{{ value.version }} - Published {{ new Date(value.date.replace(/\s/, "T")).date }}</span>
         <span v-if="value.certified" class="version">HOOBS Certified</span>
-        <p class="description">{{ value.description }}</p>
+        <p class="description">{{ parseDescription(value.description) }}</p>
     </div>
 </template>
 
@@ -24,6 +24,12 @@
         methods: {
             versionCompare(current, latest) {
                 return Semver.compare(current, latest, ">=");
+            },
+
+            parseDescription(value) {
+                value = value.replace(/homebridge/gi, "HOOBS");
+
+                return value;
             },
 
             pluginTitle() {

@@ -197,6 +197,8 @@
             },
 
             processMarkdown(value) {
+                value = value.replace(/homebridge/gi, "HOOBS");
+
                 return new Showdown.Converter({
                     tables: true
                 }).makeHtml(value);

@@ -14,6 +14,8 @@
     #dropdown {
         background: #fff;
         border-radius: 3px;
+        max-height: 400px;
+        overflow: auto;
         padding: 3px 0;
         box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
                     0 4px 5px 0 rgba(0, 0, 0, 0.14),

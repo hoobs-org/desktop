@@ -1,7 +1,6 @@
 <template>
     <div id="config">
-        <monaco v-on:mounted="() => { show.mounting = false }" value="{}" class="monaco-loader" />
-        <div v-if="!show.loading && !show.mounting" class="loaded">
+        <div v-if="!show.loading" class="loaded">
             <div class="sections">
                 <div class="actions">
                     <div v-on:click="saveChanges()" :title="$t('save_changes')" class="icon">save</div>
@@ -179,8 +178,7 @@
                     discard: false
                 },
                 show: {
-                    loading: true,
-                    mounting: true
+                    loading: true
                 },
                 devices: [],
                 configurations: {
@@ -234,14 +232,16 @@
             }
         },
 
-        async mounted() {
+        mounted() {
             this.devices = this.Settings.get("devices");
             this.show.loading = true;
 
             this.loadPreferences();
 
-            await this.loadConfig();
-            await this.loadPlugins();
+            (async () => {
+                this.loadConfig();
+                this.loadPlugins();
+            })();
 
             this.loadInstances();
 

@@ -44,6 +44,13 @@
 </script>
 
 <style scoped>
+    #confirm {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+    }
+
     #confirm .button {
         margin: 0 0 0 10px;
     }

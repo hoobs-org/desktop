@@ -169,7 +169,7 @@
     }
 
     #device .action-cell .button {
-        width: 72px;
+        width: 80px;
     }
 
     #device .action-cell .action-icon,

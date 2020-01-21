@@ -104,6 +104,12 @@
                 this.$store.commit("resizeWindow");
             });
 
+            document.body.addEventListener("error", (event) => {
+                if (event.target.tagName === "IMG") {
+                    event.target.parentNode.removeChild(event.target);
+                }
+            }, true);
+
             window.addEventListener("keydown", (event) => {
                 switch (event.which) {
                     case 83:
@@ -389,13 +395,15 @@
     .button:link,
     .button:active,
     .button:visited {
+        height: 40px;
         background: #1a1a1a;
         color: #fff !important;
         text-decoration: none !important;
         display: inline-block;
         border: 1px #1a1a1a solid;
         border-radius: 3px;
-        padding: 10px;
+        padding: 10px 14px;
+        box-sizing: border-box;
         cursor: pointer;
         user-select: none;
         margin: 0 10px 0 0;
@@ -424,6 +432,41 @@
         box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.24),
                     0 2px 1px -1px rgba(0, 0, 0, 0.22),
                     0 1px 3px 1px rgba(0, 0, 0, 0.3);;
+    }
+
+    .button.dropdown {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+        padding: 0 0 0 10px;
+    }
+
+    .button.dropdown .text {
+        height: 100%;
+        border-right: 1px #000000 solid;
+        padding: 0 10px 0 0;
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+    }
+
+    .button.dropdown .icon {
+        height: 100%;
+        border-left: 1px #272727 solid;
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+    }
+
+    .button-primary.dropdown .text {
+        border-right: 1px #e2a716 solid;
+    }
+
+    .button-primary.dropdown .icon {
+        border-left: 1px #fbc542 solid;
     }
 
     ::placeholder {

@@ -13,16 +13,16 @@
                 <span v-if="show.tips" v-bind:class="activeRoute('home')">{{ $t("dashboard") }}</span>
             </router-link>
             <router-link to="/accessories" @click.native="() => { show.tips = false }">
-                <span v-bind:class="routeIcon('accessories', 'layout')">highlight</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('accessories', 'layout')">{{ $t("accessories") }}</span>
+                <span v-bind:class="routeIcon('accessories')">highlight</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('accessories')">{{ $t("accessories") }}</span>
             </router-link>
             <router-link to="/log" @click.native="() => { show.tips = false }">
                 <span v-bind:class="routeIcon('log')">subject</span>
                 <span v-if="show.tips" v-bind:class="activeRoute('log')">{{ $t("log") }}</span>
             </router-link>
             <router-link to="/plugins/browse" @click.native="() => { show.tips = false }">
-                <span v-bind:class="routeIcon('plugins', 'plugin', 'search')">extension</span>
-                <span v-if="show.tips" v-bind:class="activeRoute('plugins', 'plugin', 'search')">{{ $t("plugins") }}</span>
+                <span v-bind:class="routeIcon('plugins')">extension</span>
+                <span v-if="show.tips" v-bind:class="activeRoute('plugins')">{{ $t("plugins") }}</span>
             </router-link>
         </div>
         <div class="routes">

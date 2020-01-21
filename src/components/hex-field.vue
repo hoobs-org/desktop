@@ -11,6 +11,7 @@
 <script>
     export default {
         name: "hex-field",
+
         props: {
             name: String,
             description: String,

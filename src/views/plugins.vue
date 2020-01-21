@@ -389,6 +389,7 @@
                 this.markNotWorking(plugin);
 
                 await this.loadPlugins();
+                await this.displayPlugin(plugin, version);
             },
 
             async uninstallPlugin(device, plugin) {

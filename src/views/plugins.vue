@@ -28,7 +28,7 @@
                     <div v-if="!show.working" class="actions">
                         <div v-if="plugin.installed && plugin.versions">
                             <div v-if="!versionCompare(plugin.installed, plugin.version)" class="button button-primary dropdown">
-                                <div v-on:click="updatePlugin(device, plugin)" class="text">Update</div>
+                                <div v-on:click="updatePlugin(device, plugin, plugin.version)" class="text">Update</div>
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
                             </div>
                             <div v-else class="button dropdown">
@@ -322,7 +322,9 @@
                 await this.displayPlugin(plugin);
             },
 
-            async updatePlugin(device, plugin) {
+            async updatePlugin(device, plugin, version) {
+                version = version|| "latest";
+
                 this.markWorking(device, plugin);
 
                 const running = this.$store.state.running[`${device.ip}:${device.port}`];
@@ -333,7 +335,7 @@
                     await this.API.post(device.ip, device.port, "/service/stop");
                 }
 
-                await this.API.post(device.ip, device.port, `/plugins/${encodeURIComponent(`${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}@latest`)}`);
+                await this.API.post(device.ip, device.port, `/plugins/${encodeURIComponent(`${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}@${version}`)}`);
 
                 if (running) {
                     await this.API.post(device.ip, device.port, "/service/start");

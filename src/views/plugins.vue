@@ -11,7 +11,7 @@
                 <div v-if="section === 'browse'">
                     <div class="search">
                         <div class="icon">search</div>
-                        <input v-on:input="debounceSearch" type="text" placeholder="Search" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Search'" />
+                        <input v-on:input="debounceSearch" type="text" :placeholder="$t('search')" onfocus="this.placeholder = ''" :onblur="`this.placeholder = '${$t('search')}'`" />
                     </div>
                 </div>
                 <div class="results">
@@ -22,13 +22,13 @@
             <div ref="details" class="details">
                 <div v-if="plugin" class="control">
                     <span class="title">{{ pluginTitle(plugin) }}</span>
-                    <span v-if="plugin.installed" class="version">{{ versionCompare(plugin.installed, plugin.version) ? `${plugin.installed} - Published ${new Date(plugin.date.replace(/\s/, "T")).date}` : `${plugin.installed} - ${plugin.version} Update Available` }}</span>
-                    <span v-else class="version">{{ plugin.version }} - Published {{ new Date(plugin.date.replace(/\s/, "T")).date }}</span>
-                    <span v-if="plugin.certified" class="version">HOOBS Certified</span>
+                    <span v-if="plugin.installed" class="version">{{ versionCompare(plugin.installed, plugin.version) ? `${plugin.installed} - ${$t("published")} ${new Date(plugin.date.replace(/\s/, "T")).date}` : `${plugin.installed} - ${plugin.version} Update Available` }}</span>
+                    <span v-else class="version">{{ plugin.version }} - {{ $t("published") }} {{ new Date(plugin.date.replace(/\s/, "T")).date }}</span>
+                    <span v-if="plugin.certified" class="version">HOOBS {{ $t("certified") }}</span>
                     <div v-if="!show.working" class="actions">
                         <div v-if="plugin.installed">
                             <div v-if="!versionCompare(plugin.installed, plugin.version)" class="button button-primary dropdown">
-                                <div v-on:click="updatePlugin(device, plugin, plugin.version)" class="text">Update</div>
+                                <div v-on:click="updatePlugin(device, plugin, plugin.version)" class="text">{{ $t("update") }}</div>
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
                             </div>
                             <div v-else class="button dropdown">
@@ -38,7 +38,7 @@
                         </div>
                         <div v-else>
                             <div class="button button-primary dropdown">
-                                <div v-on:click="showInstall(plugin, plugin.version)" class="text">Install</div>
+                                <div v-on:click="showInstall(plugin, plugin.version)" class="text">{{ $t("install") }}</div>
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
                             </div>
                         </div>
@@ -46,9 +46,9 @@
                         <div class="plugin-links">
                             <div v-on:click="$browse(`https://www.npmjs.com/package/${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}`)" class="link">NPM</div>
                             <div class="seperator">|</div>
-                            <div v-if="plugin.homepage" v-on:click="$browse(plugin.homepage)" class="link">Details</div>
+                            <div v-if="plugin.homepage" v-on:click="$browse(plugin.homepage)" class="link">{{ $t("details") }}</div>
                             <div v-if="plugin.installed" class="seperator">|</div>
-                            <router-link v-if="plugin.installed" class="config-link" :to="`/config/${plugin.name}`"><span class="icon">settings</span> Configuration</router-link>
+                            <router-link v-if="plugin.installed" class="config-link" :to="`/config/${plugin.name}`"><span class="icon">settings</span> {{ $t("config") }}</router-link>
                         </div>
                         <dropdown v-if="plugin.installed && menus['version']" class="version-menu">
                             <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`" v-on:click="updatePlugin(device, plugin, version)" class="item">
@@ -68,24 +68,24 @@
                     </div>
                 </div>
                 <div v-if="plugin">
-                    <div class="detail-version">{{ plugin.version }} - Published {{ new Date(plugin.date.replace(/\s/, "T")).age }}</div>
+                    <div class="detail-version">{{ plugin.version }} - {{ $t("published") }} {{ new Date(plugin.date.replace(/\s/, "T")).age }}</div>
                     <div id="markdown" v-html="processMarkdown(plugin.description_details || plugin.description)"></div>
-                    <div v-if="plugin.node" class="node-version">Node {{ plugin.node }} required.</div>
+                    <div v-if="plugin.node" class="node-version">Node {{ plugin.node }} {{ $t("required") }}</div>
                     <div v-if="plugin.stats" class="description">
-                        Downloads the week: {{ plugin.stats.week.downloads }}
+                        {{ $t("weekly_downloads") }}: {{ plugin.stats.week.downloads }}
                         <br>
-                        Downloads the month: {{ plugin.stats.month.downloads }}
+                        {{ $t("monthly_downloads") }}: {{ plugin.stats.month.downloads }}
                     </div>
                 </div>
                 <loader v-else-if="show.loading" class="loader" :value="`${$t('loading')}...`" />
                 <featured v-else />
             </div>
         </div>
-        <modal v-if="show.install" v-on:confirm="selectDevice()" v-on:cancel="cancelInstall()" title="Install Plugin" ok-title="Install" width="350px">
+        <modal v-if="show.install" v-on:confirm="selectDevice()" v-on:cancel="cancelInstall()" :title="$t('install_plugin')" :ok-title="$t('install')" width="350px">
             <p>
-                Select a device to install this plugin on.
+                {{ $t("plugin_select_device") }}
             </p>
-            <select-field name="Device" :options="joined" v-model="data.instance" theme="light" :required="true" />
+            <select-field :name="$t('device')" :options="data.joined" v-model="data.instance" theme="light" :required="true" />
         </modal>
     </div>
     <loader v-else id="loader" :value="`${$t('connecting')}...`" />
@@ -132,6 +132,7 @@
                     install: false
                 },
                 data: {
+                    joined: [],
                     installed: [],
                     results: [],
                     plugin: null,
@@ -146,15 +147,6 @@
                 return this.$store.state.menus;
             },
 
-            joined() {
-                return this.devices.map((d) => {
-                    return {
-                        text: d.hostname,
-                        value: `${d.mac}:${d.port}`
-                    };
-                });
-            },
-
             connected() {
                 return this.$store.state.connected;
             }
@@ -162,6 +154,13 @@
 
         async mounted() {
             this.devices = this.Settings.get("devices");
+
+            this.data.joined = this.devices.map((d) => {
+                return {
+                    text: d.hostname,
+                    value: `${d.mac}:${d.port}`
+                };
+            });
 
             for (let i = 0; i < this.devices.length; i++) {
                 await this.API.login(this.devices[i].ip, this.devices[i].port);

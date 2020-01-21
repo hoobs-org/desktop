@@ -1,25 +1,20 @@
 <template>
     <div id="help">
-        <h1>Welcome to HOOBS</h1>
-        <span>Pronounced as "huːbz"</span>
+        <h1>{{ $t("welcome_message_hoobs") }}</h1>
+        <span>{{ $t("pronounced_hoobs") }}</span>
         <p>
-            HOOBS is an ecosystem that aims to unify and simplfy the "Smart Home". We beilive that you should
-            be able to use the devices you want, and not be locked into one provider's solution. If you want
-            to use Google Home for your voice control and Apple Home for your routines, go ahead, HOOBS will
-            make tht happen for you. HOOBS can connect your devices togeather by the use of plugins. HOOBS has
-            "Certified Plugins", and it supports Homebridge plugins. This means you have over 1,000 choices
-            when it comes to your Smart Home tech.
+            {{ $t("help_welcome") }}
         </p>
-        <h2>Documentation</h2>
+        <h2>{{ $t("documentation") }}</h2>
         <p>
             <ul>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/1.0-Community')">Community</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/2.0-Getting-Started')">Getting Started</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/3.0-User-Interface')">User Interface</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/4.0-Plugins')">Plugins</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/5.0-Hardware')">Hardware</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/7.0-Legal')">Legal</li>
-                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/8.0-Credits')">Credits</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/1.0-Community')">{{ $t("community") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/2.0-Getting-Started')">{{ $t("getting_started") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/3.0-User-Interface')">{{ $t("user_interface") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/4.0-Plugins')">{{ $t("plugins") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/5.0-Hardware')">{{ $t("hardware") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/7.0-Legal')">{{ $t("legal") }}</li>
+                <li v-on:click="$browse('https://github.com/hoobs-org/HOOBS/wiki/8.0-Credits')">{{ $t("credits") }}</li>
             </ul>
         </p>
     </div>

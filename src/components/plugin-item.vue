@@ -15,9 +15,9 @@
         </div>
         <div class="info">
             <span class="title">{{ pluginTitle() }}</span>
-            <span v-if="value.installed" class="version">{{ versionCompare(value.installed, value.version) ? `${value.installed} - Published ${new Date(value.date.replace(/\s/, "T")).date}` : `${value.installed} - ${value.version} Update Available` }}</span>
-            <span v-else class="version">{{ value.version }} - Published {{ new Date(value.date.replace(/\s/, "T")).date }}</span>
-            <span v-if="value.certified" class="version">HOOBS Certified</span>
+            <span v-if="value.installed" class="version">{{ versionCompare(value.installed, value.version) ? `${value.installed} - ${$t("published")} ${new Date(value.date.replace(/\s/, "T")).date}` : `${value.installed} - ${value.version} ${$t("update_available")}` }}</span>
+            <span v-else class="version">{{ value.version }} - {{ $t("published") }} {{ new Date(value.date.replace(/\s/, "T")).date }}</span>
+            <span v-if="value.certified" class="version">HOOBS {{ $t("certified") }}</span>
             <p class="description">{{ parseDescription(value.description) }}</p>
         </div>
     </div>
@@ -51,7 +51,7 @@
                     return "Google Home";
                 }
 
-                let results = (((this.value.schema || {}).platform || {}).plugin_alias || ((this.value.schema || {}).accessories || {}).plugin_alias || this.value.name || "Unknown Plugin").split(".")[0];
+                let results = (((this.value.schema || {}).platform || {}).plugin_alias || ((this.value.schema || {}).accessories || {}).plugin_alias || this.value.name || this.$t("unknown_plugin")).split(".")[0];
 
                 results = Inflection.titleize(Decamelize(results.replace(/-/gi, " ").replace(/homebridge/gi, "").trim()));
 

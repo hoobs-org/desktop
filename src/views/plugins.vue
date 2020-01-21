@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div class="results">
-                    <plugin-item v-for="(plugin) in data.installed" :key="`installed_${plugin.scope || ''}_${plugin.name}`" v-on:select="displayPlugin(plugin)" :value="plugin" class="item" />
+                    <plugin-item v-for="(plugin) in data.installed" :key="`installed_${plugin.scope || ''}_${plugin.name}`" v-on:select="displayPlugin(plugin, plugin.installed)" :value="plugin" class="item" />
                     <plugin-item v-for="(plugin) in data.results" :key="`search_${plugin.scope || ''}_${plugin.name}`" v-on:select="displayPlugin(plugin)" :value="plugin" class="item" />
                 </div>
             </div>
@@ -247,21 +247,13 @@
                 }
             },
 
-            async displayPlugin(plugin) {
+            async displayPlugin(plugin, version) {
                 const id = plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name;
 
                 this.plugin = null;
                 this.show.loading = true;
 
-                if (this.device) {
-                    await this.API.login(this.device.ip, this.device.port);
-
-                    this.plugin = await this.API.get(this.device.ip, this.device.port, `/plugins/${encodeURIComponent(id)}`);
-                } else if (this.latest) {
-                    await this.API.login(this.latest.ip, this.latest.port);
-
-                    this.plugin = await this.API.get(this.latest.ip, this.latest.port, `/plugins/${encodeURIComponent(id)}`);
-                }
+                this.plugin = await this.Plugins.package(id, version);
 
                 this.show.loading = false;
 
@@ -294,9 +286,9 @@
                 await this.API.login(this.latest.ip, this.latest.port);
 
                 if (this.query.length >= 1) {
-                    this.data.results = await this.API.post(this.latest.ip, this.latest.port, `/plugins/${encodeURIComponent(this.query)}/50`);
+                    this.data.results = await this.Plugins.search(this.query, 50);
                 } else {
-                    this.data.results = await this.API.post(this.latest.ip, this.latest.port, "/plugins/recommended/7");
+                    this.data.results = await this.Plugins.search("recommended", 7);
                 }
             },
 
@@ -319,11 +311,11 @@
 
                 this.markNotWorking(device, plugin);
 
-                await this.displayPlugin(plugin);
+                await this.displayPlugin(plugin, version);
             },
 
             async updatePlugin(device, plugin, version) {
-                version = version|| "latest";
+                version = version || "latest";
 
                 this.markWorking(device, plugin);
 
@@ -343,7 +335,7 @@
 
                 this.markNotWorking(device, plugin);
 
-                await this.displayPlugin(plugin);
+                await this.displayPlugin(plugin, version);
             },
 
             async uninstallPlugin(device, plugin) {

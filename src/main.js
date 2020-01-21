@@ -9,6 +9,8 @@ import App from "./app.vue";
 import Router from "./router";
 
 import Store from "./lib/store";
+import Cache from "./lib/cache";
+import Plugins from "./lib/plugins";
 import Scanner from "./lib/scanner";
 import Settings from "./lib/settings";
 import Encryption from "./lib/encryption";
@@ -39,6 +41,8 @@ const settings = new Settings({
     }
 });
 
+const cache = new Cache();
+const plugins = new Plugins(cache);
 const router = Router();
 
 const scanners = {};
@@ -55,6 +59,30 @@ Vue.mixin({
     
                 set(key, value) {
                     settings.set(key, value);
+                }
+            },
+
+            Cache: {
+                get(key) {
+                    return cache.get(key);
+                },
+
+                set(key, value, age) {
+                    cache.set(key, value, age);
+                },
+
+                remove(key) {
+                    cache.remove(key);
+                }
+            },
+
+            Plugins: {
+                package(name, version) {
+                    return plugins.package(name, version);
+                },
+
+                search(search, limit) {
+                    return plugins.search(search, limit);
                 }
             },
 

@@ -232,16 +232,14 @@
             }
         },
 
-        mounted() {
+        async mounted() {
             this.devices = this.Settings.get("devices");
             this.show.loading = true;
 
             this.loadPreferences();
 
-            (async () => {
-                this.loadConfig();
-                this.loadPlugins();
-            })();
+            await this.loadConfig();
+            await this.loadPlugins();
 
             this.loadInstances();
 

@@ -43,7 +43,7 @@ export default class Plugins {
                             stats = {};
                         }
 
-                        const index = tracked.indexOf(item.scope ? `@${item.scope}/${item.name}` : item.name);
+                        const index = tracked.indexOf(item.name);
                         const tags = item["dist-tags"] || {};
 
                         if (index >= 0) {
@@ -57,7 +57,7 @@ export default class Plugins {
                         const results = {
                             name: id.length === 2 ? id[1] : item.name,
                             scope: id.length === 2 ? id[0].replace(/@/gi, "") : null,
-                            certified: index >= 0 ? true : false,
+                            certified: (database[item.name] || {}).certified || false,
                             local: false,
                             tags,
                             stats,
@@ -149,7 +149,7 @@ export default class Plugins {
                                         name: id.length === 2 ? id[1] : item.name,
                                         scope: item.scope === "unscoped" ? null : item.scope,
                                         version: item.version,
-                                        certified: tracked.indexOf(item.name) >= 0 ? true : false,
+                                        certified: (database[item.name] || {}).certified || false,
                                         date: item.date,
                                         description: (item.description || "").replace(/(?:https?|ftp):\/\/[\n\S]+/g, "").trim(),
                                         homepage: item.homepage,
@@ -180,7 +180,7 @@ export default class Plugins {
                                         name: id.length === 2 ? id[1] : item.name,
                                         scope: item.scope === "unscoped" ? null : item.scope,
                                         version: item.version,
-                                        certified: tracked.indexOf(item.name) >= 0 ? true : false,
+                                        certified: (database[item.name] || {}).certified || false,
                                         date: item.date,
                                         description: (item.description || "").replace(/(?:https?|ftp):\/\/[\n\S]+/g, "").trim(),
                                         homepage: item.homepage,

@@ -2,8 +2,8 @@
     <div v-if="connected > 0" id="plugins">
         <div class="tabs">
             <div class="spacer"></div>
-            <tab :title="$t('browse_packages')" v-on:activate="navigate('browse')" :active="section === 'browse'" />
-            <tab v-for="(device) in devices" :key="`device-${device.mac}:${device.port}`" :title="device.hostname" v-on:activate="navigate(`${device.mac}:${device.port}`)" :active="section === `${device.mac}:${device.port}`" />
+            <tab :title="$t('browse_packages')" v-on:activate="navigate('plugins', 'browse')" :active="section === 'browse'" />
+            <tab v-for="(device) in devices" :key="`device-${device.mac}:${device.port}`" :title="device.hostname" v-on:activate="navigate('plugins', `${device.mac}:${device.port}`)" :active="section === `${device.mac}:${device.port}`" />
             <div class="fill"></div>
         </div>
         <div class="layout">
@@ -26,7 +26,7 @@
                     <span v-else class="version">{{ plugin.version }} - Published {{ new Date(plugin.date.replace(/\s/, "T")).date }}</span>
                     <span v-if="plugin.certified" class="version">HOOBS Certified</span>
                     <div v-if="!show.working" class="actions">
-                        <div v-if="plugin.installed && plugin.versions">
+                        <div v-if="plugin.installed">
                             <div v-if="!versionCompare(plugin.installed, plugin.version)" class="button button-primary dropdown">
                                 <div v-on:click="updatePlugin(device, plugin, plugin.version)" class="text">Update</div>
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
@@ -36,27 +36,31 @@
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
                             </div>
                         </div>
-                        <div v-else-if="plugin.installed">
-                            <div v-if="!versionCompare(plugin.installed, plugin.version)" v-on:click="updatePlugin(device, plugin)" class="button button-primary">Update</div>
-                        </div>
-                        <div v-else-if="plugin.versions">
+                        <div v-else>
                             <div class="button button-primary dropdown">
-                                <div class="text">Install</div>
+                                <div v-on:click="showInstall(plugin, plugin.version)" class="text">Install</div>
                                 <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
                             </div>
                         </div>
-                        <div v-else>
-                            <div class="button button-primary">Install</div>
-                        </div>
                         <confirm v-if="plugin.installed" value="Uninstall" v-on:confirm="uninstallPlugin(device, plugin)" />
-                        <div v-on:click="$browse(`https://www.npmjs.com/package/${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}`)" class="link">NPM</div>
-                        <div class="seperator">|</div>
-                        <div v-if="plugin.homepage" v-on:click="$browse(plugin.homepage)" class="link">Details</div>
-                        <dropdown v-if="plugin.installed && plugin.versions && menus['version']" class="version-menu">
-                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`" v-on:click="installPlugin(device, plugin, version)" class="item">{{ version }}</div>
+                        <div class="plugin-links">
+                            <div v-on:click="$browse(`https://www.npmjs.com/package/${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}`)" class="link">NPM</div>
+                            <div class="seperator">|</div>
+                            <div v-if="plugin.homepage" v-on:click="$browse(plugin.homepage)" class="link">Details</div>
+                            <div v-if="plugin.installed" class="seperator">|</div>
+                            <router-link v-if="plugin.installed" class="config-link" :to="`/config/${plugin.name}`"><span class="icon">settings</span> Configuration</router-link>
+                        </div>
+                        <dropdown v-if="plugin.installed && menus['version']" class="version-menu">
+                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`" v-on:click="updatePlugin(device, plugin, version)" class="item">
+                                <div v-if="plugin.certified && version === plugin.version" class="certified"></div>
+                                {{ version }}
+                            </div>
                         </dropdown>
-                        <dropdown v-else-if="plugin.versions && menus['version']" class="version-menu">
-                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`" class="item">{{ version }}</div>
+                        <dropdown v-else-if="menus['version']" class="version-menu">
+                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`"  v-on:click="showInstall(plugin, version)" class="item">
+                                <div v-if="plugin.certified && version === plugin.version" class="certified"></div>
+                                {{ version }}
+                            </div>
                         </dropdown>
                     </div>
                     <div v-else class="working">
@@ -77,6 +81,12 @@
                 <featured v-else />
             </div>
         </div>
+        <modal v-if="show.install" v-on:confirm="selectDevice()" v-on:cancel="cancelInstall()" title="Install Plugin" ok-title="Install" width="350px">
+            <p>
+                Select a device to install this plugin on.
+            </p>
+            <select-field name="Device" :options="joined" v-model="data.instance" theme="light" :required="true" />
+        </modal>
     </div>
     <loader v-else id="loader" :value="`${$t('connecting')}...`" />
 </template>
@@ -91,6 +101,7 @@
 
     import Tab from "@/components/tab.vue";
     import PluginItem from "@/components/plugin-item.vue";
+    import SelectField from "@/components/select-field.vue";
     import Featured from "@/components/featured.vue";
 
     export default {
@@ -99,6 +110,7 @@
         components: {
             "tab": Tab,
             "plugin-item": PluginItem,
+            "select-field": SelectField,
             "featured": Featured
         },
 
@@ -116,11 +128,15 @@
                 query: "",
                 show: {
                     working: false,
-                    loading: false
+                    loading: false,
+                    install: false
                 },
                 data: {
                     installed: [],
-                    results: []
+                    results: [],
+                    plugin: null,
+                    version: "latest",
+                    instance: ""
                 }
             }
         },
@@ -128,6 +144,15 @@
         computed: {
             menus() {
                 return this.$store.state.menus;
+            },
+
+            joined() {
+                return this.devices.map((d) => {
+                    return {
+                        text: d.hostname,
+                        value: `${d.mac}:${d.port}`
+                    };
+                });
             },
 
             connected() {
@@ -160,7 +185,7 @@
 
                 await this.loadPlugins();
 
-                if (this.device && this.plugin && this.active.indexOf(`${this.device.mac}:${this.device.port}_@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
+                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
                     this.show.working = true;
                 }
             },
@@ -168,7 +193,7 @@
             plugin: function () {
                 this.show.working = false;
 
-                if (this.device && this.plugin && this.active.indexOf(`${this.device.mac}:${this.device.port}_@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
+                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
                     this.show.working = true;
                 }
             },
@@ -176,7 +201,7 @@
             active: function () {
                 this.show.working = false;
 
-                if (this.device && this.plugin && this.active.indexOf(`${this.device.mac}:${this.device.port}_@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
+                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
                     this.show.working = true;
                 }
             },
@@ -193,10 +218,36 @@
                 return Semver.compare(current, latest, ">=");
             },
 
-            navigate(section) {
+            navigate(controller, section) {
                 this.$router.push({
-                    path: `/plugins/${section}`
+                    path: `/${controller}/${section}`
                 });
+            },
+
+            showInstall(plugin, version) {
+                this.data.plugin = plugin;
+                this.data.version = version;
+                this.data.instance = `${this.devices[0].mac}:${this.devices[0].port}`;
+
+                this.show.install = true;
+            },
+
+            cancelInstall() {
+                this.data.plugin = null;
+                this.data.version = "latest";
+                this.data.instance = "";
+
+                this.show.install = false;
+            },
+
+            async selectDevice() {
+                this.show.install = false;
+
+                await this.installPlugin(this.devices.filter(d => `${d.mac}:${d.port}` === this.data.instance)[0], this.data.plugin, this.data.version);
+
+                this.data.plugin = null;
+                this.data.version = "latest";
+                this.data.instance = "";
             },
 
             processMarkdown(value) {
@@ -263,14 +314,14 @@
                 this.$refs.details.scrollTo(0, 0);
             },
 
-            markWorking(device, plugin) {
-                if (this.active.indexOf(`${device.mac}:${device.port}_@${plugin.scope || "unscoped"}/${plugin.name}`) === -1) {
-                    this.active.push(`${device.mac}:${device.port}_@${plugin.scope || "unscoped"}/${plugin.name}`)
+            markWorking(plugin) {
+                if (this.active.indexOf(`@${plugin.scope || "unscoped"}/${plugin.name}`) === -1) {
+                    this.active.push(`@${plugin.scope || "unscoped"}/${plugin.name}`)
                 }
             },
 
-            markNotWorking(device, plugin) {
-                const index = this.active.indexOf(`${device.mac}:${device.port}_@${plugin.scope || "unscoped"}/${plugin.name}`);
+            markNotWorking(plugin) {
+                const index = this.active.indexOf(`@${plugin.scope || "unscoped"}/${plugin.name}`);
 
                 if (index >= 0) {
                     this.active.splice(index, 1);
@@ -296,7 +347,7 @@
             },
 
             async installPlugin(device, plugin, version) {
-                this.markWorking(device, plugin);
+                this.markWorking(plugin);
 
                 const running = this.$store.state.running[`${device.ip}:${device.port}`];
 
@@ -312,15 +363,14 @@
                     await this.API.post(device.ip, device.port, "/service/start");
                 }
 
-                this.markNotWorking(device, plugin);
-
-                await this.displayPlugin(plugin, version);
+                this.markNotWorking(plugin);
+                this.navigate("config", plugin.name);
             },
 
             async updatePlugin(device, plugin, version) {
                 version = version || "latest";
 
-                this.markWorking(device, plugin);
+                this.markWorking(plugin);
 
                 const running = this.$store.state.running[`${device.ip}:${device.port}`];
 
@@ -336,13 +386,13 @@
                     await this.API.post(device.ip, device.port, "/service/start");
                 }
 
-                this.markNotWorking(device, plugin);
+                this.markNotWorking(plugin);
 
-                await this.displayPlugin(plugin, version);
+                await this.loadPlugins();
             },
 
             async uninstallPlugin(device, plugin) {
-                this.markWorking(device, plugin);
+                this.markWorking(plugin);
 
                 const running = this.$store.state.running[`${device.ip}:${device.port}`];
 
@@ -358,7 +408,7 @@
                     await this.API.post(device.ip, device.port, "/service/start");
                 }
 
-                this.markNotWorking(device, plugin);
+                this.markNotWorking(plugin);
 
                 await this.loadPlugins();
             },
@@ -563,6 +613,16 @@
         z-index: 300;
     }
 
+    #plugins .layout .details .control .actions .version-menu .certified {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 14px;
+        height: 14px;
+        clip-path: polygon(0 0, 0% 100%, 100% 0);
+        background: #feb400;
+    }
+
     #plugins .layout .details .control .actions .button {
         margin: 0 0 0 10px;
     }
@@ -576,9 +636,33 @@
         text-decoration: underline;
     }
 
+    #plugins .layout .details .control .actions .plugin-links {
+        display: flex;
+        margin: 0 0 0 10px;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-content: center;
+        align-items: center;
+    }
+
     #plugins .layout .details .control .actions .seperator {
         margin: 0 0 0 10px;
         color: #424242;
+    }
+
+    #plugins .layout .details .control .actions .config-link {
+        margin: 0 0 0 10px;
+        display: inline-flex;
+        color: #999;
+    }
+
+    #plugins .layout .details .control .actions .config-link:hover {
+        text-decoration: none;
+    }
+
+    #plugins .layout .details .control .actions .config-link .icon {
+        font-size: 17px;
+        margin: 0 2px 0 0;
     }
 
     #plugins .layout .details .control .working {

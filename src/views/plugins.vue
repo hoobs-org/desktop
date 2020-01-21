@@ -74,6 +74,7 @@
                     </div>
                 </div>
                 <loader v-else-if="show.loading" class="loader" :value="`${$t('loading')}...`" />
+                <featured v-else />
             </div>
         </div>
     </div>
@@ -89,14 +90,16 @@
     import Inflection from "inflection";
 
     import Tab from "@/components/tab.vue";
-    import PluginItem from "@/components/plugin-item.vue"
+    import PluginItem from "@/components/plugin-item.vue";
+    import Featured from "@/components/featured.vue";
 
     export default {
         name: "plugins",
 
         components: {
             "tab": Tab,
-            "plugin-item": PluginItem
+            "plugin-item": PluginItem,
+            "featured": Featured
         },
 
         props: {

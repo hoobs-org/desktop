@@ -547,8 +547,8 @@
                         bridge: config.bridge,
                         description: config.description,
                         ports: config.ports,
-                        accessories: config.accessories || [],
-                        platforms: config.platforms || []
+                        accessories: (config.accessories || []).filter(i => i),
+                        platforms: (config.platforms || []).filter(i => i)
                     }
 
                     const messages = [];

@@ -1,1430 +1,396 @@
 <template>
-    <div v-if="connected > 0" id="plugins">
-        <div class="tabs">
-            <div class="spacer"></div>
-            <tab :title="$t('browse_packages')" v-on:activate="navigate('plugins', 'browse')" :active="section === 'browse'" />
-            <tab v-for="(device) in devices" :key="`device-${device.mac}:${device.port}`" :title="device.hostname" v-on:activate="navigate('plugins', `${device.mac}:${device.port}`)" :active="section === `${device.mac}:${device.port}`" />
-            <div class="fill"></div>
-        </div>
-        <div class="layout">
-            <div class="list">
-                <div v-if="section === 'browse'">
+    <div :key="version" v-if="user.permissions.plugins" id="plugins">
+        <context />
+        <div class="content">
+            <list value="id" display="display" :values="bridges" :selected="id" initial="library" controller="plugins" />
+            <div v-if="id && id !== 'library'" class="screen">
+                <div class="section first">{{ $t("installed_plugins") }}</div>
+                <div class="wrapper">
+                    <div v-if="installed.length > 0" class="cards">
+                        <plugin v-for="(plugin, index) in installed" :key="`installed:${index}`" :subject="plugin" />
+                    </div>
+                    <div v-else-if="!loading" class="empty">
+                        <div class="message">
+                            {{ $t("no_plugins_installed") }}
+                            <router-link to="/plugins">{{ $t("plugin_search") }}</router-link>
+                        </div>
+                    </div>
+                    <div v-else class="loading">
+                        <spinner />
+                    </div>
+                </div>
+            </div>
+            <div v-else class="screen">
+                <form class="input" autocomplete="false" method="post" action="/login" v-on:submit.prevent="search()">
+                    <input type="submit" class="hidden-submit" value="submit" />
                     <div class="search">
-                        <div class="icon">search</div>
-                        <input v-on:input="debounceSearch" type="text" :placeholder="$t('search')" onfocus="this.placeholder = ''" :onblur="`this.placeholder = '${$t('search')}'`" />
+                        <search-field id="query" ref="query" style="padding-right: 0;" :placeholder="$t('search')" v-model="query" v-on:search="search" />
                     </div>
-                </div>
-                <div class="results">
-                    <plugin-item v-for="(plugin) in data.installed" :key="`installed_${plugin.scope || ''}_${plugin.name}`" v-on:select="displayPlugin(plugin, plugin.installed)" :value="plugin" class="item" />
-                    <plugin-item v-for="(plugin) in data.results" :key="`search_${plugin.scope || ''}_${plugin.name}`" v-on:select="displayPlugin(plugin)" :value="plugin" class="item" />
-                </div>
-            </div>
-            <div ref="details" class="details">
-                <div v-if="plugin" class="control">
-                    <span class="title">{{ pluginTitle(plugin) }}</span>
-                    <span v-if="plugin.installed" class="version">{{ versionCompare(plugin.installed, plugin.version) ? `${plugin.installed} - ${$t("published")} ${new Date(plugin.date.replace(/\s/, "T")).date}` : `${plugin.installed} - ${plugin.version} Update Available` }}</span>
-                    <span v-else class="version">{{ plugin.version }} - {{ $t("published") }} {{ new Date(plugin.date.replace(/\s/, "T")).date }}</span>
-                    <span v-if="plugin.certified" class="version">HOOBS {{ $t("certified") }}</span>
-                    <div v-if="!show.working" class="actions">
-                        <div v-if="plugin.installed">
-                            <div v-if="!versionCompare(plugin.installed, plugin.version)" class="button button-primary dropdown">
-                                <div v-on:click="updatePlugin(device, plugin, plugin.version)" class="text">{{ $t("update") }}</div>
-                                <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
-                            </div>
-                            <div v-else class="button dropdown">
-                                <div class="text">{{ plugin.installed }}</div>
-                                <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
-                            </div>
+                </form>
+                <div class="wrapper">
+                    <div v-if="featured.length > 0" class="section">{{ $t("featured_plugins") }}</div>
+                    <div v-if="featured.length > 0" class="cards">
+                        <plugin v-for="(plugin, index) in featured" :key="`featured:${index}`" :subject="plugin" />
+                    </div>
+                    <div v-if="popular.length > 0" class="section">{{ $t("popular_plugins") }}</div>
+                    <div v-if="popular.length > 0" class="cards">
+                        <plugin v-for="(plugin, index) in popular" :key="`popular:${index}`" :subject="plugin" />
+                    </div>
+                    <div v-if="results.length > 0" class="section">{{ $t("search_results") }}</div>
+                    <div v-if="results.length > 0" class="cards">
+                        <plugin v-for="(plugin, index) in results" :key="`search:${index}`" :subject="plugin" />
+                    </div>
+                    <div v-if="total > 1 && pagination.length > 1" class="pagination">
+                        <div v-if="pagination[0] > 0" v-on:click="paginate(0, 27)" class="page">1</div>
+                        <div v-if="pagination[0] > 0" class="more">...</div>
+                        <div v-for="(page, index) in pagination" :key="`page:${index}`" v-on:click="paginate(page * 27, 27)" :class="`${page === current ? 'page off' : 'page'}`">{{ page + 1 }}</div>
+                        <div v-if="pagination[pagination.length - 1] < total - 1" class="more">...</div>
+                        <div v-if="pagination[pagination.length - 1] < total - 1" v-on:click="paginate((total - 1) * 27, 27)" class="page">{{ total }}</div>
+                    </div>
+                    <div v-if="!loading && featured.length === 0 && popular.length === 0 && results.length === 0" class="empty">
+                        <div class="message">
+                            {{ $t("no_results") }}
                         </div>
-                        <div v-else>
-                            <div class="button button-primary dropdown">
-                                <div v-on:click="showInstall(plugin, plugin.version)" class="text">{{ $t("install") }}</div>
-                                <div v-on:click.stop="$store.commit('toggleMenu', 'version')" class="icon">arrow_drop_down</div>
-                            </div>
-                        </div>
-                        <confirm v-if="plugin.installed" value="Uninstall" v-on:confirm="uninstallPlugin(device, plugin)" />
-                        <div class="plugin-links">
-                            <div v-on:click="$browse(`https://www.npmjs.com/package/${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}`)" class="link">NPM</div>
-                            <div class="seperator">|</div>
-                            <div v-if="plugin.homepage" v-on:click="$browse(plugin.homepage)" class="link">{{ $t("details") }}</div>
-                            <div v-if="plugin.installed" class="seperator">|</div>
-                            <router-link v-if="plugin.installed" class="config-link" :to="`/config/${plugin.name}`"><span class="icon">settings</span> {{ $t("config") }}</router-link>
-                        </div>
-                        <dropdown v-if="plugin.installed && menus['version']" class="version-menu">
-                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`" v-on:click="updatePlugin(device, plugin, version)" class="item">
-                                <div v-if="plugin.certified && version === plugin.version" class="certified"></div>
-                                {{ version }}
-                            </div>
-                        </dropdown>
-                        <dropdown v-else-if="menus['version']" class="version-menu">
-                            <div v-for="(version) in pluginVersions(plugin)" :key="`plugin_version_${plugin.scope || ''}_${plugin.name}_${version}`"  v-on:click="showInstall(plugin, version)" class="item">
-                                <div v-if="plugin.certified && version === plugin.version" class="certified"></div>
-                                {{ version }}
-                            </div>
-                        </dropdown>
                     </div>
-                    <div v-else class="working">
-                        <marquee :height="3" color="#feb400" background="#856a3b" />
+                    <div v-if="loading" class="loading">
+                        <spinner />
                     </div>
                 </div>
-                <div v-if="plugin">
-                    <div class="detail-version">{{ plugin.version }} - {{ $t("published") }} {{ new Date(plugin.date.replace(/\s/, "T")).age }}</div>
-                    <div id="markdown" v-html="processMarkdown(plugin.description_details || plugin.description)"></div>
-                    <div v-if="plugin.node" class="node-version">Node {{ plugin.node }} {{ $t("required") }}</div>
-                    <div v-if="plugin.stats" class="description">
-                        {{ $t("weekly_downloads") }}: {{ plugin.stats.week.downloads }}
-                        <br>
-                        {{ $t("monthly_downloads") }}: {{ plugin.stats.month.downloads }}
-                    </div>
-                </div>
-                <loader v-else-if="show.loading" class="loader" :value="`${$t('loading')}...`" />
-                <featured v-else />
             </div>
         </div>
-        <modal v-if="show.install" v-on:confirm="selectDevice()" v-on:cancel="cancelInstall()" :title="$t('install_plugin')" :ok-title="$t('install')" width="350px">
-            <p>
-                {{ $t("plugin_select_device") }}
-            </p>
-            <select-field :name="$t('device')" :options="data.joined" v-model="data.instance" theme="light" :required="true" />
-        </modal>
     </div>
-    <loader v-else id="loader" :value="`${$t('connecting')}...`" />
 </template>
 
 <script>
-    import _ from "lodash";
-
-    import Semver from "compare-versions";
-    import Showdown from "showdown";
-    import Decamelize from "decamelize";
-    import Inflection from "inflection";
-
-    import Tab from "@/components/tab.vue";
-    import PluginItem from "@/components/plugin-item.vue";
-    import SelectField from "@/components/select-field.vue";
-    import Featured from "@/components/featured.vue";
+    import ListComponent from "@/components/elements/list.vue";
+    import PluginComponent from "@/components/elements/plugin.vue";
 
     export default {
         name: "plugins",
 
-        components: {
-            "tab": Tab,
-            "plugin-item": PluginItem,
-            "select-field": SelectField,
-            "featured": Featured
+        props: {
+            id: String,
         },
 
-        props: {
-            section: String
+        components: {
+            "list": ListComponent,
+            "plugin": PluginComponent,
+        },
+
+        computed: {
+            user() {
+                return this.$store.state.user;
+            },
         },
 
         data() {
             return {
-                active: [],
-                devices: [],
-                device: null,
-                latest: null,
-                plugin: null,
+                version: 0,
+                loading: true,
                 query: "",
-                show: {
-                    working: false,
-                    loading: false,
-                    install: false
-                },
-                data: {
-                    joined: [],
-                    installed: [],
-                    results: [],
-                    plugin: null,
-                    version: "latest",
-                    instance: ""
-                }
-            }
-        },
-
-        computed: {
-            menus() {
-                return this.$store.state.menus;
-            },
-
-            connected() {
-                return this.$store.state.connected;
-            }
-        },
-
-        async mounted() {
-            this.devices = this.Settings.get("devices");
-
-            this.data.joined = this.devices.map((d) => {
-                return {
-                    text: d.hostname,
-                    value: `${d.mac}:${d.port}`
-                };
-            });
-
-            for (let i = 0; i < this.devices.length; i++) {
-                await this.API.login(this.devices[i].ip, this.devices[i].port);
-
-                this.devices[i].version = (await this.API.get(this.devices[i].ip, this.devices[i].port, "/status")).hoobs_version;
-            }
-
-            const devices = JSON.clone(this.devices);
-
-            devices.sort((a, b) => this.versionCompare(b.version, a.version) ? 1 : -1);
-
-            this.latest = devices[0];
-
-            await this.loadPlugins();
+                pagination: [],
+                installed: [],
+                bridges: [],
+                featured: [],
+                popular: [],
+                results: [],
+                current: 0,
+                total: 0,
+                count: 0,
+            };
         },
 
         watch: {
-            section: async function () {
-                this.query = "";
-                this.show.working = false;
-
-                await this.loadPlugins();
-
-                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
-                    this.show.working = true;
-                }
+            id(value) {
+                this.load(value);
             },
 
-            plugin: function () {
-                this.show.working = false;
-
-                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
-                    this.show.working = true;
-                }
+            "$route": function route() {
+                this.load(this.id);
             },
+        },
 
-            active: function () {
-                this.show.working = false;
+        async mounted() {
+            this.bridges = (await this.$hoobs.bridges.list()).filter((item) => item.type === "bridge");
 
-                if (this.plugin && this.active.indexOf(`@${this.plugin.scope || "unscoped"}/${this.plugin.name}`) >= 0) {
-                    this.show.working = true;
-                }
-            },
+            this.bridges.sort((a, b) => {
+                if (a.display < b.display) return -1;
+                if (a.display > b.display) return 1;
 
-            query: function () {
-                if (!this.device) {
-                    this.searchPlugins();
-                }
-            }
+                return 0;
+            });
+
+            this.bridges.unshift({
+                id: "library",
+                display: this.$t("library"),
+            });
+
+            this.load(this.id);
         },
 
         methods: {
-            versionCompare(current, latest) {
-                return Semver.compare(current, latest, ">=");
+            async load(id) {
+                this.loading = true;
+
+                this.pagination = [];
+                this.installed = [];
+                this.featured = [];
+                this.popular = [];
+                this.results = [];
+
+                this.current = 0;
+                this.total = 0;
+
+                if (this.$route.path === "/plugins/library") {
+                    const query = Object.keys(this.$route.query).map((item) => `${item}=${this.$route.query[item]}`).join("&");
+
+                    if (query && query !== "") {
+                        window.history.pushState({}, null, `/plugins?${query}`);
+                    } else {
+                        window.history.pushState({}, null, "/plugins");
+                    }
+                }
+
+                if (!this.$route.query.search || this.$route.query.search === "") {
+                    this.query = "";
+                    this.featured = await this.$hoobs.repository.featured();
+                    this.popular = await this.$hoobs.repository.popular();
+
+                    if (id && id !== "") {
+                        const bridge = await this.$hoobs.bridge(id);
+
+                        if (bridge) {
+                            this.installed = await bridge.plugins.list();
+                        }
+                    }
+                } else {
+                    const skip = parseInt(this.$route.query.skip, 10) || 0;
+                    const limit = parseInt(this.$route.query.limit, 10) || 27;
+
+                    this.query = decodeURIComponent(this.$route.query.search);
+
+                    const response = await this.$hoobs.repository.search(this.query, skip, limit);
+
+                    this.results = response.results;
+                    this.count = response.count;
+
+                    this.current = limit > 0 ? skip / limit : 0;
+                    this.total = Math.min(Math.ceil(limit > 0 ? this.count / limit : 0), 27);
+                    this.pagination = [];
+
+                    let start = this.current - 2;
+                    let end = start + 4;
+
+                    if (start < 0) {
+                        start = 0;
+                        end = start + 4;
+                    }
+
+                    if (end > this.total) {
+                        end = this.total;
+                        start = end - 4;
+                    }
+
+                    if (start < 0) {
+                        start = 0;
+                    }
+
+                    for (let i = start; i < end; i += 1) {
+                        this.pagination.push(i);
+                    }
+                }
+
+                this.loading = false;
             },
 
-            navigate(controller, section) {
+            async search() {
+                if (!this.query || this.query === "") {
+                    this.$router.push({ path: "/plugins/library" });
+                } else {
+                    this.$router.push({
+                        path: "/plugins/library",
+                        query: {
+                            search: encodeURIComponent(this.query),
+                            skip: 0,
+                            limit: 27,
+                        },
+                    });
+                }
+            },
+
+            paginate(skip, limit) {
                 this.$router.push({
-                    path: `/${controller}/${section}`
+                    path: "/plugins/library",
+                    query: {
+                        search: encodeURIComponent(this.query),
+                        skip,
+                        limit,
+                    },
                 });
             },
-
-            showInstall(plugin, version) {
-                this.data.plugin = plugin;
-                this.data.version = version;
-                this.data.instance = `${this.devices[0].mac}:${this.devices[0].port}`;
-
-                this.show.install = true;
-            },
-
-            cancelInstall() {
-                this.data.plugin = null;
-                this.data.version = "latest";
-                this.data.instance = "";
-
-                this.show.install = false;
-            },
-
-            async selectDevice() {
-                this.show.install = false;
-
-                await this.installPlugin(this.devices.filter(d => `${d.mac}:${d.port}` === this.data.instance)[0], this.data.plugin, this.data.version);
-
-                this.data.plugin = null;
-                this.data.version = "latest";
-                this.data.instance = "";
-            },
-
-            processMarkdown(value) {
-                value = value.replace(/homebridge/gi, "HOOBS");
-
-                return new Showdown.Converter({
-                    tables: true
-                }).makeHtml(value);
-            },
-
-            async loadPlugins() {
-                this.device = null;
-                this.plugin = null;
-                this.active = [];
-
-                this.query = "";
-
-                this.data.installed = [];
-                this.data.results = [];
-
-                switch (this.section) {
-                    case "browse":
-                        await this.searchPlugins();
-                        break;
-
-                    default:
-                        this.device = this.devices.filter(d => (`${d.mac}:${d.port}`) === this.section)[0];
-
-                        if (this.device) {
-                            this.show.loading = true;
-
-                            await this.API.login(this.device.ip, this.device.port);
-
-                            const plugins = await this.API.get(this.device.ip, this.device.port, "/plugins");
-
-                            if (plugins) {
-                                for(let j = 0; j < plugins.length; j++) {
-                                    const plugin = plugins[j];
-
-                                    this.data.installed.push(_.assign(plugin, {
-                                        instance: `${this.device.mac}:${this.device.port}`
-                                    }));
-                                }
-                            }
-
-                            this.show.loading = false;
-                        }
-
-                        this.data.installed.sort((a, b) => (a.name.replace("homebridge-", "") > b.name.replace("homebridge-", "")) ? 1 : -1);
-                        break
-                }
-            },
-
-            async displayPlugin(plugin, version) {
-                const id = plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name;
-
-                this.plugin = null;
-                this.show.loading = true;
-
-                this.plugin = await this.Plugins.package(id, version);
-
-                this.show.loading = false;
-
-                this.$refs.details.scrollTo(0, 0);
-            },
-
-            markWorking(plugin) {
-                if (this.active.indexOf(`@${plugin.scope || "unscoped"}/${plugin.name}`) === -1) {
-                    this.active.push(`@${plugin.scope || "unscoped"}/${plugin.name}`)
-                }
-            },
-
-            markNotWorking(plugin) {
-                const index = this.active.indexOf(`@${plugin.scope || "unscoped"}/${plugin.name}`);
-
-                if (index >= 0) {
-                    this.active.splice(index, 1);
-                }
-            },
-
-            pluginVersions(plugin) {
-                return _.keys(plugin.versions).reverse();
-            },
-
-            debounceSearch: _.debounce(function (event) {
-                this.query = event.target.value;
-            }, 250),
-
-            async searchPlugins() {
-                await this.API.login(this.latest.ip, this.latest.port);
-
-                if (this.query.length >= 1) {
-                    this.data.results = await this.Plugins.search(this.query, 50);
-                } else {
-                    this.data.results = await this.Plugins.search("recommended", 7);
-                }
-            },
-
-            async installPlugin(device, plugin, version) {
-                this.markWorking(plugin);
-
-                const running = this.$store.state.running[`${device.ip}:${device.port}`];
-
-                await this.API.login(device.ip, device.port);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/stop");
-                }
-
-                await this.API.put(device.ip, device.port, `/plugins/${encodeURIComponent(`${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}@${version || "latest"}`)}`);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/start");
-                }
-
-                this.markNotWorking(plugin);
-                this.navigate("config", plugin.name);
-            },
-
-            async updatePlugin(device, plugin, version) {
-                version = version || "latest";
-
-                this.markWorking(plugin);
-
-                const running = this.$store.state.running[`${device.ip}:${device.port}`];
-
-                await this.API.login(device.ip, device.port);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/stop");
-                }
-
-                await this.API.post(device.ip, device.port, `/plugins/${encodeURIComponent(`${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}@${version}`)}`);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/start");
-                }
-
-                this.markNotWorking(plugin);
-
-                await this.loadPlugins();
-                await this.displayPlugin(plugin, version);
-            },
-
-            async uninstallPlugin(device, plugin) {
-                this.markWorking(plugin);
-
-                const running = this.$store.state.running[`${device.ip}:${device.port}`];
-
-                await this.API.login(device.ip, device.port);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/stop");
-                }
-
-                await this.API.delete(device.ip, device.port, `/plugins/${encodeURIComponent(`${plugin.scope ? `@${plugin.scope}/${plugin.name}` : plugin.name}`)}`);
-
-                if (running) {
-                    await this.API.post(device.ip, device.port, "/service/start");
-                }
-
-                this.markNotWorking(plugin);
-
-                await this.loadPlugins();
-            },
-
-            pluginTitle(plugin) {
-                if (plugin.name === "google-home" || plugin.name === "homebridge-gsh") {
-                    return "Google Home";
-                }
-
-                let value = (((plugin.schema || {}).platform || {}).plugin_alias || ((plugin.schema || {}).accessories || {}).plugin_alias || plugin.name || "Unknown Plugin").split(".")[0];
-
-                value = Inflection.titleize(Decamelize(value.replace(/-/gi, " ").replace(/homebridge/gi, "").trim()));
-
-                value = value.replace(/smart things/gi, "SmartThings");
-                value = value.replace(/smartthings/gi, "SmartThings");
-                value = value.replace(/my q/gi, "myQ");
-                value = value.replace(/myq/gi, "myQ");
-                value = value.replace(/wink2/gi, "Wink");
-                value = value.replace(/winkv2/gi, "Wink");
-                value = value.replace(/wink3/gi, "Wink");
-                value = value.replace(/winkv3/gi, "Wink");
-                value = value.replace(/rgb/gi, "RGB");
-                value = value.replace(/ffmpeg/gi, "FFMPEG");
-                value = value.replace(/webos/gi, "LG webOS");
-                value = value.replace(/webostv/gi, "webOS");
-
-                return value;
-            }
-        }
+        },
     };
 </script>
 
-<style scoped>
+<style lang="scss">
     #plugins {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        margin: 0 20px 20px 0;
-        padding: 0 0 0 7px;
-        overflow: hidden;
-    }
-
-    #plugins .tabs {
-        height: 24px;
-        display: flex;
-        flex-direction: row;
-        padding: 0 0 7px 0;
-        overflow-x: auto;
-        overflow-y: hidden;
-    }
-
-    #plugins .tabs::-webkit-scrollbar {
-        display: none;
-    }
-
-    #plugins .tabs .fill {
-        flex: 1;
-        height: 30px;
-        min-width: 20px;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #plugins .tabs .spacer {
-        height: 30px;
-        width: 10px;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #plugins .layout {
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-        overflow: hidden;
-    }
-
-    #plugins .layout .list {
-        width: 30%;
-        height: 100%;
-        min-width: 300px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    #plugins .layout .list .search {
-        display: flex;
-        flex-direction: row;
-        align-content: center;
-        align-items: center;
-        padding: 0 7px;
-        border-width: 0 0 1px 0;
-        border-style: solid;
-        border-color: #424242;
-    }
-
-    #plugins .layout .list .search:focus-within {
-        border-color: #feb400;
-    }
-
-    #plugins .layout .list .search .icon {
-        font-size: 18px;
-    }
-
-    #plugins .layout .list .search input {
-        flex: 1;
-        box-sizing: border-box;
-        padding: 0;
-        margin: 14px 0 14px 7px;
-        font-size: 14px;
-        background: transparent;
-        color: #fff;
-        border: 0 none;
-    }
-
-    #plugins .layout .list .search input:focus {
-        outline: 0 none;
-    }
-
-    #plugins .layout .list .results {
-        flex: 1;
-        overflow: auto;
-        text-align: left;
-    }
-
-    #plugins .layout .details {
-        flex: 1;
-        height: 100%;
-        padding: 20px 3px 0 20px;
-        text-align: left;
-        overflow: auto;
-    }
-
-    #plugins .layout .details .loader {
-        margin: 5em auto;
-        padding: 0 4em 0 0;
-        width: 300px;
-    }
-
-    #plugins .layout .details .stats {
-        margin: 20px 0 0 0;
-        font-size: 17px;
-    }
-
-    #plugins .layout .details .node-version {
-        margin: 20px 0 10px 0;
-        padding: 10px 0;
-        font-size: 17px;
-        border-top: 1px #424242 solid;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #plugins .layout .details .detail-version {
-        margin: 20px 0 10px 0;
-        padding: 0 0 10px 0;
-        border-bottom: 1px #424242 solid;
-        font-size: 14px;
-    }
-
-    #plugins .layout .details::-webkit-scrollbar {
-        display: none;
-    }
-
-    #plugins .layout .details .control {
-        padding: 20px;
-        margin: 0 0 20px 0;
-        background: #262626;
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.24),
-                    0 2px 1px -1px rgba(0, 0, 0, 0.22),
-                    0 1px 3px 2px rgba(0, 0, 0, 0.3);
-        border-radius: 3px;
-        display: flex;
-        flex-direction: column;
-        color: #999 !important;
-        text-decoration: none;
-    }
-
-    #plugins .layout .details .control .title {
-        font-size: 20px;
-        color: #feb400;
-    }
-
-    #plugins .layout .details .control .version {
-        font-size: 13px;
-    }
-
-    #plugins .layout .details .control .actions {
-        display: flex;
         position: relative;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-content: center;
-        align-items: center;
-        margin: 0 0 0 -10px;
-        padding: 10px 0 0 0;
-    }
-
-    #plugins .layout .details .control .actions .version-menu {
-        position: absolute;
-        top: 50px;
-        left: 10px;
-        min-width: 100px;
-        z-index: 300;
-    }
-
-    #plugins .layout .details .control .actions .version-menu .certified {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 14px;
-        height: 14px;
-        clip-path: polygon(0 0, 0% 100%, 100% 0);
-        background: #feb400;
-    }
-
-    #plugins .layout .details .control .actions .button {
-        margin: 0 0 0 10px;
-    }
-
-    #plugins .layout .details .control .actions .link {
-        margin: 0 0 0 10px;
-        cursor: pointer;
-    }
-
-    #plugins .layout .details .control .actions .link:hover {
-        text-decoration: underline;
-    }
-
-    #plugins .layout .details .control .actions .plugin-links {
         display: flex;
-        margin: 0 0 0 10px;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-content: center;
-        align-items: center;
-    }
-
-    #plugins .layout .details .control .actions .seperator {
-        margin: 0 0 0 10px;
-        color: #424242;
-    }
-
-    #plugins .layout .details .control .actions .config-link {
-        margin: 0 0 0 10px;
-        display: inline-flex;
-        color: #999;
-    }
-
-    #plugins .layout .details .control .actions .config-link:hover {
-        text-decoration: none;
-    }
-
-    #plugins .layout .details .control .actions .config-link .icon {
-        font-size: 17px;
-        margin: 0 2px 0 0;
-    }
-
-    #plugins .layout .details .control .working {
-        margin: 10px 0 0 0;
-    }
-
-    #loader {
-        margin: 7em auto;
-        width: 350px;
-    }
-</style>
-
-<style>
-    #markdown {
-        margin: 10px 0 0 0;
-        font-size: 17px;
-    }
-
-    #markdown .pl-c {
-        color: #6a737d;
-    }
-
-    #markdown .pl-c1,
-    #markdown .pl-s .pl-v {
-        color: #005cc5;
-    }
-
-    #markdown .pl-e,
-    #markdown .pl-en {
-        color: #6f42c1;
-    }
-
-    #markdown .pl-smi,
-    #markdown .pl-s .pl-s1 {
-        color: #24292e;
-    }
-
-    #markdown .pl-ent {
-        color: #22863a;
-    }
-
-    #markdown .pl-k {
-        color: #d73a49;
-    }
-
-    #markdown .pl-s,
-    #markdown .pl-pds,
-    #markdown .pl-s .pl-pse .pl-s1,
-    #markdown .pl-sr,
-    #markdown .pl-sr .pl-cce,
-    #markdown .pl-sr .pl-sre,
-    #markdown .pl-sr .pl-sra {
-        color: #032f62;
-    }
-
-    #markdown .pl-v,
-    #markdown .pl-smw {
-        color: #e36209;
-    }
-
-    #markdown .pl-bu {
-        color: #b31d28;
-    }
-
-    #markdown .pl-ii {
-        color: #fafbfc;
-        background-color: #b31d28;
-    }
-
-    #markdown .pl-c2 {
-        color: #fafbfc;
-        background-color: #d73a49;
-    }
-
-    #markdown .pl-c2::before {
-        content: "^M";
-    }
-
-    #markdown .pl-sr .pl-cce {
-        font-weight: bold;
-        color: #22863a;
-    }
-
-    #markdown .pl-ml {
-        color: #735c0f;
-    }
-
-    #markdown .pl-mh,
-    #markdown .pl-mh .pl-en,
-    #markdown .pl-ms {
-        font-weight: bold;
-        color: #005cc5;
-    }
-
-    #markdown .pl-mi {
-        font-style: italic;
-        color: #24292e;
-    }
-
-    #markdown .pl-mb {
-        font-weight: bold;
-        color: #24292e;
-    }
-
-    #markdown .pl-md {
-        color: #b31d28;
-        background-color: #ffeef0;
-    }
-
-    #markdown .pl-mi1 {
-        color: #22863a;
-        background-color: #f0fff4;
-    }
-
-    #markdown .pl-mc {
-        color: #e36209;
-        background-color: #ffebda;
-    }
-
-    #markdown .pl-mi2 {
-        color: #f6f8fa;
-        background-color: #005cc5;
-    }
-
-    #markdown .pl-mdr {
-        font-weight: bold;
-        color: #6f42c1;
-    }
-
-    #markdown .pl-ba {
-        color: #586069;
-    }
-
-    #markdown .pl-sg {
-        color: #959da5;
-    }
-
-    #markdown .pl-corl {
-        text-decoration: underline;
-        color: #032f62;
-    }
-
-    #markdown .octicon {
-        display: inline-block;
-        vertical-align: text-top;
-        fill: currentColor;
-    }
-
-    #markdown a {
-        background-color: transparent;
-    }
-
-    #markdown a:active,
-    #markdown a:hover {
-        outline-width: 0;
-    }
-
-    #markdown strong {
-        font-weight: inherit;
-    }
-
-    #markdown strong {
-        font-weight: bolder;
-    }
-
-    #markdown h1 {
-        margin: 0.67em 0;
-    }
-
-    #markdown img {
-        border-style: none;
-    }
-
-    #markdown code,
-    #markdown kbd,
-    #markdown pre {
-        font-family: monospace, monospace;
-        font-size: 1em;
-    }
-
-    #markdown hr {
-        box-sizing: content-box;
-        height: 0;
-        overflow: visible;
-    }
-
-    #markdown input {
-        font: inherit;
-        margin: 0;
-    }
-
-    #markdown input {
-        overflow: visible;
-    }
-
-    #markdown [type="checkbox"] {
-        box-sizing: border-box;
-        padding: 0;
-    }
-
-    #markdown * {
-        box-sizing: border-box;
-    }
-
-    #markdown input {
-        font-family: inherit;
-        font-size: inherit;
-        line-height: inherit;
-    }
-
-    #markdown a {
-        color: #0366d6;
-        text-decoration: none;
-    }
-
-    #markdown a:hover {
-        text-decoration: underline;
-    }
-
-    #markdown strong {
-        font-weight: 600;
-    }
-
-    #markdown hr {
-        height: 0;
-        margin: 15px 0;
+        flex-direction: column;
         overflow: hidden;
-        background: transparent;
-        border: 0;
-        border-bottom: 1px #424242 solid;
-    }
 
-    #markdown hr::before {
-        display: table;
-        content: "";
-    }
-
-    #markdown hr::after {
-        display: table;
-        clear: both;
-        content: "";
-    }
-
-    #markdown table {
-        border-spacing: 0;
-        border-collapse: collapse;
-    }
-
-    #markdown table th {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px #000 solid;
-        color: #feb400;
-    }
-
-    #markdown table td {
-        padding: 10px;
-        background-color: #262626;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #markdown h1,
-    #markdown h2,
-    #markdown h3,
-    #markdown h4,
-    #markdown h5,
-    #markdown h6 {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-
-    #markdown h1 {
-        font-size: 24px;
-        color: #feb400;
-        font-weight: 600;
-    }
-
-    #markdown h2 {
-        font-size: 20px;
-        font-weight: 600;
-    }
-
-    #markdown h3 {
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    #markdown h4,
-    #markdown h5,
-    #markdown h6 {
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    #markdown p {
-        margin-top: 0;
-        margin-bottom: 10px;
-    }
-
-    #markdown blockquote {
-        margin: 0;
-    }
-
-    #markdown ul,
-    #markdown ol {
-        padding-left: 0;
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-
-    #markdown ol ol,
-    #markdown ul ol {
-        list-style-type: lower-roman;
-    }
-
-    #markdown ul ul ol,
-    #markdown ul ol ol,
-    #markdown ol ul ol,
-    #markdown ol ol ol {
-        list-style-type: lower-alpha;
-    }
-
-    #markdown dd {
-        margin-left: 0;
-    }
-
-    #markdown code {
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
-            monospace;
-        font-size: 12px;
-    }
-
-    #markdown pre {
-        margin-top: 0;
-        margin-bottom: 0;
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
-            monospace;
-        font-size: 12px;
-    }
-
-    #markdown .octicon {
-        vertical-align: text-bottom;
-    }
-
-    #markdown .pl-0 {
-        padding-left: 0 !important;
-    }
-
-    #markdown .pl-1 {
-        padding-left: 4px !important;
-    }
-
-    #markdown .pl-2 {
-        padding-left: 8px !important;
-    }
-
-    #markdown .pl-3 {
-        padding-left: 16px !important;
-    }
-
-    #markdown .pl-4 {
-        padding-left: 24px !important;
-    }
-
-    #markdown .pl-5 {
-        padding-left: 32px !important;
-    }
-
-    #markdown .pl-6 {
-        padding-left: 40px !important;
-    }
-
-    #markdown::before {
-        display: table;
-        content: "";
-    }
-
-    #markdown::after {
-        display: table;
-        clear: both;
-        content: "";
-    }
-
-    #markdown > *:first-child {
-        margin-top: 0 !important;
-    }
-
-    #markdown > *:last-child {
-        margin-bottom: 0 !important;
-    }
-
-    #markdown a:not([href]) {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    #markdown .anchor {
-        float: left;
-        padding-right: 4px;
-        margin-left: -20px;
-        line-height: 1;
-    }
-
-    #markdown .anchor:focus {
-        outline: none;
-    }
-
-    #markdown p,
-    #markdown blockquote,
-    #markdown ul,
-    #markdown ol,
-    #markdown dl,
-    #markdown table,
-    #markdown pre {
-        margin-top: 0;
-        margin-bottom: 16px;
-    }
-
-    #markdown hr {
-        height: 1px;
-        padding: 0;
-        margin: 24px 0;
-        background-color: #424242;
-        border: 0;
-    }
-
-    #markdown blockquote {
-        padding: 0 1em;
-        color: #424242;
-        border-left: 0.25em #424242 solid;
-    }
-
-    #markdown blockquote > :first-child {
-        margin-top: 0;
-    }
-
-    #markdown blockquote > :last-child {
-        margin-bottom: 0;
-    }
-
-    #markdown kbd {
-        display: inline-block;
-        padding: 3px 5px;
-        font-size: 11px;
-        line-height: 10px;
-        color: #444d56;
-        vertical-align: middle;
-        background-color: #fafbfc;
-        border: solid 1px #c6cbd1;
-        border-bottom-color: #959da5;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 #959da5;
-    }
-
-    #markdown h1,
-    #markdown h2,
-    #markdown h3,
-    #markdown h4,
-    #markdown h5,
-    #markdown h6 {
-        margin-top: 24px;
-        margin-bottom: 16px;
-        font-weight: 600;
-        line-height: 1.25;
-    }
-
-    #markdown h1 .octicon-link,
-    #markdown h2 .octicon-link,
-    #markdown h3 .octicon-link,
-    #markdown h4 .octicon-link,
-    #markdown h5 .octicon-link,
-    #markdown h6 .octicon-link {
-        color: #1b1f23;
-        vertical-align: middle;
-        visibility: hidden;
-    }
-
-    #markdown h1:hover .anchor,
-    #markdown h2:hover .anchor,
-    #markdown h3:hover .anchor,
-    #markdown h4:hover .anchor,
-    #markdown h5:hover .anchor,
-    #markdown h6:hover .anchor {
-        text-decoration: none;
-    }
-
-    #markdown h1:hover .anchor .octicon-link,
-    #markdown h2:hover .anchor .octicon-link,
-    #markdown h3:hover .anchor .octicon-link,
-    #markdown h4:hover .anchor .octicon-link,
-    #markdown h5:hover .anchor .octicon-link,
-    #markdown h6:hover .anchor .octicon-link {
-        visibility: visible;
-    }
-
-    #markdown h1 {
-        padding-bottom: 0.3em;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #markdown h2 {
-        padding-bottom: 0.3em;
-        border-bottom: 1px #424242 solid;
-    }
-
-    #markdown ul,
-    #markdown ol {
-        padding-left: 2em;
-    }
-
-    #markdown ul ul,
-    #markdown ul ol,
-    #markdown ol ol,
-    #markdown ol ul {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-
-    #markdown li {
-        word-wrap: break-all;
-    }
-
-    #markdown li > p {
-        margin-top: 16px;
-    }
-
-    #markdown li + li {
-        margin-top: 0.25em;
-    }
-
-    #markdown dl {
-        padding: 0;
-    }
-
-    #markdown dl dt {
-        padding: 0;
-        margin-top: 16px;
-        font-size: 1em;
-        font-style: italic;
-        font-weight: 600;
-    }
-
-    #markdown dl dd {
-        padding: 0 16px;
-        margin-bottom: 16px;
-    }
-
-    #markdown table {
-        width: 100%;
-        overflow: auto;
-    }
-
-    #markdown table th {
-        font-weight: 600;
-    }
-
-    #markdown table th,
-    #markdown table td {
-        padding: 6px 13px;
-    }
-
-    #markdown table tr {
-        background-color: #262626;
-    }
-
-    #markdown table tr:nth-child(2n) {
-        background-color: #262626;
-    }
-
-    #markdown img {
-        max-width: 100%;
-        box-sizing: content-box;
-        background-color: #262626;
-    }
-
-    #markdown img[align="right"] {
-        padding-left: 20px;
-    }
-
-    #markdown img[align="left"] {
-        padding-right: 20px;
-    }
-
-    #markdown code {
-        padding: 0.2em 0.4em;
-        margin: 0;
-        font-size: 85%;
-        background-color: rgba(27, 31, 35, 0.05);
-        border-radius: 3px;
-    }
-
-    #markdown pre {
-        word-wrap: normal;
-    }
-
-    #markdown pre > code {
-        padding: 0;
-        margin: 0;
-        font-size: 100%;
-        word-break: normal;
-        white-space: pre;
-        background: transparent;
-        border: 0;
-    }
-
-    #markdown .highlight {
-        margin-bottom: 16px;
-    }
-
-    #markdown .highlight pre {
-        margin-bottom: 0;
-        word-break: normal;
-    }
-
-    #markdown .highlight pre,
-    #markdown pre {
-        padding: 16px;
-        overflow: auto;
-        font-size: 85%;
-        line-height: 1.45;
-        background-color: #444;
-        border-radius: 3px;
-    }
-
-    #markdown pre code {
-        display: inline;
-        max-width: auto;
-        padding: 0;
-        margin: 0;
-        overflow: visible;
-        line-height: inherit;
-        word-wrap: normal;
-        background-color: transparent;
-        border: 0;
-    }
-
-    #markdown .full-commit .btn-outline:not(:disabled):hover {
-        color: #005cc5;
-        border-color: #005cc5;
-    }
-
-    #markdown kbd {
-        display: inline-block;
-        padding: 3px 5px;
-        font: 11px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
-            monospace;
-        line-height: 10px;
-        color: #444d56;
-        vertical-align: middle;
-        background-color: #fafbfc;
-        border: solid 1px #d1d5da;
-        border-bottom-color: #c6cbd1;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 #c6cbd1;
-    }
-
-    #markdown :checked + .radio-label {
-        position: relative;
-        z-index: 1;
-        border-color: #0366d6;
-    }
-
-    #markdown .task-list-item {
-        list-style-type: none;
-    }
-
-    #markdown .task-list-item + .task-list-item {
-        margin-top: 3px;
-    }
-
-    #markdown .task-list-item input {
-        margin: 0 0.2em 0.25em -1.6em;
-        vertical-align: middle;
-    }
-
-    #markdown hr {
-        border-bottom-color: #424242;
-    }
-
-    #markdown .token.comment,
-    #markdown .token.prolog,
-    #markdown .token.doctype,
-    #markdown .token.cdata {
-        color: #008000;
-        font-style: italic;
-    }
-
-    #markdown .token.namespace {
-        opacity: 0.7;
-    }
-
-    #markdown .token.string {
-        color: #a31515;
-    }
-
-    #markdown .token.punctuation,
-    #markdown .token.operator {
-        color: #393a34;
-    }
-
-    #markdown .token.url,
-    #markdown .token.symbol,
-    #markdown .token.number,
-    #markdown .token.boolean,
-    #markdown .token.variable,
-    #markdown .token.constant,
-    #markdown .token.inserted {
-        color: #36acaa;
-    }
-
-    #markdown .token.atrule,
-    #markdown .token.keyword,
-    #markdown .token.attr-value,
-    #markdown .language-autohotkey .token.selector,
-    #markdown .language-json .token.boolean,
-    #markdown .language-json .token.number,
-    #markdown code[class*="language-css"] {
-        color: #0000ff;
-    }
-
-    #markdown .token.function {
-        color: #393a34;
-    }
-
-    #markdown .token.deleted,
-    #markdown .language-autohotkey .token.tag {
-        color: #9a050f;
-    }
-
-    #markdown .token.selector,
-    #markdown .language-autohotkey .token.keyword {
-        color: #00009f;
-    }
-
-    #markdown .token.important,
-    #markdown .token.bold {
-        font-weight: bold;
-    }
-
-    #markdown .token.italic {
-        font-style: italic;
-    }
-
-    #markdown .token.class-name,
-    #markdown .language-json .token.property {
-        color: #2b91af;
-    }
-
-    #markdown .token.tag,
-    #markdown .token.selector {
-        color: #800000;
-    }
-
-    #markdown .token.attr-name,
-    #markdown .token.property,
-    #markdown .token.regex,
-    #markdown .token.entity {
-        color: #ff0000;
-    }
-
-    #markdown .token.directive.tag .tag {
-        background: #ffff00;
-        color: #393a34;
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+
+            .screen {
+                flex: 1;
+                display: flex;
+                margin: 0 20px 10px 5px;
+                -ms-overflow-style: none;
+                overflow: auto;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .input {
+                    background: var(--widget-background);
+                    border: 1px var(--widget-background) solid;
+                    margin: 0 0 20px 7px;
+                    padding: 3px;
+
+                    .field {
+                        padding: 0;
+                    }
+
+                    input {
+                        background: transparent;
+                        border: 0 none;
+                    }
+
+                    .icon {
+                        bottom: 5px;
+                    }
+
+                    &:focus-within {
+                        border: 1px var(--widget-highlight) solid;
+                    }
+                }
+
+                .wrapper {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    -ms-overflow-style: none;
+                    overflow: auto;
+
+                    &::-webkit-scrollbar {
+                        display: none;
+                    }
+                }
+
+                .section {
+                    display: flex;
+                    flex-direction: row;
+                    padding: 20px 0 10px 0;
+                    border-bottom: var(--application-border) 1px solid;
+                    color: var(--application-highlight);
+                    margin: 0 0 20px 10px;
+                    user-select: none;
+
+                    &:first-child {
+                        padding: 0 0 10px 0;
+                    }
+
+                    &.first {
+                        padding: 0 0 10px 0;
+                    }
+                }
+
+                .cards {
+                    display: flex;
+                    flex-wrap: wrap;
+                }
+
+                .nav {
+                    display: flex;
+                    flex-direction: row;
+                    padding: 20px 0 10px 0;
+                    border-bottom: var(--application-border) 1px solid;
+                    margin: 0 0 20px 7px;
+                    user-select: none;
+
+                    &:first-child {
+                        padding: 0 0 10px 0;
+                    }
+
+                    &.segmented {
+                        margin: 0 0 0 7px;
+                        border-bottom: 0 none;
+                    }
+                }
+
+                .pagination {
+                    height: 50px;
+                    display: flex;
+                    padding: 10px 0 10px 14px;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    box-sizing: border-box;
+                    align-content: center;
+                    align-items: center;
+                    user-select: none;
+
+                    .more {
+                        font-size: 14px;
+                        margin: 0 0 0 3px;
+                        cursor: default;
+                        user-select: none;
+                    }
+
+                    .page {
+                        padding: 4px 10px;
+                        font-size: 14px;
+                        margin: 0 0 0 3px;
+                        background: var(--button);
+                        border: 1px var(--button-border) solid;
+                        border-radius: 3px;
+                        cursor: pointer;
+                        user-select: none;
+
+                        &:hover {
+                            box-shadow: var(--elevation-button);
+                        }
+
+                        &.off {
+                            padding: 4px 10px;
+                            font-size: 14px;
+                            margin: 0 0 0 3px;
+                            color: var(--application-highlight-text);
+                            background: var(--application-highlight);
+                            border: 1px var(--application-highlight) solid;
+                            border-radius: 3px;
+                            cursor: default;
+                            user-select: none;
+                        }
+                    }
+                }
+            }
+
+            .empty {
+                flex: 1;
+                display: flex;
+                flex-direction: row;
+                padding: 0 20px 20% 20px;
+                align-items: center;
+                overflow: hidden;
+
+                .message {
+                    margin: 0 auto;
+                }
+            }
+        }
     }
 </style>

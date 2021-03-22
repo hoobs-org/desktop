@@ -1,0 +1,66 @@
+[theme="light"] {
+    --transparency: blur(6px);
+
+    --application-text: #727272;
+    --application-highlight-text: #000;
+    --application-input-text: #000;
+    --application-error-text: #a11;
+    --application-background: #f8f8f8;
+    --application-highlight: #feb400;
+    --application-accent: #21005c;
+    --application-dark: #e7e7e7;
+    --application-drawer: #ffffffc2;
+    --application-input: #f8f8f8;
+    --application-input-accent: #f1f1f1;
+    --application-border: #dfdfdf;
+
+    --button: #f8f8f8;
+    --button-text: #1a1a1a;
+    --button-border: #dfdfdf;
+    --button-primary: #feb400;
+    --button-primary-text: #fff;
+    --button-primary-border: #feb400;
+    --button-light: #fff;
+    --button-light-text: #777;
+    --button-light-border: #e5e5e5;
+
+    --modal-text: #515151;
+    --modal-input-text: #000;
+    --modal-error-text: #a11;
+    --modal-background: #ffffffc2;
+    --modal-dark: #f1f1f1;
+    --modal-form: #ffffff00;
+    --modal-mask: #14141400;
+    --modal-highlight: #feb400;
+    --modal-input: #ffffff9f;
+    --modal-input-accent: #f8f8f8;
+    --modal-border: #e5e5e5;
+
+    --widget-text: #515151;
+    --widget-background: #ffffffc2;
+    --widget-highlight: #feb400;
+    --widget-border: #e5e5e5;
+
+    --menu-text: #515151;
+    --menu-highlight-text: #000;
+    --menu-background: #ffffffe0;
+    --menu-highlight: #f0f0f0;
+    --menu-border: #e5e5e5;
+
+    --navigation-text: #999;
+    --navigation-highlight-text: #fff;
+    --navigation-active-text: #feb400;
+    --navigation-background: #141414;
+    --navigation-highlight: #feb400;
+    --navigation-border: #4b4b4b;
+
+    --accessory-text: #0000003d;
+    --accessory-background: #e4e4e4;
+    --accessory-highlight: #fff;
+    --accessory-input: #f0f0f0;
+    --accessory-border: #dfdfdf;
+
+    --backdrop: url("/defaults/backdrops/default.jpg");
+    --elevation: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    --elevation-button: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}

@@ -1,883 +1,447 @@
 <template>
-    <div id="config">
-        <div v-if="!show.loading" class="loaded">
-            <div class="sections">
-                <div class="actions">
-                    <div v-on:click="saveChanges()" :title="$t('save_changes')" class="icon">save</div>
-                    <div class="action-seperator"></div>
-                    <div v-on:click="refresh()" :title="$t('refresh')" class="icon">refresh</div>
-                </div>
-                <div class="flow">
-                    <router-link to="/config/interface" :class="section === 'interface' ? 'active': ''">{{ $t("interface_settings") }}</router-link>
-                    <router-link to="/config/server" :class="section === 'server' ? 'active': ''">{{ $t("server_settings") }}</router-link>
-                    <router-link to="/config/ports" :class="section === 'ports' ? 'active': ''">{{ $t("port_ranges") }}</router-link>
-                    <router-link to="/config/bridge" :class="section === 'bridge' ? 'active': ''">Apple Home</router-link>
-                    <router-link v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" :to="`/config/${plugin.name}`" :class="section === plugin.name ? 'active': ''">{{ plugin.title }}</router-link>
-                    <router-link to="/config/advanced" :class="section === 'advanced' ? 'active': ''">{{ $t("advanced") }}</router-link>
-                </div>
-            </div>
-            <div v-if="section === 'interface'" class="panels">
-                <div class="tabs">
-                    <div class="spacer"></div>
-                    <tab :title="$t('preferences')" :active="true" :dirty="flags.dirty.indexOf('preferences') >= 0" />
-                    <div class="fill"></div>
-                </div>
-                <div class="flow">
-                    <div class="form">
-                        <select-field v-on:input="markDirty()" :name="$t('language')" :description="$t('language_message')" :options="$options.values.languages" v-model="configurations.working['preferences'].locale" :required="true" />
-                        <select-field v-on:input="markDirty()" :name="$t('temp_units')" :description="$t('temp_units_message')" :options="$options.values.units" v-model="configurations.working['preferences'].tempUnits" :required="true" />
-                        <select-field v-on:input="markDirty()" :name="$t('time_format')" :description="$t('time_format_message')" :options="$options.values.times" v-model="configurations.working['preferences'].timeFormat" :required="true" />
-                        <select-field v-on:input="markDirty()" :name="$t('country_code')" :description="$t('country_code_message')" :options="$options.values.countries" v-model="configurations.working['preferences'].countryCode" />
-                        <text-field v-on:input="markDirty()" :name="$t('postal_code')" :description="$t('postal_code_message')" v-model="configurations.working['preferences'].postalCode" :required="false" />
-                        <text-field v-on:input="markDirty()" :name="$t('latitude')" :description="$t('latitude_message')" v-model="configurations.working['preferences'].latitude" :required="false" />
-                        <text-field v-on:input="markDirty()" :name="$t('longitude')" :description="$t('longitude_message')" v-model="configurations.working['preferences'].longitude" :required="false" />
+    <div :key="version" v-if="user.permissions.config" id="config">
+        <context />
+        <div v-if="!loading" class="content">
+            <list value="identifier" display="display" :values="plugins" :selected="identifier" initial="hub" controller="config" />
+            <div v-if="identifier && identifier !== 'hub'" class="screen">
+                <div class="wrapper">
+                    <div class="section">{{ plugin.display }}</div>
+                    <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs" />
+                    <schema-form :bridge="bridge" :identifier="identifier" :schema="schema" v-model="working" v-on:input="updated" v-on:save="save" />
+                    <div class="row actions">
+                        <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
+                        <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
                     </div>
                 </div>
             </div>
-            <div v-if="section === 'server'" class="panels">
-                <div class="tabs">
-                    <div class="spacer"></div>
-                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                    <div class="fill"></div>
-                </div>
-                <div class="flow">
-                    <div class="form">
-                        <port-field v-on:input="markDirty()" :name="$t('server_port')" :description="$t('server_port_message')" v-model.number="configurations.working[data.instance].server.port" :required="true" />
-                        <integer-field v-on:input="markDirty()" :name="$t('autostart_after')" :description="$t('autostart_after_message')" v-model.number="configurations.working[data.instance].server.autostart" :required="false" />
-                        <integer-field v-on:input="markDirty()" :name="$t('polling_seconds')" :description="$t('polling_seconds_message')" v-model.number="configurations.working[data.instance].server.polling_seconds" :required="true" />
+            <div v-else class="screen">
+                <div class="wrapper">
+                    <div class="section">{{ $t("authentication") }}</div>
+                    <div class="row">
+                        <integer-field :title="$t('inactive_logoff')" :description="$t('inactive_logoff_description')" :min="5" :max="300" v-model="working.inactive_logoff" v-on:input="updated" />
                     </div>
-                </div>
-            </div>
-            <div v-if="section === 'ports'" class="panels">
-                <div class="tabs">
-                    <div class="spacer"></div>
-                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                    <div class="fill"></div>
-                </div>
-                <div class="flow">
-                    <div class="form">
-                        <description-field v-on:input="markDirty()" :name="$t('range_name')" :description="$t('range_name_message')" v-model="configurations.working[data.instance].ports.comment" />
-                        <port-field v-on:input="markDirty()" :name="$t('start_port')" :description="$t('start_port_message')" v-model.number="configurations.working[data.instance].ports.start" />
-                        <port-field v-on:input="markDirty()" :name="$t('end_port')" :description="$t('end_port_message')" v-model.number="configurations.working[data.instance].ports.end" />
+                    <div class="row">
+                        <checkbox id="disable_auth" :title="$t('disable_auth')" v-model="working.disable_auth" v-on:input="updated" />
                     </div>
-                </div>
-            </div>
-            <div v-if="section === 'bridge'" class="panels">
-                <div class="tabs">
-                    <div class="spacer"></div>
-                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                    <div class="fill"></div>
-                </div>
-                <div class="flow">
-                    <div class="form">
-                        <text-field v-on:input="markDirty()" :name="$t('service_name')" :description="$t('service_name_message')" v-model="configurations.working[data.instance].bridge.name" :required="true" />
-                        <description-field v-on:input="markDirty()" :name="$t('service_description')" :description="$t('service_description_message')" v-model="configurations.working[data.instance].description" />
-                        <port-field v-on:input="markDirty()" :name="$t('service_port')" :description="$t('service_port_message')" v-model.number="configurations.working[data.instance].bridge.port" :required="true" />
-                        <hex-field v-on:input="markDirty()" :name="$t('home_username')" :description="$t('home_username_message')" v-model="configurations.working[data.instance].bridge.username" :required="true" />
-                        <text-field v-on:input="markDirty()" :name="$t('home_pin')" :description="$t('home_pin_message')" v-model="configurations.working[data.instance].bridge.pin" :required="true" />
+                    <div class="section extra">{{ $t("monitor") }}</div>
+                    <div class="row">
+                        <integer-field :title="$t('update_interval')" :description="$t('update_interval_description')" :min="2" :max="300" v-model="working.polling_seconds" v-on:input="updated" />
                     </div>
-                </div>
-            </div>
-            <div v-if="section === 'advanced'" class="panels">
-                <div class="tabs">
-                    <div class="spacer"></div>
-                    <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                    <div class="fill"></div>
-                </div>
-                <div class="editor">
-                    <monaco v-on:change="updateCode" :value="code" class="monaco" />
-                </div>
-            </div>
-            <div v-for="(plugin) in data.plugins" :key="`plugin_${plugin.name}`" class="loop">
-                <div v-if="section === plugin.name" class="panels">
-                    <div class="tabs">
-                        <div class="spacer"></div>
-                        <tab v-for="(item) in data.instances" :key="`instance_${item.key}`" v-on:activate="selectinstance(item.key)" :title="item.value" :active="item.key === data.instance" :dirty="flags.dirty.indexOf(item.key) >= 0" />
-                        <div class="fill"></div>
+                    <div class="section">{{ $t("interface") }}</div>
+                    <div class="row">
+                        <text-field :title="$t('cors_orgin')" :description="$t('cors_orgin_description')" v-model="working.origin" v-on:input="updated" />
                     </div>
-                    <div v-for="(instance) in data.instances" :key="`plugin_${plugin.name}_instance_${instance.key}`" class="loop">
-                        <div v-if="instance.key === data.instance" class="flow">
-                            <div class="form">
-                                <plugin-config v-on:input="updateConfig" :plugin="plugin" :instance="instance.key" v-model="configurations.working[data.instance]" />
-                            </div>
-                        </div>
+                    <div class="row">
+                        <text-field :title="$t('gui_path')" :description="$t('gui_path_description')" v-model="working.gui_path" v-on:input="updated" />
+                    </div>
+                    <div class="row">
+                        <text-field :title="$t('touch_path')" :description="$t('touch_path_description')" v-model="working.touch_path" v-on:input="updated" />
+                    </div>
+                    <div class="row actions">
+                        <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
+                        <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
+                        <div v-on:click="$dialog.open('settings')" class="button">{{ $t("hub_settings") }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        <loader v-else id="loader" :value="`${$t('loading')}...`" :initilized="true" />
-        <modal v-if="confirm.save || confirm.refresh" v-on:cancel="discardChanges()" v-on:confirm="navigationCancel()" :cancel-title="$t('discard')" :ok-title="$t('cancel')" width="350px">
-            <b>{{ $t("unsaved_changes") }}</b>
-            <p v-if="confirm.save">
-                {{ $t("confirm_exit") }}
-            </p>
-            <p v-if="confirm.refresh">
-                {{ $t("confirm_refresh") }}
-            </p>
-        </modal>
-        <modal v-if="confirm.reboot" v-on:cancel="cancelReboot()" v-on:confirm="rebootDevice()" :cancel-title="$t('cancel')" :ok-title="$t('reboot_device')" width="450px">
-            <b>{{ $t("config_reboot_confirm") }}</b>
-            <p>
-                {{ $t("confirm_reboot") }}
-            </p>
-        </modal>
-        <modal v-if="confirm.errors" v-on:confirm="() => { confirm.errors = false }" :cancel-button="false" width="550px">
-            <b>{{ $t("save_validation") }}</b>
-            <p class="errors">
-                <span v-for="(error, index) in errors" :key="`error_${index}`">{{ error }}</span>
-            </p>
-        </modal>
+        <div v-else class="loading">
+            <spinner />
+        </div>
     </div>
 </template>
 
 <script>
-    import Decamelize from "decamelize";
-    import Inflection from "inflection";
+    import TabsComponent from "@/components/elements/tabs.vue";
+    import ListComponent from "@/components/elements/list.vue";
+    import SchemaComponent from "@/components/form.vue";
 
-    import PluginConfig from "@/components/plugin-config.vue";
-    import Tab from "@/components/tab.vue";
-
-    import TextField from "@/components/text-field.vue";
-    import DescriptionField from "@/components/description-field.vue";
-    import IntegerField from "@/components/integer-field.vue";
-    import SelectField from "@/components/select-field.vue";
-    import PortField from "@/components/port-field.vue";
-    import HexField from "@/components/hex-field.vue";
-
-    import Monaco from "../lib/monaco";
-
-    import Languages from "../locale/languages.json";
-    import Countries from "../locale/country-codes.json";
+    const BRIDGE_RESTART_DELAY = 4000;
 
     export default {
         name: "config",
 
-        components: {
-            "plugin-config": PluginConfig,
-            "tab": Tab,
-            "text-field": TextField,
-            "description-field": DescriptionField,
-            "integer-field": IntegerField,
-            "select-field": SelectField,
-            "port-field": PortField,
-            "hex-field": HexField,
-            "monaco": Monaco
+        props: {
+            name: String,
+            scope: String,
         },
 
-        props: {
-            section: String
+        components: {
+            "list": ListComponent,
+            "tabs": TabsComponent,
+            "schema-form": SchemaComponent,
+        },
+
+        computed: {
+            user() {
+                return this.$store.state.user;
+            },
+        },
+
+        watch: {
+            scope() {
+                if (!this.intermediate) {
+                    if (this.dirty) {
+                        this.$confirm(this.$t("ok"), this.$t("unsaved_changes_warning"), () => {
+                            this.switch(this.name && this.name !== "" ? `${this.scope}/${this.name}` : this.scope);
+                        }, () => {
+                            if (this.$route.path !== `/config/${this.identifier}`) {
+                                this.intermediate = true;
+                                this.$router.push({ path: `/config/${this.identifier}` });
+                            }
+                        });
+                    } else {
+                        this.switch(this.name && this.name !== "" ? `${this.scope}/${this.name}` : this.scope);
+                    }
+                }
+
+                this.intermediate = false;
+            },
         },
 
         data() {
             return {
-                confirm: {
-                    save: false,
-                    refresh: false,
-                    reboot: false,
-                    errors: false,
-                    discard: false
-                },
-                show: {
-                    loading: true
-                },
-                devices: [],
-                configurations: {
-                    originl: {},
-                    working: {}
-                },
-                flags: {
-                    dirty: [],
-                    reboot: []
-                },
-                data: {
-                    plugins: {},
-                    instances: [],
-                    instance: "preferences",
-                    reboot: [],
-                    plugin: null
-                },
-                errors: [],
-                url: null
-            }
+                version: 0,
+                intermediate: false,
+                loading: true,
+                dirty: false,
+                identifier: "",
+                type: null,
+                alias: null,
+                schema: null,
+                saved: {},
+                working: {},
+                plugins: [],
+                plugin: null,
+                bridges: [],
+                bridge: "",
+            };
         },
 
-        values: {
-            languages: Languages,
-            countries: Countries,
-            units: [{
-                text: "Celsius",
-                value: "celsius"
-            },
-            {
-                text: "Fahrenheit",
-                value: "fahrenheit"
-            }],
-            times: [{
-                text: "12 Hour",
-                value: "12hour"
-            },
-            {
-                text: "24 Hour",
-                value: "24hour"
-            }]
-        },
-
-        computed: {
-            running() {
-                return this.$store.state.running;
-            },
-
-            code() {
-                return JSON.toString(this.configurations.working[this.data.instance]);         
-            }
-        },
-
-        async mounted() {
-            this.devices = this.Settings.get("devices");
-            this.show.loading = true;
-
-            this.loadPreferences();
-
-            await this.loadConfig();
-            await this.loadPlugins();
-
-            this.loadInstances();
-
-            this.show.loading = false;
-        },
-
-        created() {
-            this.watcher = this.$store.subscribe((mutation) => {
-                if (mutation.type === "saveChanges") {
-                    this.saveChanges();
-                }
-            });
-        },
-
-        beforeDestroy() {
-            if (this.watcher) {
-                this.watcher();
-            }
-        },
-
-        beforeRouteLeave (to, from, next) {
-            if (this.flags.dirty.length === 0 || this.confirm.discard) {
-                next();
-            } else {
-                this.url = to.path;
-                this.confirm.save = true;
-
-                next(false);
-            }
-        },
-
-        watch: {
-            section: async function () {
-                this.loadInstances();
-            } 
+        mounted() {
+            this.load(this.name && this.name !== "" ? `${this.scope}/${this.name}` : this.scope);
         },
 
         methods: {
-            markDirty() {
-                const keys = Object.keys(this.configurations.working);
+            updated(value) {
+                if (JSON.stringify(value) !== JSON.stringify(this.saved)) this.dirty = true;
+            },
 
-                for (let i = 0; i < keys.length; i++) {
-                    if (!this.configurations.originl[keys[i]] || !JSON.equals(this.configurations.working[keys[i]], this.configurations.originl[keys[i]])) {
-                        if (this.flags.dirty.indexOf(keys[i]) === -1) {
-                            this.flags.dirty.push(keys[i]);
+            async save() {
+                this.loading = true;
+
+                if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
+                    const config = await this.$hoobs.config.get();
+                    const { ...working } = this.working;
+
+                    let reload = false;
+                    let logout = false;
+
+                    if (config.api.disable_auth !== working.disable_auth) {
+                        reload = true;
+
+                        if (!config.api.disable_auth) {
+                            logout = true;
+                        }
+                    }
+
+                    config.api = working;
+                    config.api.origin = config.api.origin || "*";
+
+                    this.$hoobs.config.update(config);
+
+                    if (logout) await this.$hoobs.auth.logout();
+
+                    setTimeout(() => {
+                        if (reload) {
+                            window.location.reload();
+                        } else {
+                            this.dirty = false;
+                            this.change(this.bridge);
+                        }
+                    }, BRIDGE_RESTART_DELAY);
+                } else {
+                    const bridge = await this.$hoobs.bridge(this.bridge);
+                    const config = await bridge.config.get();
+                    const { ...working } = this.working;
+
+                    let index = -1;
+
+                    switch (this.type) {
+                        case "accessory":
+                            index = config.accessories.findIndex((item) => item.accessory === this.alias);
+                            working.accessories = working.accessories || [];
+
+                            while (index >= 0) {
+                                config.accessories.splice(index, 1);
+                                index = config.accessories.findIndex((item) => item.accessory === this.alias);
+                            }
+
+                            for (let i = 0; i < working.accessories.length; i += 1) {
+                                working.accessories[i].accessory = this.alias;
+                                working.accessories[i].plugin_map = { plugin_name: this.identifier };
+                            }
+
+                            config.accessories = [...config.accessories, ...working.accessories];
+                            break;
+
+                        default:
+                            index = config.platforms.findIndex((item) => item.platform === this.alias);
+
+                            while (index >= 0) {
+                                config.platforms.splice(index, 1);
+                                index = config.platforms.findIndex((item) => item.platform === this.alias);
+                            }
+
+                            working.platform = this.alias;
+                            working.plugin_map = { plugin_name: this.identifier };
+
+                            config.platforms = [...config.platforms, working];
+                            break;
+                    }
+
+                    await bridge.config.update(config);
+
+                    setTimeout(() => {
+                        this.dirty = false;
+                        this.change(this.bridge);
+                    }, BRIDGE_RESTART_DELAY);
+                }
+            },
+
+            exit(bridge) {
+                if (this.dirty) {
+                    this.$confirm(this.$t("ok"), this.$t("unsaved_changes_warning"), () => { this.change(bridge); });
+                } else {
+                    this.change(bridge);
+                }
+            },
+
+            async change(bridge) {
+                this.loading = true;
+                this.bridge = bridge;
+
+                if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
+                    this.saved = (await this.$hoobs.config.get()).api || {};
+                    this.working = { ...this.saved };
+
+                    this.working.inactive_logoff = this.working.inactive_logoff || 30;
+                    this.working.disable_auth = this.working.disable_auth || false;
+                    this.working.polling_seconds = this.working.polling_seconds || 5;
+                    this.working.origin = this.working.origin === "*" ? "" : this.working.origin;
+
+                    this.loading = false;
+                    this.dirty = false;
+                } else {
+                    const config = await (await this.$hoobs.bridge(bridge)).config.get();
+
+                    const platforms = (config || {}).platforms || [];
+                    const accessories = (config || {}).accessories || [];
+
+                    switch (this.type) {
+                        case "accessory":
+                            this.saved = { accessories: accessories.filter((item) => item.accessory === this.alias) || [] };
+                            break;
+
+                        default:
+                            this.saved = platforms.find((item) => item.platform === this.alias) || { platform: this.alias };
+                            break;
+                    }
+
+                    this.working = { ...this.saved };
+                    this.loading = false;
+                    this.dirty = false;
+                }
+            },
+
+            async switch(identifier) {
+                this.loading = true;
+                this.identifier = identifier;
+                this.bridges = await this.$hoobs.bridges.list();
+                this.schema = null;
+                this.plugin = null;
+                this.dirty = false;
+
+                this.bridges.sort((a, b) => {
+                    if (a.display < b.display) return -1;
+                    if (a.display > b.display) return 1;
+
+                    return 0;
+                });
+
+                if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
+                    this.change("");
+                } else {
+                    this.plugin = this.plugins.find((item) => item.identifier === identifier);
+
+                    if (this.plugin && this.plugin.schema && this.plugin.schema.config) {
+                        this.type = this.plugin.schema.pluginType || (this.plugin.schema.accessory ? "accessory" : "platform");
+                        this.alias = this.plugin.alias || this.plugin.schema.pluginAlias;
+                        this.bridges = this.bridges.filter((bridge) => this.plugin.bridges.findIndex((item) => item.id === bridge.id) >= 0);
+
+                        switch (this.type) {
+                            case "accessory":
+                                this.schema = {
+                                    type: "object",
+                                    properties: {
+                                        accessories: {
+                                            type: "array",
+                                            format: "root",
+                                            items: {
+                                                title: this.$t("accessory"),
+                                                type: "object",
+                                                properties: this.plugin.schema.config.properties || this.plugin.schema.config,
+                                            },
+                                        },
+                                    },
+                                };
+
+                                break;
+
+                            default:
+                                this.schema = {
+                                    type: "object",
+                                    properties: this.plugin.schema.config.properties || this.plugin.schema.config,
+                                };
+
+                                if (this.identifier === "homebridge-ring" && this.schema.properties.refreshToken) this.schema.properties.refreshToken.widget = "ring";
+                                if (this.identifier === "homebridge-gsh" && this.schema.properties.token) this.schema.properties.token.widget = "gsh";
+
+                                if (this.identifier === "homebridge-honeywell-home" && this.schema.properties.credentials.properties.refreshToken) {
+                                    delete this.schema.properties.credentials.properties.notice;
+
+                                    this.schema.properties.credentials.properties.refreshToken.widget = "honeywell";
+                                }
+
+                                break;
                         }
                     } else {
-                        const index = this.flags.dirty.indexOf(keys[i]);
-
-                        if (index >= 0) {
-                            this.flags.dirty.splice(index, 1);
-                        }
+                        this.$router.push("/config");
                     }
 
-                    if (keys[i] !== "preferences") {
-                        if (!JSON.equals(this.configurations.working[keys[i]].server, this.configurations.originl[keys[i]].server)) {
-                            if (this.flags.reboot.indexOf(keys[i]) === -1) {
-                                this.flags.reboot.push(keys[i]);
-                            }
-                        } else {
-                            const index = this.flags.reboot.indexOf(keys[i]);
-
-                            if (index >= 0) {
-                                this.flags.reboot.splice(index, 1);
-                            }
-                        }
-                    }
+                    this.change(((this.bridges || [])[0] || {}).id || "");
                 }
             },
 
-            cancelReboot() {
-                this.confirm.reboot = false;
-                this.show.loading = false;
-            },
+            async load(identifier) {
+                this.loading = true;
 
-            async rebootDevice() {
-                this.confirm.reboot = false;
-                this.show.loading = true;
+                const plugins = await this.$hoobs.plugins();
 
-                for (let i = 0; i < this.data.reboot.length; i++) {
-                    await this.API.login(this.data.reboot[i].ip, this.data.reboot[i].port);
-                    await this.API.post(this.data.reboot[i].ip, this.data.reboot[i].port, "/service/stop");
-                    await this.API.put(this.data.reboot[i].ip, this.data.reboot[i].port, "/reboot");
-                }
+                for (let i = 0; i < plugins.length; i += 1) {
+                    const plugin = plugins[i];
 
-                setTimeout(async () => {
-                    for (let i = 0; i < this.data.reboot.length; i++) {
-                        this.Device.wait.start(this.data.reboot[i].ip, this.data.reboot[i].port, () => {
-                            this.data.reboot.pop();
+                    if (plugin && plugin.schema && plugin.schema.config) {
+                        const { bridge } = plugin;
+                        const { version } = plugin;
 
-                            if (this.data.reboot.length === 0) {
-                                this.refresh();
-                            }
-                        });
-                    }
-                }, 5000);
-            },
-
-            navigationCancel() {
-                this.confirm.save = false;
-                this.confirm.refresh = false;
-            },
-
-            discardChanges() {
-                if (this.confirm.save && this.url) {
-                    this.confirm.save = false;
-                    this.confirm.discard = true;
-
-                    this.$router.push({
-                        path: this.url
-                    });
-                } else if (this.confirm.refresh) {
-                    this.confirm.refresh = false;
-                    this.confirm.discard = true;
-
-                    this.refresh()
-                } else {
-                    this.confirm.save = false;
-                    this.confirm.refresh = false;
-                    this.confirm.discard = false;
-                }
-            },
-
-            updateConfig(value) {
-                this.configurations.working[this.data.instance] = value;
-
-                this.markDirty();
-            },
-
-            updateCode(value) {
-                this.configurations.working[this.data.instance] = JSON.tryParse(value, this.configurations.working[this.data.instance]);
-
-                this.markDirty();
-            },
-
-            refresh() {
-                if (this.flags.dirty.length === 0 || this.confirm.discard) {
-                    (async () => {
-                        this.show.loading = true;
-                        this.confirm.discard = false;
-
-                        this.loadPreferences();
-
-                        await this.loadConfig();
-                        await this.loadPlugins();
-
-                        this.loadInstances();
-
-                        this.show.loading = false;
-                    })();
-                } else {
-                    this.confirm.refresh = true;
-                }
-            },
-
-            loadPreferences() {
-                const units = this.Settings.get("units") || {};
-                const geolocation = this.Settings.get("geolocation") || {};
-
-                this.configurations.working["preferences"] = {};
-
-                this.configurations.working["preferences"].locale = this.Settings.get("locale") || "en";
-                this.configurations.working["preferences"].tempUnits = units.temperature || "fahrenheit";
-                this.configurations.working["preferences"].timeFormat = units.timeFormat || "12hour";
-                this.configurations.working["preferences"].countryCode = geolocation.countryCode || "US";
-                this.configurations.working["preferences"].postalCode = geolocation.postalCode || "94040";
-                this.configurations.working["preferences"].latitude = geolocation.latitude || "";
-                this.configurations.working["preferences"].longitude = geolocation.longitude || "";
-
-                this.configurations.originl["preferences"] = JSON.clone(this.configurations.working["preferences"]);
-            },
-
-            async loadConfig() {
-                for (let i = 0; i < this.devices.length; i++) {
-                    const device = this.devices[i];
-                    const instance = `${device.mac}:${device.port}`;
-
-                    this.flags.dirty = [];
-
-                    await this.API.login(device.ip, device.port);
-
-                    this.configurations.working[instance] = await this.API.get(device.ip, device.port, "/config") || {};
-                    this.configurations.originl[instance] = JSON.clone(this.configurations.working[instance]);
-                }
-            },
-
-            async loadPlugins() {
-                const plugins = [];
-
-                for (let i = 0; i < this.devices.length; i++) {
-                    const device = this.devices[i];
-                    const instance = `${device.mac}:${device.port}`;
-
-                    await this.API.login(device.ip, device.port);
-
-                    const response = await this.API.get(device.ip, device.port, "/plugins") || [];
-
-                    for (let j = 0; j < response.length; j++) {
-                        let index = plugins.findIndex(p => p.name === response[j].name && p.name === response[j].name);
+                        let index = this.plugins.findIndex((item) => item.identifier === plugin.identifier);
 
                         if (index === -1) {
-                            index = plugins.length;
-                            plugins.push(response[j]);
+                            index = this.plugins.length;
+                            plugin.bridges = [];
+                            plugin.display = this.$hoobs.repository.title(plugin.name);
+
+                            delete plugin.bridge;
+                            delete plugin.version;
+
+                            this.plugins.push(plugin);
                         }
 
-                        plugins[index].title = this.pluginTitle(plugins[index]);
-
-                        if (!plugins[index].instances) {
-                            plugins[index].instances = [];
-                        }
-
-                        plugins[index].instances.push(instance);
+                        this.plugins[index].bridges.push({
+                            id: bridge,
+                            version,
+                        });
                     }
                 }
 
-                plugins.sort((a, b) => (a.title > b.title) ? 1 : -1);
+                this.plugins.sort((a, b) => {
+                    if (a.display < b.display) return -1;
+                    if (a.display > b.display) return 1;
 
-                this.data.plugins = plugins;
+                    return 0;
+                });
+
+                this.plugins.unshift({
+                    identifier: "hub",
+                    display: this.$t("hub"),
+                });
+
+                this.switch(identifier);
             },
-
-            loadInstances() {
-                this.data.plugin = null;
-
-                this.data.instances = [];
-                this.data.instance = "preferences";
-
-                if (([
-                    "interface",
-                    "server",
-                    "ports",
-                    "bridge",
-                    "advanced"
-                ]).indexOf(this.section) === -1) {
-                    this.data.plugin = this.data.plugins.filter(p => p.name === this.section)[0];
-
-                    this.data.instances = this.devices.filter(d => this.data.plugin.instances.indexOf(`${d.mac}:${d.port}`) > -1).map((device) => {
-                        return {
-                            key: `${device.mac}:${device.port}`,
-                            value: device.hostname
-                        }
-                    });
-
-                    this.data.instance = this.data.instances[0].key;
-                } else if (this.section !== "interface") {
-                    this.data.instances = this.devices.map((device) => {
-                        return {
-                            key: `${device.mac}:${device.port}`,
-                            value: device.hostname
-                        }
-                    });
-
-                    this.data.instance = this.data.instances[0].key;
-                }
-            },
-
-            selectinstance(instance) {
-                this.data.instance = instance;
-            },
-
-            pluginTitle(plugin) {
-                if (plugin.name === "google-home") {
-                    return "Google Home";
-                }
-
-                let value = (((plugin.schema || {}).platform || {}).plugin_alias || ((plugin.schema || {}).accessories || {}).plugin_alias || plugin.name || "Unknown Plugin").split(".")[0];
-
-                value = Inflection.titleize(Decamelize(value.replace(/-/gi, " ").replace(/homebridge/gi, "").trim()));
-
-                value = value.replace(/wink/gi, "Wink");
-
-                if (value.indexOf("Wink") >= 0) {
-                    return "Wink";
-                }
-
-                value = value.replace(/shelly/gi, "Shelly");
-
-                if (value.indexOf("Shelly") >= 0) {
-                    return "Shelly";
-                }
-
-                value = value.replace(/smart things/gi, "SmartThings");
-                value = value.replace(/smartthings/gi, "SmartThings");
-
-                if (value.indexOf("SmartThings") >= 0) {
-                    return "SmartThings";
-                }
-
-                value = value.replace(/my q/gi, "myQ");
-                value = value.replace(/myq/gi, "myQ");
-                value = value.replace(/rgb/gi, "RGB");
-                value = value.replace(/ffmpeg/gi, "FFMPEG");
-                value = value.replace(/webos/gi, "LG webOS");
-                value = value.replace(/webostv/gi, "webOS");
-
-                return value;
-            },
-
-            validateConfig(device) {
-                if (device) {
-                    const instance = `${device.mac}:${device.port}`;
-                    const config = this.configurations.working[instance];
-
-                    const results = {
-                        server: config.server,
-                        bridge: config.bridge,
-                        description: config.description,
-                        ports: config.ports,
-                        accessories: (config.accessories || []).filter(i => i),
-                        platforms: (config.platforms || []).filter(i => i)
-                    }
-
-                    const messages = [];
-
-                    if (!results.server.port || Number.isNaN(parseInt(results.server.port, 10)) || results.server.port < 1 || results.server.port > 65535) {
-                        messages.push(`${device.hostname} - ${this.$t("server_port_invalid")}`);
-                    }
-
-                    if (!results.server.polling_seconds || results.server.polling_seconds < 1 || results.server.polling_seconds > 1800) {
-                        messages.push(`${device.hostname} - ${this.$t("polling_seconds_invalid")}`);
-                    }
-
-                    if (!results.bridge.name || results.bridge.name === "") {
-                        messages.push(`${device.hostname} - ${this.$t("service_name_required")}`);
-                    }
-
-                    if (!results.bridge.port || Number.isNaN(parseInt(results.bridge.port, 10)) || results.bridge.port < 1 || results.bridge.port > 65535) {
-                        messages.push(`${device.hostname} - ${this.$t("service_port_invalid")}`);
-                    }
-
-                    if (!results.bridge.username || results.bridge.username === "") {
-                        messages.push(`${device.hostname} - ${this.$t("homebridge_username_required")}`);
-                    }
-
-                    if (!results.bridge.pin || results.bridge.pin === "") {
-                        messages.push(`${device.hostname} - ${this.$t("pin_required")}`);
-                    }
-
-                    if (results.ports && (!Number.isNaN(parseInt(results.ports.start)) || !Number.isNaN(parseInt(results.ports.end)))) {
-                        if (Number.isNaN(parseInt(results.ports.start, 10)) || results.ports.start < 1 || results.ports.start > 65535) {
-                            messages.push(`${device.hostname} - ${this.$t("start_port_invalid")}`);
-                        }
-
-                        if (Number.isNaN(parseInt(results.ports.end, 10)) || results.ports.end < 1 || results.ports.end > 65535) {
-                            messages.push(`${device.hostname} - ${this.$t("end_port_invalid")}`);
-                        }
-
-                        if (!Number.isNaN(parseInt(results.ports.start, 10)) && !Number.isNaN(parseInt(results.ports.end, 10)) && results.ports.start > results.ports.end) {
-                            messages.push(`${device.hostname} - ${this.$t("invalid_port_range")}`);
-                        }
-                    } else {
-                        results.ports = {};
-                    }
-
-                    if (messages.length === 0) {
-                        return results;
-                    } else {
-                        for (let i = 0; i < messages.length; i++) {
-                            if (this.errors.indexOf(messages[i]) === -1) {
-                                this.errors.push(messages[i]);
-                            }
-                        }
-                    }
-                }
-
-                return null;
-            },
-
-            async saveChanges() {
-                this.errors = [];
-                this.data.reboot = [];
-
-                let localize = false;
-
-                if (this.flags.dirty.length > 0) {
-                    this.show.loading = true;
-
-                    const jobs = [];
-
-                    for (let i = 0; i < this.flags.dirty.length; i++) {
-                        if (this.flags.dirty[i] === "preferences") {
-                            let locale = this.Settings.get("locale") || "en";
-                            let units = this.Settings.get("units") || {};
-                            let geolocation = this.Settings.get("geolocation") || {};
-
-                            if (locale !== this.configurations.working["preferences"].locale) {
-                                localize = true;
-                            }
-
-                            locale = this.configurations.working["preferences"].locale;
-                            units.temperature = this.configurations.working["preferences"].tempUnits;
-                            units.timeFormat = this.configurations.working["preferences"].timeFormat;
-                            geolocation.countryCode = this.configurations.working["preferences"].countryCode;
-                            geolocation.postalCode = this.configurations.working["preferences"].postalCode;
-                            geolocation.latitude = this.configurations.working["preferences"].latitude;
-                            geolocation.longitude = this.configurations.working["preferences"].longitude;
-
-                            this.Settings.set("locale", locale);
-                            this.Settings.set("units", units);
-                            this.Settings.set("geolocation", geolocation);
-                        } else {
-                            const device = this.devices.filter(d => this.flags.dirty[i] === `${d.mac}:${d.port}`)[0];
-                            const config = this.validateConfig(device);
-
-                            if (device && config) {
-                                jobs.push({
-                                    device,
-                                    config
-                                });
-                            }
-                        }
-                    }
-
-                    if (this.errors.length === 0) {
-                        for (let i = 0; i < jobs.length; i++) {
-                            const job = jobs[i];
-
-                            await this.API.login(job.device.ip, job.device.port);
-
-                            await this.API.post(job.device.ip, job.device.port, "/config", {
-                                server: job.config.server,
-                                bridge: job.config.bridge,
-                                description: job.config.description,
-                                ports: job.config.ports,
-                                accessories: job.config.accessories || [],
-                                platforms: job.config.platforms || []
-                            });
-
-                            if (this.flags.reboot.indexOf(this.flags.dirty[i]) > -1) {
-                                this.data.reboot.push(job.device);
-                            } else {
-                                if (this.running) {
-                                    await this.API.post(job.device.ip, job.device.port, "/service/restart");
-                                } else {
-                                    await this.API.post(job.device.ip, job.device.port, "/service/start");
-                                }
-                            }
-                        }
-
-                        this.flags.dirty = [];
-                        this.flags.reboot = [];
-                        this.errors = [];
-
-                        if (this.data.reboot.length > 0) {
-                            this.confirm.reboot = true;
-                        } else {
-                            this.refresh();
-                        }
-                    } else {
-                        this.show.loading = false;
-                        this.confirm.errors = true;
-                    }
-
-                    if (localize) {
-                        await this.$localize();
-                    }
-                }
-            }
-        }
+        },
     };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
     #config {
-        flex: 1;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-    }
 
-    #config .loaded {
-        flex: 1;
-        display: flex;
-        position: relative;
-        flex-direction: row;
-        background: #262626;
-        text-align: left;
-        overflow: hidden;
-    }
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
 
-    #config .actions {
-        height: 23px;
-        display: flex;
-        flex-direction: row;
-        padding: 0 0 7px 0;
-        border-bottom: 1px #424242 solid;
-        overflow-x: auto;
-    }
+            .screen {
+                flex: 1;
+                display: flex;
+                margin: 0 20px 20px 10px;
+                padding: 20px;
+                color: var(--widget-text);
+                background: var(--widget-background);
+                backdrop-filter: var(--transparency);
+                -ms-overflow-style: none;
+                overflow: auto;
 
-    #config .actions .icon,
-    #config .actions .icon:link,
-    #config .actions .icon:active,
-    #config .actions .icon:visited {
-        font-size: 18px;
-        color: #999;
-        margin: 5px 7px 0 0;
-        cursor: pointer;
-    }
+                &::-webkit-scrollbar {
+                    display: none;
+                }
 
-    #config .actions .icon:hover {
-        color: #fff;
-        text-decoration: none;
-    }
+                .section {
+                    display: flex;
+                    flex-direction: row;
+                    padding: 0 0 10px 0;
+                    border-bottom: var(--application-border) 1px solid;
+                    color: var(--application-highlight);
+                    margin: 0 0 20px 0;
+                    user-select: none;
 
-    #config .actions .action-seperator {
-        display: inline;
-        margin: 5px 7px 0 0;
-        border-right: 1px #5e5e5e solid;
-        cursor: default;
-    }
+                    &.extra {
+                        margin: 20px 0;
+                    }
+                }
 
-    #config .tabs {
-        height: 24px;
-        display: flex;
-        flex-direction: row;
-        padding: 0 0 7px 0;
-        overflow-x: auto;
-        overflow-y: hidden;
-    }
+                .wrapper {
+                    max-width: 800px;
+                }
 
-    #config .tabs::-webkit-scrollbar {
-        display: none;
-    }
+                .tabs {
+                    margin: 20px 0;
 
-    #config .tabs .fill {
-        flex: 1;
-        height: 30px;
-        min-width: 20px;
-        border-bottom: 1px #424242 solid;
-    }
+                    &.tight {
+                        margin: 0 0 7px 0;
+                    }
+                }
 
-    #config .tabs .spacer {
-        height: 30px;
-        width: 4px;
-        border-bottom: 1px #424242 solid;
-    }
+                .actions {
+                    margin: 10px 0 0 0;
+                }
+            }
 
-    #config .sections {
-        width: 200px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        font-size: 14px;
-        box-sizing: border-box;
-        padding: 0 0 20px 7px;
-        overflow: hidden;
-    }
+            .initial {
+                flex: 1;
+                display: flex;
+                flex-direction: row;
+                padding: 0 20px 20% 20px;
+                align-items: center;
+                overflow: hidden;
 
-    #config .sections .flow {
-        flex: 1;
-        overflow: auto;
-    }
-
-    #config .sections .flow::-webkit-scrollbar {
-        display: none;
-    }
-
-    #config .sections a,
-    #config .sections a:link,
-    #config .sections a:active,
-    #config .sections a:visited {
-        padding: 10px;
-        border-bottom: 1px #333 solid;
-        color: #999;
-        text-decoration: none;
-        display: block;
-    }
-
-    #config .sections a:hover {
-        color: #fff;
-    }
-
-    #config .sections .active {
-        font-weight: bold;
-        color: #feb400 !important;
-    }
-
-    #config .loop {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    #config .loop:empty {
-        display: none;
-    }
-
-    #config .panels {
-        flex: 1;
-        display: flex;
-        padding: 0 20px 20px 0;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    #config .panels .flow {
-        flex: 1;
-        overflow: auto;
-    }
-
-    #config .panels .flow::-webkit-scrollbar {
-        display: none;
-    }
-
-    #config .form {
-        padding: 15px 20px 0 20px;
-        max-width: 700px;
-    }
-
-    #config .editor {
-        flex: 1;
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-        padding: 7px 0 0 0;
-    }
-
-    #config .monaco-loader {
-        width: 5px;
-        height: 5px;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        opacity: 0;
-    }
-
-    #config .editor .monaco {
-        width: 100%;
-        height: 100%;
-    }
-
-    #config .errors {
-        display: flex;
-        flex-direction: column;
-    }
-
-    #loader {
-        margin: 7em auto;
-        width: 350px;
+                .message {
+                    margin: 0 auto;
+                }
+            }
+        }
     }
 </style>

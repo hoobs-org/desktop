@@ -1,225 +1,229 @@
 <template>
-    <div v-if="connected > 0" id="log">
-        <div class="actions">
-            <div v-on:click.stop="$store.commit('toggleMenu', 'logFilter')" :title="$t('filters')" class="icon">router</div>
-            <div class="action-seperator"></div>
-            <div v-on:click="refresh()" :title="$t('refresh')" class="icon">refresh</div>
-        </div>
-        <div class="messages" ref="messages">
-            <div v-if="show.loading && messages.length === 0" class="loading">
-                <div class="loading-message">{{ $t("loading") }}...</div>
-                <marquee :height="3" color="#feb400" background="#856a3b" />
+    <div :key="version" id="log">
+        <context v-if="!loading">
+            <div ref="bridges" v-on:click.stop="menu('bridges')" class="button">
+                <icon name="layers" class="icon" />
+                {{ $t("bridges") }}
             </div>
-            <span class="message" v-for="(entry, midx) in messages.filter(m => expression.test(m.message))" :key="midx" v-html="colorCodeDevice(entry.timestamp, entry.message)"></span>
-        </div>
-        <dropdown v-if="menus['logFilter']" v-on:click.stop.prevent class="filter-menu">
-            <div v-on:click.stop v-for="(device) in devices" :key="`${device.mac}:${device.port}`" class="item">
-                <checkbox :value="`^\\[${device.hostname}\\]`" theme="light" v-model="filters">{{ device.hostname }}</checkbox>
+            <div ref="plugins" v-on:click.stop="menu('plugins')" class="button">
+                <icon name="puzzle" class="icon" />
+                {{ $t("plugins") }}
             </div>
-        </dropdown>
+            <icon v-if="debug" v-on:click="mode()" :title="$t('debug_log')" name="bug-check" class="icon" />
+            <icon v-else v-on:click="mode()" :title="$t('debug_log')" name="bug" class="icon dim" />
+            <div class="seperator"></div>
+            <icon v-on:click="download()" :title="$t('download_log')" name="download" class="icon" />
+        </context>
+        <context v-else />
+        <div v-if="!loading" ref="messages" class="messages">
+            <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" />
+        </div>
+        <div v-else class="loading">
+            <spinner />
+        </div>
     </div>
-    <loader v-else id="loader" :value="`${$t('connecting')}...`" />
 </template>
 
 <script>
+    import MessageComponent from "@/components/elements/message.vue";
+
+    const SCROLL_DELAY = 10;
+
     export default {
         name: "log",
 
-        data() {
-            return {
-                show: {
-                    loading: false
-                },
-                devices: [],
-                filters: [],
-                timeFormat: "12hour",
-                expression: new RegExp("^\\[\\]")
-            }
+        components: {
+            "message": MessageComponent,
         },
 
         computed: {
-            menus() {
-                return this.$store.state.menus;
-            },
-
-            connected() {
-                return this.$store.state.connected;
-            },
-
             messages() {
-                return this.$store.state.messages;
-            }
+                return this.$store.state.log.filter(this.filter);
+            },
         },
 
-        mounted() {
-            if (this.connected > 0) {
-                this.timeFormat = this.Settings.get("units").timeFormat || "12hour";
-                this.devices = this.Settings.get("devices");
-                this.filters = this.devices.map(d => `^\\[${d.hostname}\\]`);
-                this.expression = new RegExp(`^\\[\\]${this.filters.length > 0 ? `|${this.filters.join("|")}` : ""}`);
+        data() {
+            return {
+                loading: true,
+                bottom: true,
+                version: 0,
+                debug: false,
+                bridges: [],
+                plugins: [],
+            };
+        },
 
-                if (this.messages.length > 0) {
-                    this.show.loading = false;
-                }
+        created() {
+            this.$action.on("log", "plugins", (plugins) => {
+                this.plugins = plugins;
+            });
 
-                setTimeout(() => {
-                    if (this.$refs.messages) {
-                        this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
-                    }
-                }, 10);
+            this.$action.on("log", "bridges", (bridges) => {
+                this.bridges = bridges;
+            });
+        },
+
+        beforeRouteLeave(_to, _from, next) {
+            if (this.$refs.messages) this.$refs.messages.removeEventListener("scroll", this.position);
+
+            next();
+        },
+
+        async mounted() {
+            const { bridges } = this.$store.state;
+
+            this.bridges.push({
+                value: "hub",
+                text: "Hub",
+                selected: true,
+            });
+
+            for (let i = 0; i < bridges.length; i += 1) {
+                this.bridges.push({
+                    value: bridges[i].id,
+                    text: bridges[i].display,
+                    selected: true,
+                });
             }
+
+            const plugins = await this.$hoobs.plugins();
+
+            this.plugins.push({
+                value: "null",
+                text: this.$t("non_plugin"),
+                selected: true,
+            });
+
+            for (let i = 0; i < plugins.length; i += 1) {
+                if (this.plugins.findIndex((item) => item.value === plugins[i].identifier) === -1) {
+                    this.plugins.push({
+                        value: plugins[i].identifier,
+                        text: plugins[i].alias || plugins[i].name || plugins[i].identifier,
+                        selected: true,
+                    });
+                }
+            }
+
+            setTimeout(() => {
+                this.$refs.messages.addEventListener("scroll", this.position);
+
+                if (this.bottom && this.$refs.messages) this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
+            }, SCROLL_DELAY);
+
+            this.$action.emit("log", "history");
+            this.loading = false;
         },
 
         updated() {
-            if (this.connected > 0) {
-                if (this.messages.length > 0) {
-                    this.show.loading = false;
-                }
-
-                setTimeout(() => {
-                    if (this.$refs.messages) {
-                        this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
-                    }
-                }, 10);
-            }
-        },
-
-        watch: {
-            filters() {
-                this.expression = new RegExp(`^\\[\\]${this.filters.length > 0 ? `|${this.filters.join("|")}` : ""}`);
-            }
+            if (this.bottom && this.$refs.messages) this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
         },
 
         methods: {
-            refresh() {
-                this.show.loading = true;
+            position() {
+                this.bottom = false;
 
-                this.$emit("refresh");
+                if ((this.$refs.messages.clientHeight + this.$refs.messages.scrollTop) >= this.$refs.messages.scrollHeight) this.bottom = true;
             },
 
-            colorCodeDevice(timestamp, line) {
-                timestamp = new Date(timestamp);
+            mode() {
+                this.debug = !this.debug;
+            },
 
-                let parts = line.split("]");
-                let hostname = parts.shift().replace("[", "");
-                let hash = 0;
-                let hex = null;
+            menu(name) {
+                this.$menu.open(name, {
+                    opener: this.$refs[name],
+                    values: this[name],
+                });
+            },
 
-                line = parts.join("]").trim();
-
-                for (let i = 0; i < hostname.length; i++) {
-                    hash = hostname.charCodeAt(i) + ((hash << 6) - hash);
+            filter(message) {
+                if (!this.debug && message.level === "debug") {
+                    return false;
                 }
 
-                hex = (hash & 0x00FFFFFF).toString(16).toLowerCase();
+                if (!((this.bridges.find((item) => item.value === (message.bridge || "hub")) || {}).selected)) {
+                    return false;
+                }
 
-                const hostnameColor = `#${"000000".substring(0, 6 - hex.length) + hex}`;
+                if (!((this.plugins.find((item) => item.value === (message.plugin || "null")) || {}).selected)) {
+                    return false;
+                }
 
-                if (line.startsWith("[")) {
-                    parts = line.split("]");
+                return true;
+            },
 
-                    let plugin = parts.shift().replace("[", "");
+            async download() {
+                const log = await this.$hoobs.log(5000);
 
-                    hash = 0;
-                    line = parts.join("]").trim();
+                let content = "";
 
-                    const sample = `${plugin}${plugin}`;
+                for (let i = 0; i < log.length; i += 1) {
+                    content += `${new Date(log[i].timestamp).toLocaleString()} `;
 
-                    for (let i = sample.length - 1; i >= 0; i--) {
-                        hash = sample.charCodeAt(i) + ((hash << 6) - hash);
+                    if (log[i].id !== "" && log[i].id !== "hub") {
+                        content += `${log[i].display} `;
                     }
 
-                    hex = (hash & 0x00FFFFFF).toString(16).toLowerCase()
-                    line = `[<span style="color: #${"000000".substring(0, 6 - hex.length) + hex};">${plugin}</span>] ${line}`;
+                    if (log[i].plugin && log[i].plugin !== "") {
+                        content += `${log[i].prefix} `;
+                    }
+
+                    switch (log[i].level) {
+                        case "debug":
+                            content += `[ DEBUG ] ${log[i].message}`;
+                            break;
+
+                        case "error":
+                            content += `[ ERROR ] ${log[i].message}`;
+                            break;
+
+                        case "warn":
+                            content += `[ WARNING ] ${log[i].message}`;
+                            break;
+
+                        default:
+                            content += log[i].message;
+                            break;
+                    }
+
+                    content += "\r\n";
                 }
 
-                return `[<span style="color: ${hostnameColor};">${hostname}</span>] <span style="color: #808080;">${timestamp.format(this.timeFormat)}</span> ${line}`;
-            }
-        }
-    }
+                const link = document.createElement("a");
+
+                this.loading = false;
+
+                link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`;
+                link.download = "log.txt";
+                link.click();
+            },
+        },
+    };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
     #log {
         flex: 1;
         display: flex;
+        background: var(--application-background);
         position: relative;
-        flex-direction: column;
-        margin: 0 20px 20px 0;
-        padding: 0 0 0 7px;
-        background: #262626;
-        text-align: left;
-        font-size: 12px;
         overflow: hidden;
-    }
+        flex-direction: column;
 
-    #log .actions {
-        height: 23px;
-        display: flex;
-        flex-direction: row;
-        padding: 0 0 7px 0;
-        border-bottom: 1px #424242 solid;
-    }
+        .dim {
+            opacity: 0.3;
+        }
 
-    #log .actions .icon,
-    #log .actions .icon:link,
-    #log .actions .icon:active,
-    #log .actions .icon:visited {
-        font-size: 18px;
-        color: #999;
-        margin: 5px 7px 0 0;
-        cursor: pointer;
-    }
+        .messages {
+            flex: 1;
+            padding: 10px 20px 20px 20px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            overflow: auto;
 
-    #log .actions .icon:hover {
-        color: #fff;
-        text-decoration: none;
-    }
-
-    #log .actions .action-seperator {
-        display: inline;
-        margin: 5px 7px 0 0;
-        border-right: 1px #5e5e5e solid;
-        cursor: default;
-    }
-
-    #log .loading {
-        text-align: left;
-        user-select: none;
-        cursor: default;
-    }
-
-    #log .loading .loading-message {
-        font-size: 14px;
-        margin: 7px 0;
-    }
-
-    #log .messages {
-        flex: 1;
-        overflow: auto;
-    }
-
-    #log .messages::-webkit-scrollbar {
-        display: none;
-    }
-
-    #log .messages .message {
-        display: block;
-        unicode-bidi: embed;
-        font-family: monospace;
-        white-space: pre-wrap;
-        color: #d1d1d1;
-    }
-
-    #log .filter-menu {
-        position: absolute;
-        top: 23px;
-        left: 7px;
-        z-index: 1000;
-    }
-
-    #loader {
-        margin: 7em auto;
-        width: 350px;
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
     }
 </style>

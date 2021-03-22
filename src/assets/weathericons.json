@@ -1,0 +1,294 @@
+{
+    "200": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "201": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "202": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "210": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "211": {
+        "label": "weather_thunderstorm",
+        "icon": "thunderstorm"
+    },
+    "212": {
+        "label": "weather_thunderstorm",
+        "icon": "thunderstorm"
+    },
+    "221": {
+        "label": "weather_thunderstorm",
+        "icon": "thunderstorm"
+    },
+    "230": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "231": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "232": {
+        "label": "weather_thunderstorm",
+        "icon": "storm-showers"
+    },
+    "300": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "301": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "302": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "310": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "311": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "312": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "313": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "314": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "321": {
+        "label": "weather_drizzle",
+        "icon": "sprinkle"
+    },
+    "500": {
+        "label": "weather_light_rain",
+        "icon": "rain"
+    },
+    "501": {
+        "label": "weather_rain",
+        "icon": "rain"
+    },
+    "502": {
+        "label": "weather_heavy_rain",
+        "icon": "rain"
+    },
+    "503": {
+        "label": "weather_heavy_rain",
+        "icon": "rain"
+    },
+    "504": {
+        "label": "weather_heavy_rain",
+        "icon": "rain"
+    },
+    "511": {
+        "label": "weather_freezing_rain",
+        "icon": "rain-mix"
+    },
+    "520": {
+        "label": "weather_light_rain",
+        "icon": "showers"
+    },
+    "521": {
+        "label": "weather_rain",
+        "icon": "showers"
+    },
+    "522": {
+        "label": "weather_heavy_rain",
+        "icon": "showers"
+    },
+    "531": {
+        "label": "weather_rain",
+        "icon": "showers"
+    },
+    "600": {
+        "label": "weather_light_snow",
+        "icon": "snow"
+    },
+    "601": {
+        "label": "weather_snow",
+        "icon": "snow"
+    },
+    "602": {
+        "label": "weather_heavy_snow",
+        "icon": "snow"
+    },
+    "611": {
+        "label": "weather_sleet",
+        "icon": "sleet"
+    },
+    "612": {
+        "label": "weather_sleet",
+        "icon": "sleet"
+    },
+    "615": {
+        "label": "weather_rain_snow",
+        "icon": "rain-mix"
+    },
+    "616": {
+        "label": "weather_rain_snow",
+        "icon": "rain-mix"
+    },
+    "620": {
+        "label": "weather_rain_snow",
+        "icon": "rain-mix"
+    },
+    "621": {
+        "label": "weather_rain_snow",
+        "icon": "rain-mix"
+    },
+    "622": {
+        "label": "weather_rain_snow",
+        "icon": "rain-mix"
+    },
+    "701": {
+        "label": "weather_mist",
+        "icon": "sprinkle"
+    },
+    "711": {
+        "label": "weather_smoke",
+        "icon": "smoke"
+    },
+    "721": {
+        "label": "weather_haze",
+        "icon": "haze"
+    },
+    "731": {
+        "label": "weather_sand",
+        "icon": "cloudy-gusts"
+    },
+    "741": {
+        "label": "weather_fog",
+        "icon": "fog"
+    },
+    "751": {
+        "label": "weather_sand",
+        "icon": "cloudy-gusts"
+    },
+    "761": {
+        "label": "weather_dust",
+        "icon": "dust"
+    },
+    "762": {
+        "label": "weather_smog",
+        "icon": "smog"
+    },
+    "771": {
+        "label": "weather_squalls",
+        "icon": "windy"
+    },
+    "781": {
+        "label": "weather_tornado",
+        "icon": "tornado"
+    },
+    "800": {
+        "label": "weather_clear",
+        "icon": "sunny"
+    },
+    "801": {
+        "label": "weather_mostly_clear",
+        "icon": "cloudy"
+    },
+    "802": {
+        "label": "weather_partly_cloudy",
+        "icon": "cloudy"
+    },
+    "803": {
+        "label": "weather_partly_cloudy",
+        "icon": "cloudy"
+    },
+    "804": {
+        "label": "weather_overcast",
+        "icon": "cloudy"
+    },
+    "900": {
+        "label": "weather_tornado",
+        "icon": "tornado"
+    },
+    "901": {
+        "label": "weather_tropical_storm",
+        "icon": "hurricane"
+    },
+    "902": {
+        "label": "weather_hurricane",
+        "icon": "hurricane"
+    },
+    "903": {
+        "label": "weather_cold",
+        "icon": "snowflake-cold"
+    },
+    "904": {
+        "label": "weather_hot",
+        "icon": "hot"
+    },
+    "905": {
+        "label": "weather_windy",
+        "icon": "windy"
+    },
+    "906": {
+        "label": "weather_hail",
+        "icon": "hail"
+    },
+    "951": {
+        "label": "weather_clear",
+        "icon": "sunny"
+    },
+    "952": {
+        "label": "weather_light_breeze",
+        "icon": "cloudy-gusts"
+    },
+    "953": {
+        "label": "weather_light_breeze",
+        "icon": "cloudy-gusts"
+    },
+    "954": {
+        "label": "weather_light_breeze",
+        "icon": "cloudy-gusts"
+    },
+    "955": {
+        "label": "weather_light_breeze",
+        "icon": "cloudy-gusts"
+    },
+    "956": {
+        "label": "weather_strong_breeze",
+        "icon": "cloudy-gusts"
+    },
+    "957": {
+        "label": "weather_high_winds",
+        "icon": "cloudy-gusts"
+    },
+    "958": {
+        "label": "weather_high_winds",
+        "icon": "cloudy-gusts"
+    },
+    "959": {
+        "label": "weather_high_winds",
+        "icon": "cloudy-gusts"
+    },
+    "960": {
+        "label": "weather_thunderstorm",
+        "icon": "thunderstorm"
+    },
+    "961": {
+        "label": "weather_thunderstorm",
+        "icon": "thunderstorm"
+    },
+    "962": {
+        "label": "weather_hurricane",
+        "icon": "cloudy-gusts"
+    }
+}

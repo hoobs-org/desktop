@@ -54,44 +54,50 @@
         },
 
         async created() {
-            this.io.connect(this.current.ip, this.current.port);
-            this.$action.emit("log", "history");
+            if (this.current) {
+                this.io.connect(this.current.ip, this.current.port);
+                this.$action.emit("log", "history");
 
-            this.$store.commit("AUTH:STATE", (await this.$hoobs.auth.status()));
+                this.$store.commit("AUTH:STATE", (await this.$hoobs.auth.status()));
 
-            this.$action.on("io", "connected", () => {
-                setTimeout(async () => {
-                    await Wait();
+                this.$action.on("io", "connected", () => {
+                    setTimeout(async () => {
+                        await Wait();
 
-                    if (this.reload) {
-                        window.location.reload();
-                    } else {
-                        this.loading = false;
-                    }
-                }, SOCKET_RECONNECT_DELAY);
-            });
+                        if (this.reload) {
+                            window.location.reload();
+                        } else {
+                            this.loading = false;
+                        }
+                    }, SOCKET_RECONNECT_DELAY);
+                });
 
-            this.$action.on("io", "disconnected", () => {
-                this.loading = true;
-            });
+                this.$action.on("io", "disconnected", () => {
+                    this.loading = true;
+                });
 
-            this.$action.on("io", "reload", () => {
-                this.reload = true;
-            });
+                this.$action.on("io", "reload", () => {
+                    this.reload = true;
+                });
 
-            this.$dialog.on("open", () => {
-                this.dialogs += 1;
-            });
+                this.$dialog.on("open", () => {
+                    this.dialogs += 1;
+                });
 
-            this.$dialog.on("close", () => {
-                this.dialogs -= 1;
-            });
+                this.$dialog.on("close", () => {
+                    this.dialogs -= 1;
+                });
+            }
         },
 
         async mounted() {
-            await Wait();
+            if (this.current) {
+                await Wait();
 
-            this.loading = false;
+                this.loading = false;
+            } else {
+                this.$router.push({ path: "/login" });
+            }
         },
     };
 </script>

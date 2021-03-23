@@ -21,7 +21,7 @@ export default class Scanner extends EventEmitter {
     constructor(timeout?: number) {
         super();
 
-        this.timeout = timeout || 100;
+        this.timeout = timeout || 500;
         this.stopped = true;
 
         this.total = 0;
@@ -38,7 +38,6 @@ export default class Scanner extends EventEmitter {
             const subnets = this.subnets();
 
             this.emit("start");
-            this.emit("progress", 0);
 
             for (let i = 0; i < subnets.length; i += 1) {
                 if (this.stopped) {
@@ -57,8 +56,6 @@ export default class Scanner extends EventEmitter {
             if (this.stopped) {
                 break;
             } else {
-                this.emit("progress", Math.round((((this.count + 2) * 100) / this.total) * 10) / 10);
-
                 const waits: Promise<void>[] = [];
 
                 waits.push(new Promise((resolve) => {
@@ -133,13 +130,13 @@ export default class Scanner extends EventEmitter {
 
     detect(ip: string, port: number): Promise<{ [key: string]: string | undefined } | undefined> {
         return new Promise((resolve) => {
-            const source = CancelToken.source();
-
-            setTimeout(() => {
-                source.cancel();
-            }, this.timeout);
-
             if (!this.stopped) {
+                const source = CancelToken.source();
+
+                setTimeout(() => {
+                    source.cancel();
+                }, this.timeout);
+
                 Request({
                     method: "get",
                     url: `http://${ip}:${port}/api`,

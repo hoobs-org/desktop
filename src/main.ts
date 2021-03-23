@@ -40,8 +40,6 @@ const markdown = converter();
 hoobs.sdk.config.token.get(() => store.state.session);
 hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", token); });
 
-scanner.on("stop", () => store.commit("IO:SCANNER:STOP"));
-scanner.on("start", () => store.commit("IO:SCANNER:START"));
 scanner.on("device", (data) => store.commit("IO:DEVICE", data));
 
 io.on("log", (data) => store.commit("IO:LOG", data));
@@ -71,11 +69,13 @@ const { current }: any = store.state;
 if (current) hoobs.sdk.config.host.set(current.ip, current.port);
 
 router.beforeEach((to, _from, next) => {
-    hoobs.sdk.auth.validate().then((valid) => {
-        if (["/login", "/setup"].indexOf(to.path) === -1 && !valid) {
-            router.push({ path: "/login", query: { url: to.path } });
-        }
-    });
+    if (store.state.current) {
+        hoobs.sdk.auth.validate().then((valid) => {
+            if (["/login", "/setup"].indexOf(to.path) === -1 && !valid) router.push({ path: "/login", query: { url: to.path } });
+        });
+    } else if (["/login", "/setup"].indexOf(to.path) === -1) {
+        router.push({ path: "/login", query: { url: to.path } });
+    }
 
     next();
 });

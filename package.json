@@ -1,10 +1,10 @@
 {
-    "name": "hoobs",
+    "name": "HOOBS",
     "version": "4.0.1",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service electron:serve",
-        "build": "vue-cli-service electron:build",
+        "build": "vue-cli-service electron:build --mac --win",
         "lint": "vue-cli-service lint",
         "postinstall": "electron-builder install-app-deps",
         "postuninstall": "electron-builder install-app-deps"

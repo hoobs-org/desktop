@@ -8,7 +8,6 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         log: [],
-        scanning: false,
         current: null,
         devices: [],
         bridges: [],
@@ -55,14 +54,6 @@ export default new Vuex.Store({
     },
 
     mutations: {
-        "IO:SCANNER:START": (state: { [key: string]: any }) => {
-            state.scanning = true;
-        },
-
-        "IO:SCANNER:STOP": (state: { [key: string]: any }) => {
-            state.scanning = false;
-        },
-
         "IO:DEVICE": (state: { [key: string]: any }, payload: any) => {
             const index = state.devices.findIndex((item: { [key: string]: any }) => item.mac === payload.mac);
 

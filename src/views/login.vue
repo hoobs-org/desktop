@@ -25,7 +25,7 @@
                     <div class="title">{{ device.ip }}</div>
                     <div class="sub">{{ device.mac }}</div>
                 </div>
-                <div v-if="!$scanner.stopped" class="scanning">
+                <div v-if="scanning" class="scanning">
                     <spinner />
                 </div>
             </div>
@@ -59,6 +59,7 @@
 
         data() {
             return {
+                scanning: false,
                 status: null,
                 loading: false,
                 version: 0,
@@ -73,7 +74,10 @@
         async mounted() {
             this.url = this.$route.query.url || "/";
 
-            if (!this.current) this.$scanner.start(80, 50826);
+            if (!this.current) {
+                this.scanning = true;
+                this.$scanner.start(80, 50826);
+            }
 
             if (this.url.startsWith("/login")) this.url = "/";
             if (this.devices.length === 1) this.select(this.devices[0]);
@@ -86,7 +90,9 @@
                 if (device) {
                     this.$hoobs.config.host.set(device.ip, device.port);
                     this.$scanner.stop();
+                    this.scanning = false;
                 } else {
+                    this.scanning = true;
                     this.$scanner.start(80, 50826);
                 }
 

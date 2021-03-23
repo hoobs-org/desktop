@@ -34,6 +34,7 @@ async function createWindow() {
         },
     });
 
+    window.setTitle("HOOBS");
     state.manage(window);
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {

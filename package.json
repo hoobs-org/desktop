@@ -1,7 +1,11 @@
 {
     "name": "HOOBS",
     "version": "4.0.1",
+    "description": "Interface component for the certified HOOBS stack.",
     "private": true,
+    "author": {
+        "name": "Michael J Kellsy"
+    },
     "scripts": {
         "serve": "vue-cli-service electron:serve",
         "build": "bin/build desktop --lint",

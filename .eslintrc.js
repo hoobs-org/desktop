@@ -190,5 +190,14 @@ module.exports = {
                 "global-require": "off",
             },
         },
+        {
+            files: [
+                "bin/*",
+            ],
+            rules: {
+                "import/no-extraneous-dependencies": "off",
+                "@typescript-eslint/no-var-requires": "off",
+            },
+        },
     ],
 };

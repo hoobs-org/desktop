@@ -100,6 +100,7 @@
                 this.$store.commit("IO:DEVICE:SET", device);
                 this.$theme.load();
 
+                if (this.status === "disabled") this.$store.commit("SESSION:DISABLE");
                 if (this.status === "uninitialized") this.$router.push({ path: "/setup" });
                 if (this.status === "disabled") this.$router.push({ path: "/" });
 

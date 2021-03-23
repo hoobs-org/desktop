@@ -3,7 +3,7 @@
         <context />
         <div v-if="!loading" class="content">
             <list value="identifier" display="display" :values="plugins" :selected="identifier" initial="hub" controller="config" />
-            <div v-if="identifier && identifier !== 'hub'" class="screen">
+            <div v-if="identifier && identifier !== 'hub' && identifier !== 'advanced'" class="screen">
                 <div class="wrapper">
                     <div class="section">{{ plugin.display }}</div>
                     <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs" />
@@ -12,6 +12,14 @@
                         <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
                         <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
                     </div>
+                </div>
+            </div>
+            <div v-else-if="identifier && identifier === 'advanced'" class="screen">
+                <tabs v-if="bridges.length > 0" :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
+                <monaco v-if="bridges.length > 0" class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
+                <div class="row actions">
+                    <div v-if="bridges.length > 0" v-on:click="save" class="button primary">{{ $t("save") }}</div>
+                    <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
                 </div>
             </div>
             <div v-else class="screen">
@@ -55,6 +63,7 @@
     import TabsComponent from "@/components/elements/tabs.vue";
     import ListComponent from "@/components/elements/list.vue";
     import SchemaComponent from "@/components/form.vue";
+    import Monaco from "../components/monaco";
 
     const BRIDGE_RESTART_DELAY = 4000;
 
@@ -70,11 +79,16 @@
             "list": ListComponent,
             "tabs": TabsComponent,
             "schema-form": SchemaComponent,
+            "monaco": Monaco,
         },
 
         computed: {
             user() {
                 return this.$store.state.user;
+            },
+
+            code() {
+                return JSON.stringify(this.working, null, 4);
             },
         },
 
@@ -102,6 +116,9 @@
         data() {
             return {
                 version: 0,
+                theme: "dark",
+                foreground: "999999",
+                background: "141414",
                 intermediate: false,
                 loading: true,
                 dirty: false,
@@ -119,12 +136,33 @@
         },
 
         mounted() {
+            this.$action.off("personalize", "update");
+
+            this.$action.on("personalize", "update", () => {
+                if (this.identifier === "advanced") this.change(this.bridge);
+            });
+
             this.load(this.name && this.name !== "" ? `${this.scope}/${this.name}` : this.scope);
         },
 
         methods: {
             updated(value) {
                 if (JSON.stringify(value) !== JSON.stringify(this.saved)) this.dirty = true;
+            },
+
+            parse(value) {
+                let working;
+
+                try {
+                    working = JSON.parse(value);
+                } catch (_error) {
+                    working = undefined;
+                }
+
+                if (working) {
+                    this.working = working;
+                    this.updated(working);
+                }
             },
 
             async save() {
@@ -159,6 +197,45 @@
                             this.dirty = false;
                             this.change(this.bridge);
                         }
+                    }, BRIDGE_RESTART_DELAY);
+                } else if (this.identifier === "advanced") {
+                    const bridge = await this.$hoobs.bridge(this.bridge);
+                    const plugins = await bridge.plugins.list();
+
+                    const { ...working } = this.working;
+
+                    working.accessories = working.accessories || [];
+                    working.platforms = working.platforms || [];
+
+                    for (let i = 0; i < working.platforms.length; i += 1) {
+                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
+
+                        if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
+                    }
+
+                    for (let i = 0; i < working.accessories.length; i += 1) {
+                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
+
+                        if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
+                    }
+
+                    for (let i = 0; i < working.platforms.length; i += 1) {
+                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
+
+                        if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
+                    }
+
+                    for (let i = 0; i < working.accessories.length; i += 1) {
+                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
+
+                        if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
+                    }
+
+                    await bridge.config.update(working);
+
+                    setTimeout(() => {
+                        this.dirty = false;
+                        this.change(this.bridge);
                     }, BRIDGE_RESTART_DELAY);
                 } else {
                     const bridge = await this.$hoobs.bridge(this.bridge);
@@ -232,6 +309,25 @@
 
                     this.loading = false;
                     this.dirty = false;
+                } else if (this.identifier === "advanced") {
+                    const theme = await this.$hoobs.theme.get(this.$store.state.theme);
+
+                    this.theme = theme.mode;
+                    this.foreground = theme.widget.text.default.replace("#", "");
+                    this.background = "00000000";
+
+                    if (this.foreground.length === 3) {
+                        this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
+                    }
+
+                    if (this.background.length === 3) {
+                        this.background = this.background.split("").map((item) => `${item}${item}`).join("");
+                    }
+
+                    this.saved = await (await this.$hoobs.bridge(bridge)).config.get();
+                    this.working = { ...this.saved };
+                    this.loading = false;
+                    this.dirty = false;
                 } else {
                     const config = await (await this.$hoobs.bridge(bridge)).config.get();
 
@@ -271,6 +367,12 @@
 
                 if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
                     this.change("");
+                } else if (this.identifier === "advanced") {
+                    if (this.bridges.length > 0) {
+                        this.change(((this.bridges || [])[0] || {}).id || "");
+                    } else {
+                        this.loading = false;
+                    }
                 } else {
                     this.plugin = this.plugins.find((item) => item.identifier === identifier);
 
@@ -367,6 +469,11 @@
                     display: this.$t("hub"),
                 });
 
+                this.plugins.push({
+                    identifier: "advanced",
+                    display: this.$t("advanced"),
+                });
+
                 this.switch(identifier);
             },
         },
@@ -425,6 +532,23 @@
                     }
                 }
 
+                .editor {
+                    flex: 1;
+
+                    textarea {
+                        background: transparent;
+                        color: var(--application-input-text);
+                        border: 0 none;
+                        border-radius: 0;
+                        outline: 0 none !important;
+
+                        &:focus {
+                            border-color: #f0f;
+                            border-radius: 0;
+                        }
+                    }
+                }
+
                 .actions {
                     margin: 10px 0 0 0;
                 }
@@ -440,6 +564,25 @@
 
                 .message {
                     margin: 0 auto;
+                }
+            }
+        }
+    }
+</style>
+
+<style lang="scss">
+    #config {
+        .editor {
+            textarea {
+                background: transparent;
+                color: transparent;
+                border: 0 none;
+                border-radius: 0;
+                outline: 0 none !important;
+
+                &:focus {
+                    border: 0 none;
+                    border-radius: 0;
                 }
             }
         }

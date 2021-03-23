@@ -29,6 +29,8 @@
         "identicon.js": "^2.3.3",
         "ip": "^1.1.5",
         "lodash.debounce": "^4.0.8",
+        "monaco-editor": "0.19.3",
+        "monaco-editor-webpack-plugin": "1.8.2",
         "node-arp": "^1.0.6",
         "showdown": "^1.9.1",
         "showdown-highlight": "^2.1.6",

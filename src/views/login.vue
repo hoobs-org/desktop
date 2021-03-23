@@ -59,6 +59,7 @@
 
         data() {
             return {
+                scan: false,
                 scanning: false,
                 status: null,
                 loading: false,
@@ -73,6 +74,7 @@
 
         async mounted() {
             this.url = this.$route.query.url || "/";
+            this.scan = this.$route.query.scan === "true";
 
             if (!this.current) {
                 this.scanning = true;
@@ -80,7 +82,7 @@
             }
 
             if (this.url.startsWith("/login")) this.url = "/";
-            if (this.devices.length === 1) this.select(this.devices[0]);
+            if (!this.scan && this.devices.length === 1) this.select(this.devices[0]);
         },
 
         methods: {

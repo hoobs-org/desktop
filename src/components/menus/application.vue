@@ -14,7 +14,7 @@
         <div v-if="user.permissions.controller" v-on:click="$dialog.open('settings')" class="item">{{ $t("hub_settings") }}</div>
         <div v-on:click="$dialog.open('personalize')" class="item">{{ $t("personalize") }}</div>
         <div v-if="user.permissions.terminal" v-on:click="terminal()" class="item">{{ $t("terminal") }}</div>
-        <div v-if="devices.length > 1" v-on:click="exit()" class="item">{{ $t("devices") }}</div>
+        <div v-on:click="exit()" class="item">{{ $t("devices") }}</div>
         <div v-if="auth" class="seperator"></div>
         <div v-if="auth" v-on:click="logout()" class="item">{{ $t("logout") }}</div>
     </div>
@@ -27,10 +27,6 @@
         computed: {
             user() {
                 return this.$store.state.user;
-            },
-
-            devices() {
-                return this.$store.state.devices;
             },
         },
 
@@ -71,7 +67,7 @@
                 await this.$hoobs.auth.logout();
 
                 this.$store.commit("IO:DEVICE:SET", null);
-                this.$router.push({ path: "/login", query: { url: "/" } });
+                this.$router.push({ path: "/login", query: { scan: "true", url: "/" } });
             },
         },
     };

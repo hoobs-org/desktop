@@ -101,6 +101,16 @@ module.exports = {
         },
         {
             files: [
+                "src/components/monaco.js",
+            ],
+            rules: {
+                "no-unused-expressions": "off",
+                "@typescript-eslint/no-var-requires": "off",
+                "global-require": "off",
+            },
+        },
+        {
+            files: [
                 "*.ts",
             ],
             rules: {
@@ -178,6 +188,15 @@ module.exports = {
             rules: {
                 "import/no-dynamic-require": "off",
                 "global-require": "off",
+            },
+        },
+        {
+            files: [
+                "bin/*",
+            ],
+            rules: {
+                "import/no-extraneous-dependencies": "off",
+                "@typescript-eslint/no-var-requires": "off",
             },
         },
     ],

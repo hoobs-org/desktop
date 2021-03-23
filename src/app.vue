@@ -1,5 +1,5 @@
 <template>
-    <div id="app" :theme="theme">
+    <div id="app" :theme="theme || 'dark'">
         <component :is="$route.meta.layout">
             <router-view class="view" />
         </component>

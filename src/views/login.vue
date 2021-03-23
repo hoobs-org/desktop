@@ -59,6 +59,7 @@
 
         data() {
             return {
+                scan: false,
                 scanning: false,
                 status: null,
                 loading: false,
@@ -73,6 +74,7 @@
 
         async mounted() {
             this.url = this.$route.query.url || "/";
+            this.scan = this.$route.query.scan === "true";
 
             if (!this.current) {
                 this.scanning = true;
@@ -80,7 +82,7 @@
             }
 
             if (this.url.startsWith("/login")) this.url = "/";
-            if (this.devices.length === 1) this.select(this.devices[0]);
+            if (!this.scan && this.devices.length === 1) this.select(this.devices[0]);
         },
 
         methods: {
@@ -100,6 +102,7 @@
                 this.$store.commit("IO:DEVICE:SET", device);
                 this.$theme.load();
 
+                if (this.status === "disabled") this.$store.commit("SESSION:DISABLE");
                 if (this.status === "uninitialized") this.$router.push({ path: "/setup" });
                 if (this.status === "disabled") this.$router.push({ path: "/" });
 

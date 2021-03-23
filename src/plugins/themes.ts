@@ -15,7 +15,11 @@ export function path(theme: string, hoobs?: any | unknown, store?: Store<any>): 
 
         default:
             if (hoobs && store && store.state.current) {
-                return `${hoobs.sdk.config.host.get("themes")}/${theme}/theme.css`;
+                try {
+                    return `${hoobs.sdk.config.host.get("themes")}/${theme}/theme.css`;
+                } catch (_error) {
+                    return "/defaults/dark/theme.css";
+                }
             }
 
             return "/defaults/dark/theme.css";

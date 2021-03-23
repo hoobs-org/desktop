@@ -92,12 +92,27 @@
 
         async mounted() {
             if (this.current) {
-                await Wait();
+                this.$scanner.detect(this.current.ip, this.current.port).then(async (response) => {
+                    if (response) {
+                        await Wait();
 
-                this.loading = false;
+                        this.loading = false;
+                    } else {
+                        this.exit();
+                    }
+                }).catch(() => {
+                    this.exit();
+                });
             } else {
-                this.$router.push({ path: "/login" });
+                this.exit();
             }
+        },
+
+        methods: {
+            exit() {
+                this.$store.commit("IO:DEVICE:SET", null);
+                this.$router.push({ path: "/login", query: { scan: "true", url: "/" } });
+            },
         },
     };
 </script>

@@ -1,5 +1,5 @@
 {
-    "name": "HOOBS",
+    "name": "hoobs",
     "version": "4.0.2",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,

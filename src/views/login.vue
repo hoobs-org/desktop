@@ -21,12 +21,22 @@
                 </div>
             </form>
             <div v-else-if="!loading" class="devices">
-                <div  v-for="(device) in devices" :key="device.mac" v-on:click="select(device)" class="device">
+                <div v-for="(device) in devices" :key="device.mac" v-on:click="select(device)" class="device">
                     <div class="title">{{ device.ip }}</div>
                     <div class="sub">{{ device.mac }}</div>
                 </div>
+                <div v-if="!scanning && devices.length === 0" class="no-device">
+                    <span>
+                        {{ $t("no_devices") }}
+                        <br>
+                        <br>
+                        {{ $t("no_devices_message") }}
+                    </span>
+                </div>
                 <div v-if="scanning" class="scanning">
-                    <spinner />
+                    <div class="progress">
+                        <div class="marker" :style="`width: ${progress}%`"></div>
+                    </div>
                 </div>
             </div>
             <div v-else class="loading">
@@ -36,6 +46,7 @@
                 <div class="copyright">
                     Copyright &copy; {{ (new Date()).getFullYear() }} HOOBS, Inc. All rights reserved.
                 </div>
+                <div v-if="!loading && !current && !scanning" class="button" v-on:click="rescan()">{{ $t("rescan") }}</div>
                 <div v-if="!loading && current" class="button" v-on:click="select(null)">{{ $t("devices") }}</div>
                 <div v-if="!loading && current" class="button primary" v-on:click="login()">{{ $t("login") }}</div>
             </div>
@@ -59,12 +70,13 @@
 
         data() {
             return {
+                url: "/",
                 scan: false,
+                progress: 0,
                 scanning: false,
                 status: null,
                 loading: false,
                 version: 0,
-                url: "/",
                 username: "",
                 password: "",
                 remember: true,
@@ -72,12 +84,25 @@
             };
         },
 
+        created() {
+            this.$scanner.on("start", () => {
+                this.scanning = true;
+            });
+
+            this.$scanner.on("stop", () => {
+                this.scanning = false;
+            });
+
+            this.$scanner.on("progress", (value) => {
+                this.progress = value;
+            });
+        },
+
         async mounted() {
             this.url = this.$route.query.url || "/";
             this.scan = this.$route.query.scan === "true";
 
             if (!this.current) {
-                this.scanning = true;
                 this.$scanner.start(80, 50826);
             }
 
@@ -86,15 +111,17 @@
         },
 
         methods: {
+            rescan() {
+                this.$scanner.start(80, 50826);
+            },
+
             async select(device) {
                 this.loading = true;
 
                 if (device) {
                     this.$hoobs.config.host.set(device.ip, device.port);
                     this.$scanner.stop();
-                    this.scanning = false;
                 } else {
-                    this.scanning = true;
                     this.$scanner.start(80, 50826);
                 }
 
@@ -178,6 +205,9 @@
 
         .devices {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
             margin: 10px 10px 0 10px;
             min-height: 153px;
 
@@ -185,7 +215,28 @@
                 display: flex;
                 flex-direction: row;
                 justify-content: space-around;
-                padding: 40px 20px;
+                padding: 10px 0;
+
+                .progress {
+                    height: 4px;
+                    flex: 1;
+                    display: flex;
+                    background: var(--modal-border);
+
+                    .marker {
+                        height: 4px;
+                        background: var(--modal-highlight);
+                    }
+                }
+            }
+
+            .no-device {
+                flex: 1;
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+                padding: 0 0 10% 0;
+                align-items: center;
             }
 
             .device {

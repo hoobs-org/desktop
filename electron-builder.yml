@@ -1,0 +1,17 @@
+productName: "HOOBS"
+appId: "org.hoobs.desktop"
+
+mac:
+  icon: "build/icon.icns"
+
+dmg:
+  title: "HOOBS"
+  icon: "build/icon.icns"
+  background: "build/background.png"
+  backgroundColor: #141414
+  window:
+    width: 512
+    height: 348
+
+win:
+  icon: "build/icon.ico"

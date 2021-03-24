@@ -91,6 +91,8 @@
         },
 
         async mounted() {
+            this.$scanner.stop();
+
             if (this.current) {
                 this.$scanner.detect(this.current.ip, this.current.port).then(async (response) => {
                     if (response) {

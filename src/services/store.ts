@@ -68,6 +68,11 @@ export default new Vuex.Store({
             state.current = payload;
         },
 
+        "IO:DEVICE:CLEAR": (state: { [key: string]: any }) => {
+            state.current = null;
+            state.devices = [];
+        },
+
         "IO:LOG": (state: { [key: string]: any }, payload: any) => {
             state.log.push(payload);
             state.log = state.log.slice(Math.max(state.log.length - 5000, 0));

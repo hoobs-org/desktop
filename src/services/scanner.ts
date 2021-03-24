@@ -59,6 +59,7 @@ export default class Scanner extends EventEmitter {
             this.errors = 0;
 
             this.emit("start");
+            this.emit("clear");
             this.emit("progress", 0);
 
             const subnets = this.subnets();

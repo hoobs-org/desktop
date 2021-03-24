@@ -8,8 +8,11 @@
             </div>
             <menu-view />
         </div>
-        <div v-else class="loading">
-            <spinner v-if="dialogs <= 0" />
+        <div v-else class="disconnected">
+            <context :login="true" />
+            <div class="loading">
+                <spinner v-if="dialogs <= 0" />
+            </div>
         </div>
         <dialog-view />
     </div>
@@ -141,6 +144,12 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
+        }
+
+        .disconnected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .form {

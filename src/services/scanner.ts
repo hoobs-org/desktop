@@ -1,31 +1,53 @@
 import Request from "axios";
 import EventEmitter from "events";
+import Scan from "evilscan";
 
 import { getMAC } from "node-arp";
 import { CancelToken } from "cancel-token";
 import { networkInterfaces } from "os";
-import { fromLong, toLong, cidrSubnet } from "ip";
+import { cidrSubnet } from "ip";
 import Vue, { VueConstructor } from "vue";
 
+interface Subnet {
+    network: string;
+    broadcast: string;
+    hosts: number;
+}
+
+interface Canidate {
+    ip: string;
+    port: number;
+}
+
+interface Active {
+    ip: string;
+    port: number;
+    application: string;
+    version: string;
+    mac?: string;
+}
+
 export default class Scanner extends EventEmitter {
-    declare timeout: number;
-
     declare stopped: boolean;
-
-    declare timer: NodeJS.Timeout | undefined;
 
     declare total: number;
 
     declare count: number;
 
-    constructor(timeout?: number) {
+    declare errors: number;
+
+    declare timeout: number;
+
+    constructor() {
         super();
 
-        this.timeout = timeout || 500;
         this.stopped = true;
 
         this.total = 0;
         this.count = 0;
+        this.errors = 0;
+
+        this.timeout = 5 * 1000;
     }
 
     async start(...ports: number[]): Promise<void> {
@@ -34,80 +56,74 @@ export default class Scanner extends EventEmitter {
 
             this.total = 0;
             this.count = 0;
-
-            const subnets = this.subnets();
+            this.errors = 0;
 
             this.emit("start");
+            this.emit("progress", 0);
+
+            const subnets = this.subnets();
+            const scanners: Promise<void>[] = [];
+            const canidates: Canidate[] = [];
+
+            this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
+
+            this.count += 1;
+            this.emit("progress", this.count);
 
             for (let i = 0; i < subnets.length; i += 1) {
-                if (this.stopped) {
-                    break;
-                } else {
-                    for (let j = 0; j < ports.length; j += 1) {
-                        this.subnet(subnets[i].start, subnets[i].end, ports[j]);
-                    }
-                }
+                scanners.push(new Promise((resolve) => {
+                    const scan = new Scan({
+                        target: subnets[i].network,
+                        port: ports.join(","),
+                        status: "TROU",
+                        banner: true,
+                    });
+
+                    scan.on("result", (data: { [key: string]: any }) => {
+                        if (data.status === "open") {
+                            canidates.push({ ip: data.ip, port: data.port });
+                        } else {
+                            this.total -= 1;
+                        }
+                    });
+
+                    scan.on("done", () => {
+                        this.count += 1;
+                        this.emit("progress", this.count);
+
+                        resolve();
+                    });
+
+                    scan.run();
+                }));
             }
+
+            Promise.all(scanners).then(async () => {
+                for (let i = 0; i < canidates.length; i += 1) {
+                    if (this.stopped) break;
+
+                    const data = await this.detect(canidates[i].ip, canidates[i].port);
+
+                    if (data) this.emit("device", data);
+
+                    this.count += 1;
+                    this.emit("progress", Math.round((this.count * 100) / this.total));
+                }
+
+                this.stopped = true;
+                this.emit("stop");
+            });
         }
     }
 
-    async subnet(start: number, end: number, port: number): Promise<void> {
-        for (let l = start, r = end; l <= r; l += 1, r -= 1) {
-            if (this.stopped) {
-                break;
-            } else {
-                const waits: Promise<void>[] = [];
-
-                waits.push(new Promise((resolve) => {
-                    this.detect(fromLong(l), port).then((response) => {
-                        if (response) {
-                            this.emit("device", {
-                                ip: fromLong(l),
-                                mac: response.mac,
-                                port,
-                                application: response.application,
-                                version: response.version,
-                            });
-
-                            resolve();
-                        } else {
-                            resolve();
-                        }
-                    });
-                }));
-
-                waits.push(new Promise((resolve) => {
-                    this.detect(fromLong(r), port).then((response) => {
-                        if (response) {
-                            this.emit("device", {
-                                ip: fromLong(r),
-                                mac: response.mac,
-                                port,
-                                application: response.application,
-                                version: response.version,
-                            });
-
-                            resolve();
-                        } else {
-                            resolve();
-                        }
-                    });
-                }));
-
-                await Promise.all(waits);
-
-                this.count += 2;
-
-                if (this.count >= this.total) {
-                    this.emit("stop");
-                }
-            }
-        }
+    stop(): void {
+        this.stopped = true;
+        this.emit("stop");
     }
 
-    subnets(): { [key: string]: number }[] {
+    private subnets(): Subnet[] {
+        const subnets: Subnet[] = [];
         const ifaces = networkInterfaces();
-        const subnets: { [key: string]: number }[] = [];
         const keys = Object.keys(ifaces);
 
         for (let i = 0; i < keys.length; i += 1) {
@@ -115,11 +131,10 @@ export default class Scanner extends EventEmitter {
                 if ((ifaces[keys[i]] || [])[j].family === "IPv4" && !(ifaces[keys[i]] || [])[j].internal) {
                     const details = cidrSubnet((ifaces[keys[i]] || [])[j].cidr || "");
 
-                    this.total += (toLong(details.lastAddress) - toLong(details.firstAddress));
-
                     subnets.push({
-                        start: toLong(details.firstAddress),
-                        end: toLong(details.lastAddress),
+                        network: `${details.networkAddress}/${details.subnetMaskLength}`,
+                        broadcast: details.broadcastAddress,
+                        hosts: details.numHosts,
                     });
                 }
             }
@@ -128,36 +143,36 @@ export default class Scanner extends EventEmitter {
         return subnets;
     }
 
-    detect(ip: string, port: number): Promise<{ [key: string]: string | undefined } | undefined> {
+    detect(ip: string, port: number): Promise<Active | undefined> {
         return new Promise((resolve) => {
-            if (!this.stopped) {
-                const source = CancelToken.source();
+            let data: Active | undefined;
 
-                setTimeout(() => {
-                    source.cancel();
-                }, this.timeout);
+            const source = CancelToken.source();
 
-                Request({
-                    method: "get",
-                    url: `http://${ip}:${port}/api`,
-                    timeout: this.timeout,
-                    cancelToken: source.token,
-                }).then(async (response) => {
-                    if (response && response.data && response.data.application === "hoobsd" && response.data.version) {
-                        resolve({
-                            application: response.data.application,
-                            version: response.data.version,
-                            mac: await this.identify(ip),
-                        });
-                    } else {
-                        resolve(undefined);
-                    }
-                }).catch(() => {
-                    resolve(undefined);
-                });
-            } else {
-                resolve(undefined);
-            }
+            setTimeout(() => {
+                source.cancel();
+            }, this.timeout);
+
+            Request({
+                method: "get",
+                url: `http://${ip}:${port}/api`,
+                timeout: this.timeout,
+                cancelToken: source.token,
+            }).then(async (response) => {
+                if (response && response.data && response.data.application === "hoobsd" && response.data.version) {
+                    data = {
+                        ip,
+                        port,
+                        application: response.data.application,
+                        version: response.data.version,
+                        mac: await this.identify(ip),
+                    };
+                }
+            }).catch(() => {
+                this.errors += 1;
+            }).finally(() => {
+                resolve(data);
+            });
         });
     }
 
@@ -171,21 +186,6 @@ export default class Scanner extends EventEmitter {
                 }
             });
         });
-    }
-
-    stop(): void {
-        this.stopped = true;
-
-        this.total = 0;
-        this.count = 0;
-
-        if (this.timer) {
-            clearTimeout(this.timer);
-        }
-
-        this.timer = undefined;
-
-        this.emit("stop");
     }
 
     install(vue: VueConstructor<Vue>): void {

@@ -1,6 +1,6 @@
 {
     "name": "HOOBS",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,
     "author": {
@@ -30,7 +30,9 @@
         "electron-devtools-installer": "^3.1.0",
         "electron-window-state": "^5.0.3",
         "emojer": "^1.1.5",
+        "evilscan": "^1.8.0",
         "fs-extra": "^9.1.0",
+        "geoip-lite": "^1.4.2",
         "identicon.js": "^2.3.3",
         "ip": "^1.1.5",
         "lodash.debounce": "^4.0.8",

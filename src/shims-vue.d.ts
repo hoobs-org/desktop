@@ -7,3 +7,5 @@ declare module "*.vue" {
 declare module "node-arp";
 
 declare module "emojer";
+
+declare module "evilscan";

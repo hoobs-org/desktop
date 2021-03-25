@@ -50,7 +50,7 @@ export default class Scanner extends EventEmitter {
         this.timeout = 5 * 1000;
     }
 
-    async start(...ports: number[]): Promise<void> {
+    async start(devices: Active[], ...ports: number[]): Promise<void> {
         if (this.stopped) {
             this.stopped = false;
 
@@ -65,6 +65,15 @@ export default class Scanner extends EventEmitter {
             const subnets = this.subnets();
             const scanners: Promise<void>[] = [];
             const canidates: Canidate[] = [];
+            const active = [...devices];
+
+            this.emit("message", "Checking Existing Connections");
+
+            for (let i = 0; i < active.length; i += 1) {
+                const data = await this.detect(active[i].ip, active[i].port);
+
+                if (data) this.emit("device", data);
+            }
 
             this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
 
@@ -101,9 +110,11 @@ export default class Scanner extends EventEmitter {
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
-                    const data = await this.detect(canidates[i].ip, canidates[i].port);
+                    if (active.findIndex((item) => item.ip === canidates[i].ip && item.port === canidates[i].port) === -1) {
+                        const data = await this.detect(canidates[i].ip, canidates[i].port);
 
-                    if (data) this.emit("device", data);
+                        if (data) this.emit("device", data);
+                    }
 
                     this.count += 1;
                     this.emit("progress", Math.round((this.count * 100) / this.total));

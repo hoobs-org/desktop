@@ -160,8 +160,6 @@ export default class Scanner extends EventEmitter {
             const source = CancelToken.source();
 
             setTimeout(() => {
-                this.emit("message", `Request Timeout: ${ip}:${port}`);
-
                 source.cancel();
             }, this.timeout);
 

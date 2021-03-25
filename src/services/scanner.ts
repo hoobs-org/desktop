@@ -72,6 +72,8 @@ export default class Scanner extends EventEmitter {
             this.emit("progress", this.count);
 
             for (let i = 0; i < subnets.length; i += 1) {
+                this.emit("message", `Scanning Network: ${subnets[i].network}`);
+
                 scanners.push(new Promise((resolve) => {
                     const scan = new Scan({
                         target: subnets[i].network,
@@ -100,6 +102,8 @@ export default class Scanner extends EventEmitter {
             }
 
             Promise.all(scanners).then(async () => {
+                this.emit("message", `Checking ${canidates.length} Host(s)`);
+
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
@@ -112,6 +116,8 @@ export default class Scanner extends EventEmitter {
                 }
 
                 this.stopped = true;
+
+                this.emit("message", "Scan Complete");
                 this.emit("stop");
             });
         }
@@ -151,8 +157,12 @@ export default class Scanner extends EventEmitter {
             const source = CancelToken.source();
 
             setTimeout(() => {
+                this.emit("message", "Request Timeout");
+
                 source.cancel();
             }, this.timeout);
+
+            this.emit("message", `Checking: ${ip}:${port}`);
 
             Request({
                 method: "get",
@@ -161,6 +171,8 @@ export default class Scanner extends EventEmitter {
                 cancelToken: source.token,
             }).then(async (response) => {
                 if (response && response.data && response.data.application === "hoobsd" && response.data.version) {
+                    this.emit("message", `Found HOOBS Device: ${ip}:${port}`);
+
                     data = {
                         ip,
                         port,

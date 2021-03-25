@@ -275,11 +275,11 @@
                             setTimeout(() => {
                                 Wait().then(() => {
                                     if (success) {
-                                        this.$dialog.close("bridges");
-                                        this.$router.push(`/config/${this.identifier}`);
+                                        // this.$dialog.close("bridges");
+                                        // this.$router.push(`/config/${this.identifier}`);
                                     } else {
-                                        this.$dialog.close("bridges");
-                                        this.$alert(this.$t("plugin_install_failed"));
+                                        // this.$dialog.close("bridges");
+                                        // this.$alert(this.$t("plugin_install_failed"));
                                     }
                                 });
                             }, SOCKET_RECONNECT_DELAY);

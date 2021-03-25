@@ -231,6 +231,7 @@
 
             .loading {
                 flex: 1;
+                padding: 0 0 4% 0;
             }
         }
     }

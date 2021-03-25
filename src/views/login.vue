@@ -37,6 +37,7 @@
                     <div class="progress">
                         <div class="marker" :style="`width: ${progress}%`"></div>
                     </div>
+                    <div class="scanner-message">{{ message }}</div>
                 </div>
             </div>
             <div v-else class="loading">
@@ -72,6 +73,7 @@
             return {
                 url: "/",
                 scan: false,
+                message: "",
                 progress: 0,
                 scanning: false,
                 status: null,
@@ -95,6 +97,10 @@
 
             this.$scanner.on("progress", (value) => {
                 this.progress = value;
+            });
+
+            this.$scanner.on("message", (value) => {
+                this.message = value;
             });
         },
 
@@ -208,13 +214,12 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            margin: 10px 10px 0 10px;
+            margin: 0 10px;
             min-height: 153px;
 
             .scanning {
                 display: flex;
-                flex-direction: row;
-                justify-content: space-around;
+                flex-direction: column;
                 padding: 10px 0;
 
                 .progress {
@@ -227,6 +232,12 @@
                         height: 4px;
                         background: var(--modal-highlight);
                     }
+                }
+
+                .scanner-message {
+                    font-size: 12px;
+                    margin: 7px 0 0 0;
+                    opacity: 0.8;
                 }
             }
 
@@ -241,6 +252,7 @@
 
             .device {
                 padding: 14px;
+                margin: 10px 0 0 0;
                 border: var(--modal-border) 1px solid;
                 user-select: none;
                 cursor: pointer;

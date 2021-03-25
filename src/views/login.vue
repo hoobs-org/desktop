@@ -35,8 +35,10 @@
                 </div>
                 <div v-if="scanning" class="scanning">
                     <div class="progress">
+                        <div class="marque" :style="`width: ${skip}%`"></div>
                         <div class="marker" :style="`width: ${progress}%`"></div>
                     </div>
+                    <div class="scanner-message">{{ message }}</div>
                 </div>
             </div>
             <div v-else class="loading">
@@ -72,7 +74,10 @@
             return {
                 url: "/",
                 scan: false,
+                message: "",
+                marque: null,
                 progress: 0,
+                skip: 0,
                 scanning: false,
                 status: null,
                 loading: false,
@@ -94,7 +99,28 @@
             });
 
             this.$scanner.on("progress", (value) => {
-                this.progress = value;
+                if (this.marque) clearInterval(this.marque);
+
+                if (value === 0) {
+                    this.marque = setInterval(() => {
+                        if (this.progress < 25 && this.skip < 75) this.progress += 1;
+                        if (this.progress > 0 && this.skip >= 75) this.progress -= 1;
+                        if (this.progress === 25 && this.skip < 75) this.skip += 1;
+                        if (this.skip >= 75) this.skip += 1;
+
+                        if (this.skip === 100) {
+                            this.progress = 0;
+                            this.skip = 0;
+                        }
+                    }, 30);
+                } else {
+                    this.skip = 0;
+                    this.progress = value;
+                }
+            });
+
+            this.$scanner.on("message", (value) => {
+                this.message = value;
             });
         },
 
@@ -208,13 +234,12 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            margin: 10px 10px 0 10px;
+            margin: 0 10px;
             min-height: 153px;
 
             .scanning {
                 display: flex;
-                flex-direction: row;
-                justify-content: space-around;
+                flex-direction: column;
                 padding: 10px 0;
 
                 .progress {
@@ -227,6 +252,17 @@
                         height: 4px;
                         background: var(--modal-highlight);
                     }
+
+                    .marque {
+                        height: 4px;
+                        background: transparent;
+                    }
+                }
+
+                .scanner-message {
+                    font-size: 12px;
+                    margin: 7px 0 0 0;
+                    opacity: 0.8;
                 }
             }
 
@@ -241,6 +277,7 @@
 
             .device {
                 padding: 14px;
+                margin: 10px 0 0 0;
                 border: var(--modal-border) 1px solid;
                 user-select: none;
                 cursor: pointer;

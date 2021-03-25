@@ -110,11 +110,9 @@ export default class Scanner extends EventEmitter {
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
-                    if (active.findIndex((item) => item.ip === canidates[i].ip && item.port === canidates[i].port) === -1) {
-                        const data = await this.detect(canidates[i].ip, canidates[i].port);
+                    const data = await this.detect(canidates[i].ip, canidates[i].port);
 
-                        if (data) this.emit("device", data);
-                    }
+                    if (data) this.emit("device", data);
 
                     this.count += 1;
                     this.emit("progress", Math.round((this.count * 100) / this.total));

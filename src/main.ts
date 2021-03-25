@@ -41,6 +41,7 @@ hoobs.sdk.config.token.get(() => store.state.session);
 hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", token); });
 
 scanner.on("device", (data) => store.commit("IO:DEVICE", data));
+scanner.on("clear", () => store.commit("IO:DEVICE:CLEAR"));
 
 io.on("log", (data) => store.commit("IO:LOG", data));
 io.on("monitor", (data) => store.commit("IO:MONITOR", data));
@@ -48,20 +49,12 @@ io.on("notification", (data) => store.commit("IO:NOTIFICATION", data));
 io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
 io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
 
-io.on("connect", async () => {
-    actions.emit("io", "connected");
-});
-
-io.on("reconnect", async () => {
-    actions.emit("io", "connected");
-});
-
-io.on("disconnect", async () => {
-    actions.emit("io", "disconnected");
-});
+io.on("connect", () => actions.emit("io", "connected"));
+io.on("reconnect", () => actions.emit("io", "connected"));
+io.on("disconnect", () => actions.emit("io", "disconnected"));
 
 actions.on("log", "history", () => {
-    hoobs.sdk.log().then((messages: any) => { store.commit("LOG:HISTORY", messages); });
+    hoobs.sdk.log().then((messages) => store.commit("LOG:HISTORY", messages));
 });
 
 const { current }: any = store.state;

@@ -1,4 +1,12 @@
-import { app, protocol, BrowserWindow } from "electron";
+import {
+    app,
+    shell,
+    protocol,
+    BrowserWindow,
+    MenuItemConstructorOptions,
+    Menu,
+} from "electron";
+
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
@@ -10,6 +18,49 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 async function createWindow() {
+    const template: MenuItemConstructorOptions[] = [];
+
+    if (process.platform === "darwin") {
+        template.push({
+            label: app.name,
+            submenu: [
+                { role: "about" },
+                { type: "separator" },
+                { role: "services" },
+                { type: "separator" },
+                { role: "hide" },
+                { role: "hideOthers" },
+                { role: "unhide" },
+                { type: "separator" },
+                { role: "quit" },
+            ],
+        });
+    }
+
+    template.push({
+        label: "File",
+        submenu: [
+            { role: "reload" },
+            { role: "forceReload" },
+            { type: "separator" },
+            process.platform === "darwin" ? { role: "close" } : { role: "quit" },
+        ],
+    });
+
+    template.push({
+        role: "help",
+        submenu: [
+            {
+                label: "Learn More",
+                click: async () => {
+                    await shell.openExternal("https://support.hoobs.org/docs");
+                },
+            },
+        ],
+    });
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+
     const state = windowState({
         defaultWidth: 1000,
         defaultHeight: 800,

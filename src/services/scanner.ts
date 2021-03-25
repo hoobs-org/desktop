@@ -68,9 +68,6 @@ export default class Scanner extends EventEmitter {
 
             this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
 
-            this.count += 1;
-            this.emit("progress", this.count);
-
             for (let i = 0; i < subnets.length; i += 1) {
                 this.emit("message", `Scanning Network: ${subnets[i].network}`);
 
@@ -91,9 +88,6 @@ export default class Scanner extends EventEmitter {
                     });
 
                     scan.on("done", () => {
-                        this.count += 1;
-                        this.emit("progress", this.count);
-
                         resolve();
                     });
 

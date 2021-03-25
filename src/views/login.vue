@@ -35,6 +35,7 @@
                 </div>
                 <div v-if="scanning" class="scanning">
                     <div class="progress">
+                        <div class="marque" :style="`width: ${skip}%`"></div>
                         <div class="marker" :style="`width: ${progress}%`"></div>
                     </div>
                     <div class="scanner-message">{{ message }}</div>
@@ -74,7 +75,9 @@
                 url: "/",
                 scan: false,
                 message: "",
+                marque: null,
                 progress: 0,
+                skip: 0,
                 scanning: false,
                 status: null,
                 loading: false,
@@ -96,7 +99,24 @@
             });
 
             this.$scanner.on("progress", (value) => {
-                this.progress = value;
+                if (this.marque) clearInterval(this.marque);
+
+                if (value === 0) {
+                    this.marque = setInterval(() => {
+                        if (this.progress < 25 && this.skip < 75) this.progress += 1;
+                        if (this.progress > 0 && this.skip >= 75) this.progress -= 1;
+                        if (this.progress === 25 && this.skip < 75) this.skip += 1;
+                        if (this.skip >= 75) this.skip += 1;
+
+                        if (this.skip === 100) {
+                            this.progress = 0;
+                            this.skip = 0;
+                        }
+                    }, 30);
+                } else {
+                    this.skip = 0;
+                    this.progress = value;
+                }
             });
 
             this.$scanner.on("message", (value) => {
@@ -231,6 +251,11 @@
                     .marker {
                         height: 4px;
                         background: var(--modal-highlight);
+                    }
+
+                    .marque {
+                        height: 4px;
+                        background: transparent;
                     }
                 }
 

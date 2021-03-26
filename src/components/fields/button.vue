@@ -1,7 +1,11 @@
 <template>
     <div id="field">
         <span v-if="schema.description && schema.description !== ''" class="description" v-html="schema.description"></span>
-        <div class="action">
+        <div v-if="schema.title && schema.populated_title" class="action">
+            <div v-if="value" class="button" v-on:click="clear">{{ schema.populated_title }}</div>
+            <div v-else class="button primary" v-on:click="open">{{ schema.title }}</div>
+        </div>
+        <div v-else class="action">
             <div class="button primary" v-on:click="open">{{ schema.title || "Undefined" }}</div>
         </div>
     </div>
@@ -23,6 +27,11 @@
             update(value) {
                 this.$emit("input", value);
                 this.$emit("change", value);
+            },
+
+            clear() {
+                this.$emit("input", undefined);
+                this.$emit("change", undefined);
             },
 
             open() {

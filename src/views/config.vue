@@ -406,8 +406,6 @@
                                     properties: this.plugin.schema.config.properties || this.plugin.schema.config,
                                 };
 
-                                if (this.identifier === "homebridge-gsh" && this.schema.properties.token) this.schema.properties.token.widget = "gsh";
-
                                 if (this.identifier === "homebridge-honeywell-home" && this.schema.properties.credentials.properties.refreshToken) {
                                     delete this.schema.properties.credentials.properties.notice;
 

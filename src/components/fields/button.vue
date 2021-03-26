@@ -36,7 +36,7 @@
             },
 
             open() {
-                let dialog = "dialog";
+                let dialog = "plugin";
 
                 switch (this.schema.action) {
                     case "popup":
@@ -44,7 +44,7 @@
                         break;
 
                     default:
-                        dialog = "dialog";
+                        dialog = "plugin";
                         break;
                 }
 

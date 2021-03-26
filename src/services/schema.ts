@@ -68,9 +68,6 @@ export function merge(first: any, second: any) {
 
 export function component(name: string) {
     switch (name) {
-        case "custom:honeywell":
-            return () => import(/* webpackChunkName: "custom-honeywell" */ "@/partner/honeywell.vue");
-
         case "field:button":
             return ButtonField;
 
@@ -119,8 +116,6 @@ export function component(name: string) {
 }
 
 export function field(schema: { [key: string]: any }) {
-    if (schema.widget === "honeywell") return component("custom:honeywell");
-
     if (schema.widget === "button") return component("field:button");
     if (schema.widget === "textarea") return component("field:textarea");
 

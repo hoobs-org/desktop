@@ -406,12 +406,6 @@
                                     properties: this.plugin.schema.config.properties || this.plugin.schema.config,
                                 };
 
-                                if (this.identifier === "homebridge-honeywell-home" && this.schema.properties.credentials.properties.refreshToken) {
-                                    delete this.schema.properties.credentials.properties.notice;
-
-                                    this.schema.properties.credentials.properties.refreshToken.widget = "honeywell";
-                                }
-
                                 break;
                         }
                     } else {

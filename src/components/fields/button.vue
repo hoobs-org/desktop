@@ -8,8 +8,6 @@
 </template>
 
 <script>
-    const PLUGIN_URL = (process.env.API_URL || process.env.VUE_APP_API || "/api").replace("/api", "/ui/plugin");
-
     export default {
         name: "button-field",
 
@@ -23,7 +21,7 @@
 
         data() {
             return {
-                action: (typeof this[this.schema.action || "dialog"] === "function") ? this[this.schema.action || "dialog"] : () => { /* null */ },
+                action: (this.schema.action || "dialog") === "dialog" ? this.dialog : this.popup,
             };
         },
 
@@ -35,7 +33,7 @@
 
             dialog() {
                 this.$dialog.open("plugin", {
-                    url: `${PLUGIN_URL}/${this.identifier}`,
+                    url: `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`,
                     value: this.value,
                     update: this.update,
                     bridge: this.bridge,
@@ -49,11 +47,16 @@
                 const fetch = () => this.value;
                 const update = (response) => this.update(response);
 
-                const dialog = window.open(`${PLUGIN_URL}/${this.identifier}`, "HOOBS", `toolbar=no,status=no,menubar=no,resizable=yes,width=760,height=760,top=${top},left=${left}`);
+                const dialog = window.open(
+                    `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`,
+                    "HOOBS",
+                    `toolbar=no,status=no,menubar=no,resizable=yes,width=760,height=760,top=${top},left=${left}`,
+                );
 
                 dialog.addEventListener("load", () => {
                     dialog.window.$hoobs = this.$hoobs;
                     dialog.window.$bridge = this.bridge;
+                    dialog.window.$close = () => { dialog.close(); };
 
                     Object.defineProperty(dialog.window, "$value", {
                         get: () => fetch(),

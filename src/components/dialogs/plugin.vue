@@ -29,15 +29,18 @@
             const fetch = () => this.options.value;
             const update = (response) => this.options.update(response);
 
-            this.$refs.frame.addEventListener("load", () => {
-                this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
-                this.$refs.frame.contentWindow.$bridge = this.bridge;
+            setTimeout(() => {
+                this.$refs.frame.addEventListener("load", () => {
+                    this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
+                    this.$refs.frame.contentWindow.$bridge = this.bridge;
+                    this.$refs.frame.contentWindow.$close = () => { this.$dialog.close("plugin"); };
 
-                Object.defineProperty(this.$refs.frame.contentWindow, "$value", {
-                    get: () => fetch(),
-                    set: (response) => update(response),
-                });
-            }, true);
+                    Object.defineProperty(this.$refs.frame.contentWindow, "$value", {
+                        get: () => fetch(),
+                        set: (response) => update(response),
+                    });
+                }, true);
+            }, 10);
         },
     };
 </script>

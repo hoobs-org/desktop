@@ -48,7 +48,6 @@
             },
 
             loader() {
-                this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
                 this.$refs.frame.contentWindow.$bridge = this.options.bridge;
 
                 this.$refs.frame.contentWindow.$close = (reload) => {

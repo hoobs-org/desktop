@@ -42,10 +42,16 @@
                 const token = encodeURIComponent(btoa(JSON.stringify({
                     host: domain[0],
                     port: domain.length > 1 ? parseInt(domain[1], 10) : 80,
+                    bridge: this.bridge,
+                    plugin: this.identifier,
                     token: this.$hoobs.config.token.get(),
                 })));
 
                 switch (this.schema.action) {
+                    case "oauth":
+                        this.$action.emit("window", "open", `${url}?token=${token}`);
+                        break;
+
                     case "window":
                         this.$action.emit("window", "open", `${url}?token=${token}`);
                         break;

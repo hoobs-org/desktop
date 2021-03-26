@@ -30,32 +30,42 @@
         },
 
         mounted() {
-            const fetch = () => this.options.value;
-            const update = (response) => this.options.update(response);
-
             setTimeout(() => {
-                this.$refs.frame.addEventListener("load", () => {
-                    this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
-                    this.$refs.frame.contentWindow.$bridge = this.options.bridge;
-
-                    this.$refs.frame.contentWindow.$close = (reload) => {
-                        this.$dialog.close("plugin");
-
-                        if (reload) this.$action.emit("config", "update");
-                    };
-
-                    Object.defineProperty(this.$refs.frame.contentWindow, "$config", {
-                        get: () => this.options.items,
-                    });
-
-                    Object.defineProperty(this.$refs.frame.contentWindow, "$value", {
-                        get: () => fetch(),
-                        set: (response) => update(response),
-                    });
-                }, true);
+                this.$refs.frame.removeEventListener("load", this.loader);
+                this.$refs.frame.addEventListener("load", this.loader, true);
 
                 this.source = this.options.url;
             }, 100);
+        },
+
+        methods: {
+            fetch() {
+                return this.options.value;
+            },
+
+            commit(value) {
+                this.options.update(value);
+            },
+
+            loader() {
+                this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
+                this.$refs.frame.contentWindow.$bridge = this.options.bridge;
+
+                this.$refs.frame.contentWindow.$close = (reload) => {
+                    this.$dialog.close("plugin");
+
+                    if (reload) this.$action.emit("config", "update");
+                };
+
+                Object.defineProperty(this.$refs.frame.contentWindow, "$config", {
+                    get: () => this.options.items,
+                });
+
+                Object.defineProperty(this.$refs.frame.contentWindow, "$value", {
+                    get: () => this.fetch(),
+                    set: (value) => this.commit(value),
+                });
+            },
         },
     };
 </script>

@@ -38,7 +38,7 @@ const scanner = new Scanner();
 const io = hoobs.sdk.io();
 const markdown = converter();
 
-hoobs.sdk.config.token.get(() => store.state.session);
+hoobs.sdk.config.token.get(() => (store.state.session || ""));
 hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", token); });
 
 scanner.on("device", (data) => store.commit("IO:DEVICE", data));

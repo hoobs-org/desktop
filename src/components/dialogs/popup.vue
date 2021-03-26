@@ -1,5 +1,5 @@
 <template>
-    <iframe id="frame" ref="frame" :src="options.url" frameborder="0"></iframe>
+    <iframe id="frame" ref="frame" :src="source" frameborder="0"></iframe>
 </template>
 
 <script>
@@ -8,6 +8,12 @@
 
         props: {
             options: Object,
+        },
+
+        data() {
+            return {
+                source: "about:blank",
+            };
         },
 
         mounted() {
@@ -29,7 +35,9 @@
                         set: (response) => update(response),
                     });
                 }, true);
-            }, 10);
+
+                this.source = this.options.url;
+            }, 100);
         },
     };
 </script>

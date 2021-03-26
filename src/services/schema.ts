@@ -68,9 +68,6 @@ export function merge(first: any, second: any) {
 
 export function component(name: string) {
     switch (name) {
-        case "custom:ring":
-            return () => import(/* webpackChunkName: "custom-ring" */ "@/partner/ring.vue");
-
         case "custom:gsh":
             return () => import(/* webpackChunkName: "custom-gsh" */ "@/partner/gsh.vue");
 
@@ -125,7 +122,6 @@ export function component(name: string) {
 }
 
 export function field(schema: { [key: string]: any }) {
-    if (schema.widget === "ring") return component("custom:ring");
     if (schema.widget === "gsh") return component("custom:gsh");
     if (schema.widget === "honeywell") return component("custom:honeywell");
 

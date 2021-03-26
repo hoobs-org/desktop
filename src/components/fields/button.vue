@@ -47,7 +47,7 @@
                         dialog = "plugin";
                         break;
                 }
-
+                console.log(this.items);
                 this.$dialog.open(dialog, {
                     url: `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`,
                     value: this.value,

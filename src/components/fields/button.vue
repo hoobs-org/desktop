@@ -37,7 +37,7 @@
 
             open() {
                 const url = `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`;
-                const domain = (this.$hoobs.config.get.host().split("/")[2]).split(":");
+                const domain = (this.$hoobs.config.host.get().split("/")[2]).split(":");
 
                 const token = encodeURIComponent(btoa(JSON.stringify({
                     host: domain[0],

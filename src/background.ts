@@ -98,6 +98,8 @@ async function createWindow() {
     }
 }
 
+app.commandLine.appendSwitch("disable-site-isolation-trials");
+
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit();

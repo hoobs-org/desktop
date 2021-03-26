@@ -18,8 +18,11 @@
                 this.$refs.frame.addEventListener("load", () => {
                     this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
                     this.$refs.frame.contentWindow.$bridge = this.bridge;
-                    this.$refs.frame.contentWindow.$config = this.options.items;
                     this.$refs.frame.contentWindow.$close = () => { this.$dialog.close("plugin"); };
+
+                    Object.defineProperty(this.$refs.frame.contentWindow, "$config", {
+                        get: () => this.options.items,
+                    });
 
                     Object.defineProperty(this.$refs.frame.contentWindow, "$value", {
                         get: () => fetch(),

@@ -36,25 +36,31 @@
             },
 
             open() {
-                let dialog = "plugin";
+                const url = `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`;
+                const domain = (this.$hoobs.config.get.host().split("/")[2]).split(":");
+
+                const token = encodeURIComponent(btoa(JSON.stringify({
+                    host: domain[0],
+                    port: domain.length > 1 ? parseInt(domain[1], 10) : 80,
+                    token: this.$hoobs.config.token.get(),
+                })));
 
                 switch (this.schema.action) {
-                    case "popup":
-                        dialog = "popup";
+                    case "window":
+                        this.$action.emit("window", "open", `${url}?token=${token}`);
                         break;
 
                     default:
-                        dialog = "plugin";
+                        this.$dialog.open("plugin", {
+                            url: `${url}?token=${token}`,
+                            value: this.value,
+                            items: this.items,
+                            update: this.update,
+                            bridge: this.bridge,
+                        });
+
                         break;
                 }
-
-                this.$dialog.open(dialog, {
-                    url: `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`,
-                    value: this.value,
-                    items: this.items,
-                    update: this.update,
-                    bridge: this.bridge,
-                });
             },
         },
     };

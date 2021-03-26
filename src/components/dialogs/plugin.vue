@@ -36,8 +36,13 @@
             setTimeout(() => {
                 this.$refs.frame.addEventListener("load", () => {
                     this.$refs.frame.contentWindow.$hoobs = this.$hoobs;
-                    this.$refs.frame.contentWindow.$bridge = this.bridge;
-                    this.$refs.frame.contentWindow.$close = () => { this.$dialog.close("plugin"); };
+                    this.$refs.frame.contentWindow.$bridge = this.options.bridge;
+
+                    this.$refs.frame.contentWindow.$close = (reload) => {
+                        this.$dialog.close("plugin");
+
+                        if (reload) this.$action.emit("config", "update");
+                    };
 
                     Object.defineProperty(this.$refs.frame.contentWindow, "$config", {
                         get: () => this.options.items,

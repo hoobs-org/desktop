@@ -136,7 +136,12 @@
         },
 
         mounted() {
+            this.$action.off("config", "update");
             this.$action.off("personalize", "update");
+
+            this.$action.on("config", "update", () => {
+                this.change(this.bridge);
+            });
 
             this.$action.on("personalize", "update", () => {
                 if (this.identifier === "advanced") this.change(this.bridge);

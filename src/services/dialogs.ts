@@ -38,10 +38,6 @@ export default new Dialogs([
         component: () => import(/* webpackChunkName: "dialog-plugin" */ "@/components/dialogs/plugin.vue"),
     },
     {
-        name: "popup",
-        component: () => import(/* webpackChunkName: "dialog-popup" */ "@/components/dialogs/popup.vue"),
-    },
-    {
         name: "accessory",
         component: () => import(/* webpackChunkName: "dialog-accessory" */ "@/components/dialogs/accessory.vue"),
     },

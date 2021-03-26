@@ -18,6 +18,7 @@
         props: {
             schema: Object,
             value: [Object, String, Number, Boolean, Array],
+            items: [Object, Array],
             title: String,
             bridge: String,
             identifier: String,
@@ -50,6 +51,7 @@
                 this.$dialog.open(dialog, {
                     url: `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`,
                     value: this.value,
+                    items: this.items,
                     update: this.update,
                     bridge: this.bridge,
                 });

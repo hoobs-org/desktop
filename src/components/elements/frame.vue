@@ -61,7 +61,7 @@
                 padding: 10px;
                 color: #515151;
                 background: #fff;
-                border-top: 7px var(--modal-highlight) solid;
+                border-top: 0 none;
                 box-shadow: var(--elevation);
                 -ms-overflow-style: none;
                 scrollbar-width: none;

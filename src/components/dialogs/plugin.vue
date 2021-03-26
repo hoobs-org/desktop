@@ -3,9 +3,7 @@
         <div id="plugin">
             <div class="content">
                 <iframe ref="frame" :src="options.url" class="frame" frameborder="0"></iframe>
-            </div>
-            <div class="actions modal">
-                <div class="button" v-on:click="$dialog.close('plugin')">{{ $t("cancel") }}</div>
+                <icon class="icon" name="close" v-on:click="$dialog.close('plugin')" />
             </div>
         </div>
     </modal-frame>
@@ -49,11 +47,26 @@
     #plugin {
         flex: 1;
         display: flex;
+        position: relative;
         flex-direction: column;
         margin: 0 0 0 10px;
 
         .frame {
             flex: 1;
+        }
+
+        .icon {
+            height: 20px;
+            position: absolute;
+            top: -12px;
+            right: -3px;
+            opacity: 0.7;
+            cursor: pointer;
+            user-select: none;
+
+            &:hover {
+                opacity: 1;
+            }
         }
 
         .button {

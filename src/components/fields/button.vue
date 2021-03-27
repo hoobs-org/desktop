@@ -44,7 +44,7 @@
                     port: domain.length > 1 ? parseInt(domain[1], 10) : 80,
                     bridge: this.bridge,
                     plugin: this.identifier,
-                    token: this.$hoobs.config.token.get(),
+                    token: this.$hoobs.config.token.authorization,
                 })));
 
                 switch (this.schema.action) {

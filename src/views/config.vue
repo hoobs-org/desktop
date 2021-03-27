@@ -329,7 +329,16 @@
                         this.background = this.background.split("").map((item) => `${item}${item}`).join("");
                     }
 
-                    this.saved = await (await this.$hoobs.bridge(bridge)).config.get();
+                    this.saved = (await (await this.$hoobs.bridge(bridge)).config.get()) || {};
+
+                    for (let i = 0; i < (this.saved.accessories || []).length; i += 1) {
+                        delete this.saved.accessories[i].plugin_map;
+                    }
+
+                    for (let i = 0; i < (this.saved.platforms || []).length; i += 1) {
+                        delete this.saved.platforms[i].plugin_map;
+                    }
+
                     this.working = { ...this.saved };
                     this.loading = false;
                     this.dirty = false;

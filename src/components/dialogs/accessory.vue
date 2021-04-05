@@ -20,6 +20,9 @@
                         <div v-on:click="() => { show.icons = true; }" class="button">{{ $t("change") }}</div>
                     </div>
                     <div v-if="plugin" class="row section">{{ $t("plugin") }}</div>
+                    <div v-if="plugin" class="row plugin">
+                        <span>{{ $hoobs.repository.title(plugin) }}</span>
+                    </div>
                     <div v-if="plugin" class="row">
                         <div v-on:click="configure" class="button">{{ $t("configuration") }}</div>
                     </div>
@@ -284,6 +287,15 @@
 
                 .title {
                     margin: 14px 0 0 0;
+                }
+
+                .plugin {
+                    margin: 0 0 10px 0;
+                    align-items: center;
+
+                    span {
+                        font-size: 20px;
+                    }
                 }
 
                 .current-room {

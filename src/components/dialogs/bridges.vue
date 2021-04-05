@@ -19,7 +19,7 @@
                     <p v-if="bridges.length > 0">
                         {{ $t("plugin_install_bridge") }}
                     </p>
-                    <div v-if="bridges.length > 0">
+                    <div v-if="bridges.length > 0" class="bridge-list">
                         <radio v-for="(bridge, index) in bridges" :key="`bridge:${index}`" id="current" name="current" :title="bridge.display" v-model="current" :value="bridge.id" />
                     </div>
                 </form>
@@ -32,7 +32,7 @@
                     <p>
                         {{ $t("plugin_uninstall_bridge") }}
                     </p>
-                    <div>
+                    <div class="bridge-list">
                         <radio v-for="(bridge, index) in bridges" :key="`bridge:${index}`" id="current" name="current" :title="bridge.display" v-model="current" :value="bridge.id" />
                     </div>
                 </form>
@@ -218,11 +218,30 @@
         display: flex;
         flex-direction: column;
         margin: 0 0 0 10px;
+        overflow: hidden;
 
         .full {
             flex: 1;
             margin: 0 10px 10px 0;
             justify-content: space-around;
+        }
+
+        .content {
+            overflow: hidden;
+
+            .form {
+                overflow: hidden;
+            }
+
+            .bridge-list {
+                overflow: auto;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+            }
         }
 
         .status {

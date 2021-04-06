@@ -1,5 +1,5 @@
 <template>
-    <div id="field">
+    <div v-if="running" id="field">
         <span v-if="schema.description && schema.description !== ''" class="description" v-html="schema.description"></span>
         <div v-if="schema.title && schema.populated_title" class="action">
             <div v-if="value" class="button" v-on:click="clear">{{ schema.populated_title }}</div>
@@ -22,6 +22,12 @@
             title: String,
             bridge: String,
             identifier: String,
+        },
+
+        computed: {
+            running() {
+                return (this.$store.state.bridges.find((item) => item.id === this.bridge) || {}).running || false;
+            },
         },
 
         methods: {

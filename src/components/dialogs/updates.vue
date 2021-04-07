@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="actions modal">
-                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("cancel") }}</div>
+                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("ok") }}</div>
             </div>
         </div>
     </modal>

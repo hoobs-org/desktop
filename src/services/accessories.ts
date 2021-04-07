@@ -24,6 +24,9 @@ export function types(accessory: { [key: string]: any }): string | undefined {
         case "security_system":
             return "security-accessory";
 
+        case "valve":
+            return "sprinkler-accessory";
+
         case "window_covering":
             return "blind-accessory";
 
@@ -62,6 +65,7 @@ export function accessories(): { [key: string]: () => any } {
         "switch-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/switch.vue"),
         "garage-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/garage.vue"),
         "security-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/security.vue"),
+        "sprinkler-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/sprinkler.vue"),
         "thermostat-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/thermostat.vue"),
         "brightness-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/brightness.vue"),
         "unavailable-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/unavailable.vue"),

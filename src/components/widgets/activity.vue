@@ -43,7 +43,7 @@
                     name: `${this.$t("cpu")} ${(this.cpu || {}).used || 0}%`,
                     data: this.cpu.history,
                 }, {
-                    name: `${this.$t("memory")} ${(this.memory || {}).load || 0}% (${((this.memory || {}).used || {}).value || 0} ${((this.memory || {}).used || {}).units || "MB"})`,
+                    name: `${this.$t("memory")} ${(this.memory || {}).load || 0}%`,
                     data: this.memory.history,
                 }];
             },

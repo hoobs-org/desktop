@@ -34,6 +34,10 @@
             <form v-else-if="subject" class="screen form">
                 <div class="wrapper">
                     <div class="row title">{{ display }}</div>
+                    <div class="row section">{{ $t("memory") }}</div>
+                    <div class="row">
+                        {{ heap }}
+                    </div>
                     <div class="row section">{{ $t("pairing") }}</div>
                     <div v-if="!loading && running && (status || {}).setup_id" class="row">
                         <p style="margin-top: 0">{{ $t("pairing_description") }}</p>
@@ -129,6 +133,17 @@
 
             running() {
                 return (this.$store.state.bridges.find((item) => item.id === this.id) || {}).running || false;
+            },
+
+            heap() {
+                const bytes = (this.$store.state.bridges.find((item) => item.id === this.id) || {}).heap || 0;
+                const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+                if (bytes === 0) return "0 Bytes";
+
+                const power = Math.floor(Math.log(bytes) / Math.log(1024));
+
+                return `${parseFloat((bytes / (1024 ** power)).toFixed(1))} ${sizes[power]}`;
             },
         },
 

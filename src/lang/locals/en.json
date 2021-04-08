@@ -219,7 +219,6 @@
         "plugin_uninstall_failed": "Unable to uninstall plugin. Please try again.",
         "plugin_uninstall_warning": "Are you sure you want to uninstall this plugin?",
         "plugin_update": "Update",
-        "plugin_updates": "plugin update(s)",
         "popular_plugins": "Popular Plugins",
         "presence_detected": "Presence Detected",
         "privacy_policy": "Privacy Policy",

@@ -77,9 +77,10 @@
             },
 
             memory() {
-                const bytes = (this.$store.state.heap || 0) + this.$store.state.bridges.map((item) => item.heap || 0).reduce((accumulator, item) => accumulator + item);
+                let bytes = this.$store.state.heap || 0;
                 const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
+                if (this.$store.state.bridges && this.$store.state.bridges.length > 0) bytes += this.$store.state.bridges.map((item) => item.heap || 0).reduce((accumulator, item) => accumulator + item);
                 if (bytes === 0) return "0 Bytes";
 
                 const power = Math.floor(Math.log(bytes) / Math.log(1024));

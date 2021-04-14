@@ -1,7 +1,7 @@
 <template>
     <div id="widget">
         <div class="title">{{ $t("cpu") }}</div>
-        <div class="value">{{ temp ? `${temp}&#8451;` : "N/A" }}</div>
+        <div class="value">{{ temp ? `${temp}&deg;C` : "N/A" }}</div>
     </div>
 </template>
 

@@ -53,13 +53,13 @@
                 </draggable>
                 <div v-else class="devices">
                     <div v-if="features.off" class="device">
-                        <off-accessory :id="id" />
+                        <off-accessory :id="id" :room="current" />
                     </div>
                     <div v-if="features.light || features.brightness" class="device">
-                        <brightness-accessory :id="id" :features="features" />
+                        <brightness-accessory :id="id" :room="current" :features="features" />
                     </div>
                     <div v-if="features.hue" class="device">
-                        <hue-accessory :id="id" />
+                        <hue-accessory :id="id" :room="current" />
                     </div>
                     <div v-for="(accessory, index) in accessories" :key="`accessory:${index}`" class="device">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
@@ -123,6 +123,7 @@
                 key: 1,
                 version: 0,
                 loading: true,
+                current: null,
                 locked: {
                     rooms: true,
                     accessories: true,
@@ -216,7 +217,7 @@
                 this.accessories = [];
                 this.display = "";
 
-                await this.loadRooms();
+                if (!this.rooms || this.rooms.length === 0) await this.loadRooms();
 
                 this.features.off = false;
 
@@ -228,23 +229,21 @@
                     const index = this.rooms.findIndex((item) => item.id === this.room);
 
                     if (index >= 0) {
-                        const room = await this.$hoobs.room(this.rooms[index].id);
-
-                        this.display = room.name || this.$t(room.id);
+                        this.current = await this.$hoobs.room(this.rooms[index].id);
+                        this.display = this.current.name || this.$t(this.current.id);
                     }
                 } else if (id !== "add") {
                     let index = this.rooms.findIndex((item) => item.id === id);
 
                     if (index === -1 && this.rooms.length > 0) index = 0;
 
-                    if (index >= 0) {
-                        const room = await this.$hoobs.room(this.rooms[index].id);
-
-                        this.characteristics = room.characteristics || [];
-                        this.accessories = room.accessories || [];
-                        this.identifier = room.id;
-                        this.display = room.name || this.$t(room.id);
-                        this.types = room.types || [];
+                    if (index >= 0 && this.rooms[index].id && this.rooms[index].id !== "") {
+                        this.current = await this.$hoobs.room(this.rooms[index].id);
+                        this.characteristics = this.current.characteristics || [];
+                        this.accessories = this.current.accessories || [];
+                        this.identifier = this.current.id;
+                        this.display = this.current.name || this.$t(this.current.id);
+                        this.types = this.current.types || [];
 
                         this.features.off = this.characteristics.indexOf("off") >= 0;
 
@@ -274,9 +273,7 @@
                 this.$confirm(this.$t("remove"), this.$t("remove_remove_warning"), async () => {
                     this.intermediate = true;
 
-                    const room = await this.$hoobs.room(this.room);
-
-                    if (room.id === this.room) await room.remove();
+                    if (this.current && this.current.id === this.room) await this.current.remove();
 
                     this.$router.push({ path: "/accessories" });
                 });
@@ -285,9 +282,7 @@
             async update() {
                 this.intermediate = true;
 
-                const room = await this.$hoobs.room(this.room);
-
-                if (room.id === this.room) await room.set("name", this.display);
+                if (this.current && this.current.id === this.room) await this.current.set("name", this.display);
 
                 this.$router.push({ path: `/accessories/${this.room}` });
             },

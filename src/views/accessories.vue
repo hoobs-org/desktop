@@ -81,15 +81,12 @@
 
 <script>
     import Sanitize from "@hoobs/sdk/lib/sanitize";
-    import { Wait } from "@hoobs/sdk/lib/wait";
 
     import DraggableComponent from "vuedraggable";
     import ListComponent from "@/components/elements/list.vue";
 
     import Validators from "../services/validators";
     import { accessories, types } from "../services/accessories";
-
-    const SOCKET_RECONNECT_DELAY = 500;
 
     export default {
         name: "accessories",
@@ -275,6 +272,8 @@
 
                     if (this.current && this.current.id === this.room) await this.current.remove();
 
+                    await this.loadRooms();
+
                     this.$router.push({ path: "/accessories" });
                 });
             },
@@ -283,6 +282,8 @@
                 this.intermediate = true;
 
                 if (this.current && this.current.id === this.room) await this.current.set("name", this.display);
+
+                await this.loadRooms();
 
                 this.$router.push({ path: `/accessories/${this.room}` });
             },
@@ -294,13 +295,9 @@
 
                 if (validation.valid) {
                     await this.$hoobs.rooms.add(this.display);
+                    await this.loadRooms();
 
-                    setTimeout(async () => {
-                        await Wait();
-
-                        this.rooms = await this.$hoobs.rooms.list();
-                        this.$router.push({ path: `/accessories/${this.rooms.find((item) => item.id === Sanitize(this.display)).id}` });
-                    }, SOCKET_RECONNECT_DELAY);
+                    this.$router.push({ path: `/accessories/${this.rooms.find((item) => item.id === Sanitize(this.display)).id}` });
                 } else {
                     this.intermediate = false;
                     this.$alert(this.$t(validation.error));

@@ -7,8 +7,8 @@
             </router-link>
             <div v-if="rooms.length > 0" class="seperator"></div>
             <icon v-if="rooms.length > 0" v-on:click.stop="$dialog.open('hidden')" :title="$t('hidden_accessories')" name="eye-off" class="icon" />
-            <icon v-if="rooms.length > 0 && locked.rooms" v-on:click.stop="() => { locked.rooms = !locked.rooms}" :title="$t('sort_rooms')" name="lock" class="icon" />
-            <icon v-else-if="rooms.length > 0" v-on:click.stop="() => { locked.rooms = !locked.rooms}" :title="$t('sort_rooms')" name="lock-open-variant" class="icon" />
+            <icon v-if="rooms.length > 0 && locked.rooms" v-on:click.stop="unlock" :title="$t('sort_rooms')" name="lock" class="icon" />
+            <icon v-else-if="rooms.length > 0" v-on:click.stop="lock" :title="$t('sort_rooms')" name="lock-open-variant" class="icon" />
         </context>
         <div v-if="!loading && rooms.length > 0" class="content">
             <list value="id" display="name" :values="filtered" :selected="id" :initial="rooms[0].id" :sort="!locked.rooms" v-on:update="layout" controller="accessories" />
@@ -184,7 +184,16 @@
                 }
 
                 await Promise.all(updates);
+            },
+
+            async lock() {
                 await this.loadRooms();
+
+                this.locked.rooms = !this.locked.rooms;
+            },
+
+            unlock() {
+                this.locked.rooms = !this.locked.rooms;
             },
 
             async sort() {

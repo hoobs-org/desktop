@@ -265,6 +265,7 @@
         .settings {
             display: none;
             position: absolute;
+            color: #fff;
             justify-content: space-around;
             align-items: center;
             padding: 3px;
@@ -274,7 +275,7 @@
 
             .icon {
                 height: 22px;
-                opacity: 0.3;
+                opacity: 0.4;
             }
 
             &:hover {

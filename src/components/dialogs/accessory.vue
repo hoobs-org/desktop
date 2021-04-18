@@ -33,6 +33,10 @@
                         <div v-on:click="() => { show.rooms = true; }" class="button">{{ $t("room_assign") }}</div>
                         <div v-if="room !== 'default'" v-on:click="assign()" class="button">{{ $t("remove") }}</div>
                     </div>
+                    <div v-if="options.unknown" class="row section">{{ $t("accessory_data") }}</div>
+                    <div v-if="options.unknown" class="row">
+                        <div v-on:click="dump" class="button">{{ $t("download") }}</div>
+                    </div>
                 </div>
             </div>
             <div v-else class="loading">
@@ -58,6 +62,7 @@
 
 <script>
     import { Wait } from "@hoobs/sdk/lib/wait";
+    import { saveAs } from "file-saver";
 
     import IconsComponent from "@/components/dialogs/icons.vue";
     import RoomsComponent from "@/components/dialogs/rooms.vue";
@@ -260,6 +265,10 @@
                 this.$dialog.close("accessory");
                 this.$action.emit("dashboard", "update");
                 this.$router.push({ path: "/" });
+            },
+
+            dump() {
+                saveAs(new Blob([JSON.stringify(this.accessory, null, 4)], { type: "application/json" }), "accessory.json");
             },
         },
     };

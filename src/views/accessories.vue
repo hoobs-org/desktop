@@ -226,7 +226,6 @@
                 if (!this.rooms || this.rooms.length === 0) await this.loadRooms();
 
                 this.features.off = false;
-
                 this.features.light = false;
                 this.features.brightness = false;
                 this.features.hue = false;
@@ -251,15 +250,20 @@
                         this.display = this.current.name || this.$t(this.current.id);
                         this.types = this.current.types || [];
 
-                        this.features.off = this.characteristics.indexOf("off") >= 0;
-
                         for (let i = 0; i < this.accessories.length; i += 1) {
                             this.accessories[i].control = types(this.accessories[i]);
                         }
 
-                        this.features.light = this.types.indexOf("lightbulb") && this.characteristics.indexOf("on") >= 0;
-                        this.features.brightness = this.types.indexOf("lightbulb") && this.characteristics.indexOf("brightness") >= 0;
-                        this.features.hue = this.characteristics.indexOf("hue") >= 0;
+                        this.features.off = (
+                            this.types.indexOf("light") >= 0
+                            || this.types.indexOf("switch") >= 0
+                            || this.types.indexOf("television") >= 0
+                            || this.types.indexOf("fan") >= 0
+                        ) && this.characteristics.indexOf("off") >= 0;
+
+                        this.features.light = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
+                        this.features.brightness = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
+                        this.features.hue = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
                     }
                 }
 

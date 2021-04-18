@@ -41,6 +41,7 @@ export default new Vuex.Store({
         },
         auth: false,
         notifications: [],
+        snapshots: {},
         latest: null,
         navigation: false,
         accessory: null,
@@ -144,6 +145,10 @@ export default new Vuex.Store({
             };
 
             state.notifications.unshift(notification);
+        },
+
+        "IO:SNAPSHOT:UPDATE": (state: { [key: string]: any }, payload: any) => {
+            state.snapshots[payload.id] = payload.data;
         },
 
         "IO:ACCESSORY:CHANGE": (state: { [key: string]: any }, payload: any) => {

@@ -15,6 +15,9 @@ export function types(accessory: { [key: string]: any }): string | undefined {
         case "lock":
             return "lock-accessory";
 
+        case "camera":
+            return "camera-accessory";
+
         case "thermostat":
             return "thermostat-accessory";
 
@@ -61,6 +64,7 @@ export function accessories(): { [key: string]: () => any } {
         "lock-accessory": () => import(/* webpackChunkName: "accessory-lock" */ "@/components/accessories/lock.vue"),
         "light-accessory": () => import(/* webpackChunkName: "accessory-light" */ "@/components/accessories/light.vue"),
         "blind-accessory": () => import(/* webpackChunkName: "accessory-blind" */ "@/components/accessories/blind.vue"),
+        "camera-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/camera.vue"),
         "sensor-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/sensor.vue"),
         "switch-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/switch.vue"),
         "garage-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/garage.vue"),

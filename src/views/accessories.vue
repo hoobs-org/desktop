@@ -46,7 +46,7 @@
                     <router-link v-if="identifier !== 'default'" :to="`/accessories/edit/${id || rooms[0].id}`" :title="$t('room_settings')" class="edit-room"><icon name="pencil" class="icon" /></router-link>
                 </div>
                 <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
-                    <div v-for="(accessory, index) in accessories" :key="`accessory:${index}`" class="device editing">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type !== 'camera')" :key="`accessory:${index}`" class="device editing">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
                         <div v-if="accessory.control" class="device-cover"></div>
                     </div>
@@ -61,7 +61,18 @@
                     <div v-if="features.hue" class="device">
                         <hue-accessory :id="id" :room="current" />
                     </div>
-                    <div v-for="(accessory, index) in accessories" :key="`accessory:${index}`" class="device">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type !== 'camera')" :key="`accessory:${index}`" class="device">
+                        <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
+                    </div>
+                </div>
+                <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type === 'camera')" :key="`accessory:${index}`" class="camera editing">
+                        <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
+                        <div v-if="accessory.control" class="device-cover"></div>
+                    </div>
+                </draggable>
+                <div v-else class="devices">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type === 'camera')" :key="`accessory:${index}`" class="camera">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
                     </div>
                 </div>
@@ -385,6 +396,33 @@
                         padding: 10px 10px 10px 10px;
                         position: relative;
                         width: 155px;
+                        user-select: none;
+
+                        &.editing {
+                            background: var(--widget-background);
+
+                            &:hover {
+                                opacity: 1;
+                            }
+                        }
+
+                        .device-cover {
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            border: 1px var(--application-border) solid;
+                            border-radius: 4px;
+                            top: 0;
+                            left: 0;
+                            z-index: 200;
+                        }
+                    }
+
+                    .camera {
+                        margin: 0 0 20px 20px;
+                        padding: 10px 10px 10px 10px;
+                        position: relative;
+                        width: 480px;
                         user-select: none;
 
                         &.editing {

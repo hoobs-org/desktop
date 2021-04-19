@@ -228,7 +228,7 @@
             async add() {
                 const config = await this.$hoobs.config.get();
                 const items = JSON.parse(JSON.stringify(this.items));
-                const widget = layout("accessory-widget");
+                const widget = this.options.camera ? layout("camera-widget") : layout("accessory-widget");
 
                 config.dashboard = config.dashboard || {};
 
@@ -251,7 +251,14 @@
             async remove() {
                 const config = await this.$hoobs.config.get();
                 const items = JSON.parse(JSON.stringify(this.items));
-                const index = items.findIndex((item) => item.component === "accessory-widget" && item.i === this.accessory.accessory_identifier);
+
+                let index = -1;
+
+                if (this.options.camera) {
+                    index = items.findIndex((item) => item.component === "camera-widget" && item.i === this.accessory.accessory_identifier);
+                } else {
+                    index = items.findIndex((item) => item.component === "accessory-widget" && item.i === this.accessory.accessory_identifier);
+                }
 
                 config.dashboard = config.dashboard || {};
 

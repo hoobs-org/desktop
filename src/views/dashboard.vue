@@ -150,9 +150,6 @@
             }
 
             .widget {
-                color: var(--widget-text);
-                background: var(--widget-background);
-                backdrop-filter: var(--transparency);
                 border-radius: 0;
                 box-sizing: border-box;
                 touch-action: none;

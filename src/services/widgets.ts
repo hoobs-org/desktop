@@ -56,6 +56,11 @@ export const initial = [{
 
 export function layout(name: string): { [key: string]: any } | undefined {
     switch (name) {
+        case "camera-widget":
+            return {
+                x: 0, y: 0, w: 23, h: 22, component: "camera-widget",
+            };
+
         case "accessory-widget":
             return {
                 x: 0, y: 0, w: 8, h: 16, component: "accessory-widget",
@@ -118,6 +123,7 @@ export function layout(name: string): { [key: string]: any } | undefined {
 
 export function widgets(): { [key: string]: () => any } {
     return {
+        "camera-widget": () => import(/* webpackChunkName: "widget-camera" */ "@/components/widgets/camera.vue"),
         "accessory-widget": () => import(/* webpackChunkName: "widget-accessory" */ "@/components/widgets/accessory.vue"),
         "activity-widget": () => import(/* webpackChunkName: "widget-activity" */ "@/components/widgets/activity.vue"),
         "cpu-widget": () => import(/* webpackChunkName: "widget-cpu" */ "@/components/widgets/cpu.vue"),

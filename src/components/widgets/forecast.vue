@@ -66,6 +66,9 @@
         flex-direction: column;
         padding: 20px 6px 20px 20px;
         position: relative;
+        color: var(--widget-text);
+        background: var(--widget-background);
+        backdrop-filter: var(--transparency);
         cursor: default;
 
         .setup {

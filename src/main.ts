@@ -1,5 +1,6 @@
 import hoobs from "@hoobs/sdk";
 import Vue from "vue";
+import { shell } from "electron";
 
 import IconComponent from "@/components/elements/icon.vue";
 import ModalComponent from "@/components/elements/modal.vue";
@@ -55,6 +56,10 @@ io.on("disconnect", () => actions.emit("io", "disconnected"));
 
 actions.on("log", "history", () => {
     hoobs.sdk.log().then((messages) => store.commit("LOG:HISTORY", messages));
+});
+
+actions.on("window", "open", (url) => {
+    shell.openExternal(url);
 });
 
 const { current }: any = store.state;

@@ -37,7 +37,7 @@
                 </tr>
                 <tr>
                     <td>{{ $t("memory") }}</td>
-                    <td>{{ memory.load || 0 }}%</td>
+                    <td>{{ memory }} ({{ heap }})</td>
                 </tr>
                 <tr v-for="(value, index) in Object.keys(system)" :key="`value:${index}`">
                     <td>{{ $t(`system_${value}`) }}</td>
@@ -65,8 +65,27 @@
                 return this.$store.state.cpu;
             },
 
+            heap() {
+                const bytes = this.$store.state.heap || 0;
+                const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+                if (bytes === 0) return "0 Bytes";
+
+                const power = Math.floor(Math.log(bytes) / Math.log(1024));
+
+                return `${parseFloat((bytes / (1024 ** power)).toFixed(1))} ${sizes[power]}`;
+            },
+
             memory() {
-                return this.$store.state.memory;
+                let bytes = this.$store.state.heap || 0;
+                const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+                if (this.$store.state.bridges && this.$store.state.bridges.length > 0) bytes += this.$store.state.bridges.map((item) => item.heap || 0).reduce((accumulator, item) => accumulator + item);
+                if (bytes === 0) return "0 Bytes";
+
+                const power = Math.floor(Math.log(bytes) / Math.log(1024));
+
+                return `${parseFloat((bytes / (1024 ** power)).toFixed(1))} ${sizes[power]}`;
             },
         },
 
@@ -105,6 +124,9 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
         overflow: auto;
+        color: var(--widget-text);
+        background: var(--widget-background);
+        backdrop-filter: var(--transparency);
         cursor: default;
 
         &::-webkit-scrollbar {

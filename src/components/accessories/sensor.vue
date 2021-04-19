@@ -218,7 +218,7 @@
                         const leak = this.subject.characteristics.find((item) => item.type === "leak_detected");
                         const temperature = this.subject.characteristics.find((item) => item.type === "current_temperature");
                         const humidity = this.subject.characteristics.find((item) => item.type === "current_relative_humidity");
-                        const smoke = this.subject.characteristics.find((item) => item.type === "carbon_dioxide_detected");
+                        const smoke = this.subject.characteristics.find((item) => item.type === "smoke_detected" || item.type === "carbon_dioxide_detected");
                         const carbon = this.subject.characteristics.find((item) => item.type === "carbon_monoxide_detected");
                         const contact = this.subject.characteristics.find((item) => item.type === "contact_sensor_state" || item.type === "current_door_state");
                         const motion = this.subject.characteristics.find((item) => item.type === "motion_detected");
@@ -229,7 +229,7 @@
                         if (this.subject.main_sensor === "leak_detected") this.main = "leak";
                         if (this.subject.main_sensor === "current_temperature") this.main = "temperature";
                         if (this.subject.main_sensor === "current_relative_humidity") this.main = "humidity";
-                        if (this.subject.main_sensor === "carbon_dioxide_detected") this.main = "smoke";
+                        if (this.subject.main_sensor === "smoke_detected" || this.subject.main_sensor === "carbon_dioxide_detected") this.main = "smoke";
                         if (this.subject.main_sensor === "carbon_monoxide_detected") this.main = "carbon";
                         if (this.subject.main_sensor === "contact_sensor_state" || this.subject.main_sensor === "current_door_state") this.main = "contact";
                         if (this.subject.main_sensor === "motion_detected") this.main = "motion";

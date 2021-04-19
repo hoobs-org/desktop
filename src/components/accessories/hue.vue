@@ -20,6 +20,7 @@
         props: {
             id: String,
             disabled: Boolean,
+            room: Object,
         },
 
         data() {
@@ -28,7 +29,6 @@
                 wheel: null,
                 saturation: 0,
                 local: false,
-                room: null,
                 subject: null,
             };
         },
@@ -47,8 +47,6 @@
 
                 this.wheel.on("input:end", this.pick);
             }, 10);
-
-            this.room = await this.$hoobs.room(this.id);
         },
 
         methods: {
@@ -57,8 +55,10 @@
                 this.hue = color.hsl.h;
                 this.saturation = color.hsl.s;
 
-                await this.room.set("hue", this.hue);
-                await this.room.set("saturation", this.saturation);
+                if (this.room) {
+                    await this.room.set("hue", this.hue);
+                    await this.room.set("saturation", this.saturation);
+                }
 
                 setTimeout(() => { this.local = false; }, LOCAL_DELAY);
             },

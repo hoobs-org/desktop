@@ -42,6 +42,7 @@
             id: String,
             disabled: Boolean,
             features: Object,
+            room: Object,
         },
 
         computed: {
@@ -101,26 +102,26 @@
                 on: false,
                 brightness: 0,
                 local: false,
-                room: null,
+                accessories: [],
                 subject: null,
                 updater: Debounce(() => {
                     if (this.room && !this.local) {
                         if (this.subject && this.subject.type === "light") {
                             const { ...subject } = this.subject;
-                            const index = this.room.accessories.findIndex((item) => item.accessory_identifier === subject.accessory_identifier);
+                            const index = this.accessories.findIndex((item) => item.accessory_identifier === subject.accessory_identifier);
 
-                            if (index >= 0) this.room.accessories[index] = subject;
+                            if (index >= 0) this.accessories[index] = subject;
                         }
 
                         this.subject = null;
                         this.brightness = 0;
                         this.on = false;
-                        this.room.accessories = this.room.accessories || [];
+                        this.accessories = this.accessories || [];
 
-                        for (let i = 0; i < this.room.accessories.length; i += 1) {
-                            if (this.room.accessories[i].type === "light") {
-                                const on = this.room.accessories[i].characteristics.find((item) => item.type === "on");
-                                const brightness = this.room.accessories[i].characteristics.find((item) => item.type === "brightness");
+                        for (let i = 0; i < this.accessories.length; i += 1) {
+                            if (this.accessories[i].type === "light") {
+                                const on = this.accessories[i].characteristics.find((item) => item.type === "on");
+                                const brightness = this.accessories[i].characteristics.find((item) => item.type === "brightness");
 
                                 this.on = this.on || (on || {}).value || false;
 
@@ -151,7 +152,7 @@
                 if (mutation.type === "IO:ROOM:CHANGE" && mutation.payload.data.action === "control" && mutation.payload.data.service === "off") {
                     setTimeout(async () => {
                         this.on = false;
-                        this.room = await this.$hoobs.room(this.id);
+                        this.accessories = this.room.accessories || [];
                         this.updater();
                     }, LOCAL_DELAY * (this.room.devices || 5));
                 }
@@ -159,10 +160,7 @@
         },
 
         async mounted() {
-            this.room = await this.$hoobs.room(this.id);
-            this.room.accessories = this.room.accessories || [];
-            this.room.accessories = this.room.accessories.filter((item) => item.type === "light");
-
+            this.accessories = this.room.accessories || [];
             this.updater();
         },
 

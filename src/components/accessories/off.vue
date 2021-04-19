@@ -17,16 +17,7 @@
 
         props: {
             id: String,
-        },
-
-        data() {
-            return {
-                room: null,
-            };
-        },
-
-        async mounted() {
-            this.room = await this.$hoobs.room(this.id);
+            room: Object,
         },
 
         methods: {

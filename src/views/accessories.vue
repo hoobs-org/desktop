@@ -7,8 +7,8 @@
             </router-link>
             <div v-if="rooms.length > 0" class="seperator"></div>
             <icon v-if="rooms.length > 0" v-on:click.stop="$dialog.open('hidden')" :title="$t('hidden_accessories')" name="eye-off" class="icon" />
-            <icon v-if="rooms.length > 0 && locked.rooms" v-on:click.stop="() => { locked.rooms = !locked.rooms}" :title="$t('sort_rooms')" name="lock" class="icon" />
-            <icon v-else-if="rooms.length > 0" v-on:click.stop="() => { locked.rooms = !locked.rooms}" :title="$t('sort_rooms')" name="lock-open-variant" class="icon" />
+            <icon v-if="rooms.length > 0 && locked.rooms" v-on:click.stop="unlock" :title="$t('sort_rooms')" name="lock" class="icon" />
+            <icon v-else-if="rooms.length > 0" v-on:click.stop="lock" :title="$t('sort_rooms')" name="lock-open-variant" class="icon" />
         </context>
         <div v-if="!loading && rooms.length > 0" class="content">
             <list value="id" display="name" :values="filtered" :selected="id" :initial="rooms[0].id" :sort="!locked.rooms" v-on:update="layout" controller="accessories" />
@@ -46,22 +46,33 @@
                     <router-link v-if="identifier !== 'default'" :to="`/accessories/edit/${id || rooms[0].id}`" :title="$t('room_settings')" class="edit-room"><icon name="pencil" class="icon" /></router-link>
                 </div>
                 <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
-                    <div v-for="(accessory, index) in accessories" :key="`accessory:${index}`" class="device editing">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type !== 'camera')" :key="`accessory:${index}`" class="device editing">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
                         <div v-if="accessory.control" class="device-cover"></div>
                     </div>
                 </draggable>
                 <div v-else class="devices">
                     <div v-if="features.off" class="device">
-                        <off-accessory :id="id" />
+                        <off-accessory :id="id" :room="current" />
                     </div>
                     <div v-if="features.light || features.brightness" class="device">
-                        <brightness-accessory :id="id" :features="features" />
+                        <brightness-accessory :id="id" :room="current" :features="features" />
                     </div>
                     <div v-if="features.hue" class="device">
-                        <hue-accessory :id="id" />
+                        <hue-accessory :id="id" :room="current" />
                     </div>
-                    <div v-for="(accessory, index) in accessories" :key="`accessory:${index}`" class="device">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type !== 'camera')" :key="`accessory:${index}`" class="device">
+                        <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
+                    </div>
+                </div>
+                <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type === 'camera')" :key="`accessory:${index}`" class="camera editing">
+                        <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
+                        <div v-if="accessory.control" class="device-cover"></div>
+                    </div>
+                </draggable>
+                <div v-else class="devices">
+                    <div v-for="(accessory, index) in accessories.filter((item) => item.type === 'camera')" :key="`accessory:${index}`" class="camera">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
                     </div>
                 </div>
@@ -81,15 +92,12 @@
 
 <script>
     import Sanitize from "@hoobs/sdk/lib/sanitize";
-    import { Wait } from "@hoobs/sdk/lib/wait";
 
     import DraggableComponent from "vuedraggable";
     import ListComponent from "@/components/elements/list.vue";
 
     import Validators from "../services/validators";
     import { accessories, types } from "../services/accessories";
-
-    const SOCKET_RECONNECT_DELAY = 500;
 
     export default {
         name: "accessories",
@@ -123,6 +131,7 @@
                 key: 1,
                 version: 0,
                 loading: true,
+                current: null,
                 locked: {
                     rooms: true,
                     accessories: true,
@@ -186,7 +195,16 @@
                 }
 
                 await Promise.all(updates);
+            },
+
+            async lock() {
                 await this.loadRooms();
+
+                this.locked.rooms = !this.locked.rooms;
+            },
+
+            unlock() {
+                this.locked.rooms = !this.locked.rooms;
             },
 
             async sort() {
@@ -216,10 +234,9 @@
                 this.accessories = [];
                 this.display = "";
 
-                await this.loadRooms();
+                if (!this.rooms || this.rooms.length === 0) await this.loadRooms();
 
                 this.features.off = false;
-
                 this.features.light = false;
                 this.features.brightness = false;
                 this.features.hue = false;
@@ -228,33 +245,36 @@
                     const index = this.rooms.findIndex((item) => item.id === this.room);
 
                     if (index >= 0) {
-                        const room = await this.$hoobs.room(this.rooms[index].id);
-
-                        this.display = room.name || this.$t(room.id);
+                        this.current = await this.$hoobs.room(this.rooms[index].id);
+                        this.display = this.current.name || this.$t(this.current.id);
                     }
                 } else if (id !== "add") {
                     let index = this.rooms.findIndex((item) => item.id === id);
 
                     if (index === -1 && this.rooms.length > 0) index = 0;
 
-                    if (index >= 0) {
-                        const room = await this.$hoobs.room(this.rooms[index].id);
-
-                        this.characteristics = room.characteristics || [];
-                        this.accessories = room.accessories || [];
-                        this.identifier = room.id;
-                        this.display = room.name || this.$t(room.id);
-                        this.types = room.types || [];
-
-                        this.features.off = this.characteristics.indexOf("off") >= 0;
+                    if (index >= 0 && this.rooms[index].id && this.rooms[index].id !== "") {
+                        this.current = await this.$hoobs.room(this.rooms[index].id);
+                        this.characteristics = this.current.characteristics || [];
+                        this.accessories = this.current.accessories || [];
+                        this.identifier = this.current.id;
+                        this.display = this.current.name || this.$t(this.current.id);
+                        this.types = this.current.types || [];
 
                         for (let i = 0; i < this.accessories.length; i += 1) {
                             this.accessories[i].control = types(this.accessories[i]);
                         }
 
-                        this.features.light = this.types.indexOf("lightbulb") && this.characteristics.indexOf("on") >= 0;
-                        this.features.brightness = this.types.indexOf("lightbulb") && this.characteristics.indexOf("brightness") >= 0;
-                        this.features.hue = this.characteristics.indexOf("hue") >= 0;
+                        this.features.off = (
+                            this.types.indexOf("light") >= 0
+                            || this.types.indexOf("switch") >= 0
+                            || this.types.indexOf("television") >= 0
+                            || this.types.indexOf("fan") >= 0
+                        ) && this.characteristics.indexOf("off") >= 0;
+
+                        this.features.light = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
+                        this.features.brightness = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
+                        this.features.hue = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
                     }
                 }
 
@@ -274,9 +294,9 @@
                 this.$confirm(this.$t("remove"), this.$t("remove_remove_warning"), async () => {
                     this.intermediate = true;
 
-                    const room = await this.$hoobs.room(this.room);
+                    if (this.current && this.current.id === this.room) await this.current.remove();
 
-                    if (room.id === this.room) await room.remove();
+                    await this.loadRooms();
 
                     this.$router.push({ path: "/accessories" });
                 });
@@ -285,9 +305,9 @@
             async update() {
                 this.intermediate = true;
 
-                const room = await this.$hoobs.room(this.room);
+                if (this.current && this.current.id === this.room) await this.current.set("name", this.display);
 
-                if (room.id === this.room) await room.set("name", this.display);
+                await this.loadRooms();
 
                 this.$router.push({ path: `/accessories/${this.room}` });
             },
@@ -299,13 +319,9 @@
 
                 if (validation.valid) {
                     await this.$hoobs.rooms.add(this.display);
+                    await this.loadRooms();
 
-                    setTimeout(async () => {
-                        await Wait();
-
-                        this.rooms = await this.$hoobs.rooms.list();
-                        this.$router.push({ path: `/accessories/${this.rooms.find((item) => item.id === Sanitize(this.display)).id}` });
-                    }, SOCKET_RECONNECT_DELAY);
+                    this.$router.push({ path: `/accessories/${this.rooms.find((item) => item.id === Sanitize(this.display)).id}` });
                 } else {
                     this.intermediate = false;
                     this.$alert(this.$t(validation.error));
@@ -380,6 +396,33 @@
                         padding: 10px 10px 10px 10px;
                         position: relative;
                         width: 155px;
+                        user-select: none;
+
+                        &.editing {
+                            background: var(--widget-background);
+
+                            &:hover {
+                                opacity: 1;
+                            }
+                        }
+
+                        .device-cover {
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            border: 1px var(--application-border) solid;
+                            border-radius: 4px;
+                            top: 0;
+                            left: 0;
+                            z-index: 200;
+                        }
+                    }
+
+                    .camera {
+                        margin: 0 0 20px 20px;
+                        padding: 10px 10px 10px 10px;
+                        position: relative;
+                        width: 480px;
                         user-select: none;
 
                         &.editing {

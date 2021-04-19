@@ -1,23 +1,21 @@
 <template>
-    <div v-if="!loading" id="widget">
+    <div v-if="!loading" id="widget" :class="locked ? 'locked' : 'unlocked'">
         <div ref="device" class="device">
-            <component v-if="available" :is="control(accessory)" :accessory="accessory" :disabled="!locked" />
+            <camera-accessory v-if="available" :accessory="accessory" :disabled="!locked" :dashboard="true" />
             <unavailable-accessory v-else :item="item" :disabled="!locked" />
-            <div v-if="control(accessory) && !locked" class="device-cover"></div>
+            <div v-if="!locked" class="device-cover"></div>
         </div>
     </div>
 </template>
 
 <script>
-    import { accessories, types } from "../../services/accessories";
-
     const LOAD_RETRY_DELAY = 5 * 1000;
 
     export default {
-        name: "accessory-widget",
+        name: "camera-widget",
 
         components: {
-            ...accessories(),
+            "camera-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/camera.vue"),
         },
 
         props: {
@@ -45,7 +43,7 @@
             async load() {
                 this.accessory = await this.$hoobs.accessory(this.item.bridge, this.item.id);
 
-                if (this.accessory.accessory_identifier) {
+                if (this.accessory.accessory_identifier && this.accessory.type === "camera") {
                     this.available = true;
                     this.loading = false;
                 } else if (this.retries > 0) {
@@ -58,10 +56,6 @@
                     this.loading = false;
                 }
             },
-
-            control(accessory) {
-                return types(accessory);
-            },
         },
     };
 </script>
@@ -70,25 +64,14 @@
     #widget {
         width: 100%;
         height: 100%;
-        padding: 20px 30px;
         box-sizing: border-box;
-        color: var(--widget-text);
-        background: var(--widget-background);
-        backdrop-filter: var(--transparency);
         cursor: default;
         user-select: none;
 
         .device {
-            max-width: 100%;
-            max-height: 100%;
-            margin: auto;
-            aspect-ratio: 155/214;
-            object-fit: contain;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
+            width: 100%;
+            height: 100%;
             position: relative;
-            align-items: center;
 
             .device-cover {
                 width: 100%;
@@ -97,6 +80,12 @@
                 top: 0;
                 left: 0;
                 z-index: 200;
+            }
+        }
+
+        &.unlocked {
+            .device {
+                pointer-events: none;
             }
         }
     }

@@ -43,7 +43,7 @@
                     name: `${this.$t("cpu")} ${(this.cpu || {}).used || 0}%`,
                     data: this.cpu.history,
                 }, {
-                    name: `${this.$t("memory")} ${(this.memory || {}).load || 0}% (${((this.memory || {}).used || {}).value || 0} ${((this.memory || {}).used || {}).units || "MB"})`,
+                    name: `${this.$t("memory")} ${(this.memory || {}).load || 0}%`,
                     data: this.memory.history,
                 }];
             },
@@ -65,6 +65,9 @@
         height: 100%;
         padding: 30px 20px 15px 10px;
         box-sizing: border-box;
+        color: var(--widget-text);
+        background: var(--widget-background);
+        backdrop-filter: var(--transparency);
         cursor: default;
     }
 </style>

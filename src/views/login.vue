@@ -129,7 +129,7 @@
             this.scan = this.$route.query.scan === "true";
 
             if (!this.current) {
-                this.$scanner.start(80, 50826);
+                this.$scanner.start(this.$store.state.devices, 80, 50826);
             }
 
             if (this.url.startsWith("/login")) this.url = "/";
@@ -138,7 +138,7 @@
 
         methods: {
             rescan() {
-                this.$scanner.start(80, 50826);
+                this.$scanner.start(this.$store.state.devices, 80, 50826);
             },
 
             async select(device) {
@@ -148,7 +148,7 @@
                     this.$hoobs.config.host.set(device.ip, device.port);
                     this.$scanner.stop();
                 } else {
-                    this.$scanner.start(80, 50826);
+                    this.$scanner.start(this.$store.state.devices, 80, 50826);
                 }
 
                 this.status = await this.$hoobs.auth.status();

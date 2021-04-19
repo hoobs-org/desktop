@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('hub_settings')" :draggable="true" width="760px" height="775px">
+    <modal :title="$t('hub_settings')" :draggable="true" width="760px" height="875px">
         <div id="settings">
             <div v-if="!loading" class="content">
                 <restore v-if="show.restore" v-on:restore="() => { show.cancel = false; }" />
@@ -51,10 +51,14 @@
                     <div class="row input-field">
                         <integer-field :description="$t('update_interval_description')" :min="2" :max="300" v-model="interval" />
                     </div>
+                    <div v-if="user.permissions.reboot" class="row section" style="margin-bottom: 7px;">{{ $t("cache") }}</div>
+                    <div v-if="user.permissions.reboot" class="row">
+                        <div v-on:click="purge()" class="button">{{ $t("purge_cache") }}</div>
+                    </div>
                     <div v-if="user.permissions.reboot" class="row section" style="margin-bottom: 7px;">{{ $t("system") }}</div>
                     <div v-if="user.permissions.reboot" class="row">
-                        <div v-on:click="reboot()" class="button">{{ $t("reboot_device") }}</div>
-                        <div v-on:click="purge()" class="button">{{ $t("purge_cache") }}</div>
+                        <div v-on:click="reboot()" class="button">{{ $t("reboot") }}</div>
+                        <div v-on:click="shutdown()" class="button">{{ $t("shutdown") }}</div>
                         <div v-on:click="reset()" class="button">{{ $t("factory_reset") }}</div>
                     </div>
                 </div>
@@ -256,6 +260,48 @@
                         setTimeout(() => {
                             this.$dialog.close("settings");
                         }, REDIRECT_DELAY);
+                    });
+                });
+            },
+
+            shutdown() {
+                this.$confirm(this.$t("shutdown"), this.$t("shutdown_warning"), async () => {
+                    this.loading = true;
+
+                    this.messages.push({
+                        level: "warn",
+                        bridge: "hub",
+                        display: "hub",
+                        timestamp: new Date().getTime(),
+                        message: "device shutdown command received",
+                    }, {
+                        level: "info",
+                        bridge: "hub",
+                        display: "hub",
+                        timestamp: new Date().getTime(),
+                        message: "shutting down",
+                    }, {
+                        level: "info",
+                        bridge: "hub",
+                        display: "hub",
+                        timestamp: new Date().getTime(),
+                        message: ".",
+                    });
+
+                    setInterval(() => {
+                        if (this.messages[this.messages.length - 1].message === ".................................") {
+                            this.messages[this.messages.length - 1].message = ".";
+                        } else {
+                            this.messages[this.messages.length - 1].message += ".";
+                        }
+                    }, 500);
+
+                    this.messages = this.messages.slice(Math.max(this.messages.length - 100, 0));
+
+                    await (await this.$hoobs.system()).shutdown();
+
+                    this.$action.on("io", "disconnected", () => {
+                        this.$dialog.close("settings");
                     });
                 });
             },

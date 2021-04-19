@@ -50,7 +50,7 @@ export default class Scanner extends EventEmitter {
         this.timeout = 5 * 1000;
     }
 
-    async start(...ports: number[]): Promise<void> {
+    async start(devices: Active[], ...ports: number[]): Promise<void> {
         if (this.stopped) {
             this.stopped = false;
 
@@ -65,6 +65,15 @@ export default class Scanner extends EventEmitter {
             const subnets = this.subnets();
             const scanners: Promise<void>[] = [];
             const canidates: Canidate[] = [];
+            const active = [...devices];
+
+            this.emit("message", "Checking Existing Connections");
+
+            for (let i = 0; i < active.length; i += 1) {
+                const data = await this.detect(active[i].ip, active[i].port);
+
+                if (data) this.emit("device", data);
+            }
 
             this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
 
@@ -151,8 +160,6 @@ export default class Scanner extends EventEmitter {
             const source = CancelToken.source();
 
             setTimeout(() => {
-                this.emit("message", "Request Timeout");
-
                 source.cancel();
             }, this.timeout);
 

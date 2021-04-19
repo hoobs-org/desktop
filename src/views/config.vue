@@ -136,7 +136,12 @@
         },
 
         mounted() {
+            this.$action.off("config", "update");
             this.$action.off("personalize", "update");
+
+            this.$action.on("config", "update", () => {
+                this.change(this.bridge);
+            });
 
             this.$action.on("personalize", "update", () => {
                 if (this.identifier === "advanced") this.change(this.bridge);
@@ -324,7 +329,16 @@
                         this.background = this.background.split("").map((item) => `${item}${item}`).join("");
                     }
 
-                    this.saved = await (await this.$hoobs.bridge(bridge)).config.get();
+                    this.saved = (await (await this.$hoobs.bridge(bridge)).config.get()) || {};
+
+                    for (let i = 0; i < (this.saved.accessories || []).length; i += 1) {
+                        delete this.saved.accessories[i].plugin_map;
+                    }
+
+                    for (let i = 0; i < (this.saved.platforms || []).length; i += 1) {
+                        delete this.saved.platforms[i].plugin_map;
+                    }
+
                     this.working = { ...this.saved };
                     this.loading = false;
                     this.dirty = false;
@@ -405,15 +419,6 @@
                                     type: "object",
                                     properties: this.plugin.schema.config.properties || this.plugin.schema.config,
                                 };
-
-                                if (this.identifier === "homebridge-ring" && this.schema.properties.refreshToken) this.schema.properties.refreshToken.widget = "ring";
-                                if (this.identifier === "homebridge-gsh" && this.schema.properties.token) this.schema.properties.token.widget = "gsh";
-
-                                if (this.identifier === "homebridge-honeywell-home" && this.schema.properties.credentials.properties.refreshToken) {
-                                    delete this.schema.properties.credentials.properties.notice;
-
-                                    this.schema.properties.credentials.properties.refreshToken.widget = "honeywell";
-                                }
 
                                 break;
                         }

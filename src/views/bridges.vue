@@ -34,11 +34,15 @@
             <form v-else-if="subject" class="screen form">
                 <div class="wrapper">
                     <div class="row title">{{ display }}</div>
+                    <div class="row section">{{ $t("memory") }}</div>
+                    <div class="row">
+                        {{ heap }}
+                    </div>
                     <div class="row section">{{ $t("pairing") }}</div>
-                    <div v-if="!loading && (status || {}).setup_id" class="row">
+                    <div v-if="!loading && running && (status || {}).setup_id" class="row">
                         <p style="margin-top: 0">{{ $t("pairing_description") }}</p>
                     </div>
-                    <div v-if="!loading && (status || {}).setup_id" class="row qrcode">
+                    <div v-if="!loading && running && (status || {}).setup_id" class="row qrcode">
                         <qrcode :value="(status || {}).setup_id" :options="{ width: 200, color: { dark: theme.widget.text.default, light: '#00000000' }}" />
                     </div>
                     <div class="row actions">
@@ -129,6 +133,17 @@
 
             running() {
                 return (this.$store.state.bridges.find((item) => item.id === this.id) || {}).running || false;
+            },
+
+            heap() {
+                const bytes = (this.$store.state.bridges.find((item) => item.id === this.id) || {}).heap || 0;
+                const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+                if (bytes === 0) return "0 Bytes";
+
+                const power = Math.floor(Math.log(bytes) / Math.log(1024));
+
+                return `${parseFloat((bytes / (1024 ** power)).toFixed(1))} ${sizes[power]}`;
             },
         },
 
@@ -413,10 +428,14 @@
                     display: flex;
                     align-items: center;
                 }
+
+                .actions {
+                    padding-top: 0;
+                }
             }
 
             .qrcode {
-                margin: -10px;
+                margin: -10px -10px 5px -10px;
             }
 
             .initial {

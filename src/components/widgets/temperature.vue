@@ -1,7 +1,7 @@
 <template>
     <div id="widget">
         <div class="title">{{ $t("cpu") }}</div>
-        <div class="value">{{ temp ? `${temp}&#8451;` : "N/A" }}</div>
+        <div class="value">{{ temp ? `${temp}&deg;C` : "N/A" }}</div>
     </div>
 </template>
 
@@ -28,6 +28,9 @@
         align-content: center;
         padding: 14px;
         position: relative;
+        color: var(--widget-text);
+        background: var(--widget-background);
+        backdrop-filter: var(--transparency);
         cursor: default;
         user-select: none;
 

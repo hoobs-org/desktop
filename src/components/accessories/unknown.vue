@@ -97,6 +97,7 @@
                 this.$dialog.open("accessory", {
                     bridge: this.subject.bridge,
                     id: this.subject.accessory_identifier,
+                    unknown: true,
                 });
             },
         },

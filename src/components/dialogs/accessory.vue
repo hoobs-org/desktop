@@ -1,5 +1,5 @@
 <template>
-    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="760px" height="660px">
+    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="760px" height="720px">
         <div id="accessory">
             <div v-if="!loading" class="content">
                 <icons v-if="accessory && show.icons" v-on:update="select" />
@@ -20,6 +20,9 @@
                         <div v-on:click="() => { show.icons = true; }" class="button">{{ $t("change") }}</div>
                     </div>
                     <div v-if="plugin" class="row section">{{ $t("plugin") }}</div>
+                    <div v-if="plugin" class="row plugin">
+                        <span>{{ $hoobs.repository.title(plugin) }}</span>
+                    </div>
                     <div v-if="plugin" class="row">
                         <div v-on:click="configure" class="button">{{ $t("configuration") }}</div>
                     </div>
@@ -29,6 +32,10 @@
                         <span>{{ title }}</span>
                         <div v-on:click="() => { show.rooms = true; }" class="button">{{ $t("room_assign") }}</div>
                         <div v-if="room !== 'default'" v-on:click="assign()" class="button">{{ $t("remove") }}</div>
+                    </div>
+                    <div v-if="options.unknown" class="row section">{{ $t("accessory_data") }}</div>
+                    <div v-if="options.unknown" class="row">
+                        <div v-on:click="dump" class="button">{{ $t("download") }}</div>
                     </div>
                 </div>
             </div>
@@ -55,6 +62,7 @@
 
 <script>
     import { Wait } from "@hoobs/sdk/lib/wait";
+    import { saveAs } from "file-saver";
 
     import IconsComponent from "@/components/dialogs/icons.vue";
     import RoomsComponent from "@/components/dialogs/rooms.vue";
@@ -220,7 +228,7 @@
             async add() {
                 const config = await this.$hoobs.config.get();
                 const items = JSON.parse(JSON.stringify(this.items));
-                const widget = layout("accessory-widget");
+                const widget = this.options.camera ? layout("camera-widget") : layout("accessory-widget");
 
                 config.dashboard = config.dashboard || {};
 
@@ -243,7 +251,14 @@
             async remove() {
                 const config = await this.$hoobs.config.get();
                 const items = JSON.parse(JSON.stringify(this.items));
-                const index = items.findIndex((item) => item.component === "accessory-widget" && item.i === this.accessory.accessory_identifier);
+
+                let index = -1;
+
+                if (this.options.camera) {
+                    index = items.findIndex((item) => item.component === "camera-widget" && item.i === this.accessory.accessory_identifier);
+                } else {
+                    index = items.findIndex((item) => item.component === "accessory-widget" && item.i === this.accessory.accessory_identifier);
+                }
 
                 config.dashboard = config.dashboard || {};
 
@@ -257,6 +272,10 @@
                 this.$dialog.close("accessory");
                 this.$action.emit("dashboard", "update");
                 this.$router.push({ path: "/" });
+            },
+
+            dump() {
+                saveAs(new Blob([JSON.stringify(this.accessory, null, 4)], { type: "application/json" }), "accessory.json");
             },
         },
     };
@@ -284,6 +303,15 @@
 
                 .title {
                     margin: 14px 0 0 0;
+                }
+
+                .plugin {
+                    margin: 0 0 10px 0;
+                    align-items: center;
+
+                    span {
+                        font-size: 20px;
+                    }
                 }
 
                 .current-room {

@@ -20,8 +20,8 @@
                         {{ $t("version_node") }}: {{ status.node_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && plugins.length > 0" class="row">
-                        {{ $t("plugins") }}: {{ plugins.length }} {{ $t("plugin_updates") }}
+                    <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
+                        {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
                     <div v-if="!loading && !updated" class="row" style="margin-top: 7px;">
@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="actions modal">
-                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("cancel") }}</div>
+                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("ok") }}</div>
             </div>
         </div>
     </modal>

@@ -271,7 +271,6 @@
 
                 this.$dialog.close("accessory");
                 this.$action.emit("dashboard", "update");
-                this.$router.push({ path: "/" });
             },
 
             dump() {

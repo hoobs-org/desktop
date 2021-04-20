@@ -124,9 +124,6 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
         overflow: auto;
-        color: var(--widget-text);
-        background: var(--widget-background);
-        backdrop-filter: var(--transparency);
         cursor: default;
 
         &::-webkit-scrollbar {

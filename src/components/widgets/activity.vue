@@ -65,9 +65,6 @@
         height: 100%;
         padding: 30px 20px 15px 10px;
         box-sizing: border-box;
-        color: var(--widget-text);
-        background: var(--widget-background);
-        backdrop-filter: var(--transparency);
         cursor: default;
     }
 </style>

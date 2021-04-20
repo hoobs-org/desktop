@@ -45,7 +45,7 @@
                     <icon v-else v-on:click.stop="() => { locked.accessories = !locked.accessories; load(id); }" :title="$t('sort_accessories')" name="lock-open-variant" class="icon" />
                     <router-link v-if="identifier !== 'default'" :to="`/accessories/edit/${id || rooms[0].id}`" :title="$t('room_settings')" class="edit-room"><icon name="pencil" class="icon" /></router-link>
                 </div>
-                <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
+                <draggable :key="`accessories:${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
                     <div v-for="(accessory, index) in accessories.filter((item) => item.type !== 'camera')" :key="`accessory:${index}`" class="device editing">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
                         <div v-if="accessory.control" class="device-cover"></div>
@@ -65,7 +65,7 @@
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="false" />
                     </div>
                 </div>
-                <draggable :key="`version-${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
+                <draggable :key="`cameras:${key}`" v-if="!locked.accessories" ghost-class="ghost" v-model="accessories" v-on:end="sort" class="devices">
                     <div v-for="(accessory, index) in accessories.filter((item) => item.type === 'camera')" :key="`accessory:${index}`" class="camera editing">
                         <component v-if="accessory.control" :is="accessory.control" :accessory="accessory" :disabled="true" />
                         <div v-if="accessory.control" class="device-cover"></div>

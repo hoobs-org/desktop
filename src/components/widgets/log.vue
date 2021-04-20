@@ -45,9 +45,6 @@
         box-sizing: border-box;
         overflow: hidden;
         padding: 20px;
-        color: var(--widget-text);
-        background: var(--widget-background);
-        backdrop-filter: var(--transparency);
         cursor: default;
 
         .dim {

@@ -260,6 +260,7 @@ export default new Vuex.Store({
             session: state.session,
             user: state.user,
             notifications: state.notifications,
+            snapshots: state.snapshots,
             navigation: state.navigation,
         }),
     }).plugin],

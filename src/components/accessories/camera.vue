@@ -52,7 +52,7 @@
             },
 
             span() {
-                if (!this.timelapse) return this.$t("now");
+                if (!this.timelapse) return "";
 
                 if (this.timelapse >= 3600) {
                     const hours = Math.round(this.timelapse / 3600);
@@ -80,7 +80,7 @@
             return {
                 snapshot: null,
                 subject: null,
-                timelapse: 0,
+                timelapse: null,
                 display: "",
                 source: false,
                 live: false,
@@ -147,8 +147,6 @@
                 }
 
                 if (repeat) {
-                    if (!this.timers.timelapse) this.lapse();
-
                     const snapshot = await this.subject.snapshot();
 
                     if (snapshot) {
@@ -156,6 +154,8 @@
                             id: this.subject.accessory_identifier,
                             data: snapshot,
                         });
+
+                        if (!this.timers.timelapse) this.lapse();
                     }
 
                     this.timers.snapshot = setTimeout(() => this.cycle(true, false), this.live ? 1000 : CYCLE_TIMER);

@@ -65,55 +65,66 @@
             });
         },
 
-        async mounted() {
-            await this.load();
+        mounted() {
+            this.load();
         },
 
-        async beforeRouteLeave(_to, _from, next) {
-            if (!this.locked) await this.save();
-
-            next();
+        beforeRouteLeave(_to, _from, next) {
+            this.save(() => next());
         },
 
         methods: {
-            async load() {
+            load() {
                 this.loading = true;
 
-                const config = await this.$hoobs.config.get();
+                this.$hoobs.config.get().then((config) => {
+                    const dashboard = config.dashboard || { items: [...initial] };
 
-                config.dashboard = config.dashboard || {
-                    items: [...initial],
-                };
+                    this.items = dashboard.items || [];
+                    this.backdrop = dashboard.backdrop || false;
 
-                this.items = config.dashboard.items || [];
-                this.backdrop = config.dashboard.backdrop || false;
-                this.loading = false;
+                    this.loading = false;
+                });
             },
 
             render() {
                 this.version += 1;
             },
 
-            async toggle() {
-                if (!this.locked) await this.save();
-
-                this.locked = !this.locked;
+            toggle() {
+                this.save(() => {
+                    this.locked = !this.locked;
+                });
             },
 
-            async save() {
-                if (!this.loading) {
-                    const config = await this.$hoobs.config.get();
-                    const items = JSON.parse(JSON.stringify(this.items));
+            save(next) {
+                if (!this.loading && !this.locked) {
+                    this.$hoobs.config.get().then((response) => {
+                        const config = response;
+                        const items = JSON.parse(JSON.stringify(this.items));
 
-                    config.dashboard = config.dashboard || {};
+                        config.dashboard = config.dashboard || {};
 
-                    for (let i = 0; i < items.length; i += 1) {
-                        delete items[i].moved;
-                    }
+                        for (let i = 0; i < items.length; i += 1) {
+                            delete items[i].moved;
+                        }
 
-                    config.dashboard.items = items;
+                        config.dashboard.items = items;
 
-                    await this.$hoobs.config.update(config);
+                        this.$hoobs.config.update(config).then(() => {
+                            if (next) next();
+                        }).catch(() => {
+                            this.$alert("Unable to save configuration.");
+
+                            if (next) next();
+                        });
+                    }).catch(() => {
+                        this.$alert("Unable to load configuration.");
+
+                        if (next) next();
+                    });
+                } else if (next) {
+                    next();
                 }
             },
         },

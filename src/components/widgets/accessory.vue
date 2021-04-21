@@ -37,26 +37,26 @@
             };
         },
 
-        async mounted() {
-            await this.load();
+        mounted() {
+            this.load();
         },
 
         methods: {
-            async load() {
-                this.accessory = await this.$hoobs.accessory(this.item.bridge, this.item.id);
+            load() {
+                this.$hoobs.accessory(this.item.bridge, this.item.id).then((accessory) => {
+                    this.accessory = accessory;
 
-                if (this.accessory.accessory_identifier) {
-                    this.available = true;
-                    this.loading = false;
-                } else if (this.retries > 0) {
-                    this.retries -= 1;
+                    if (this.accessory.accessory_identifier) {
+                        this.available = true;
+                        this.loading = false;
+                    } else if (this.retries > 0) {
+                        this.retries -= 1;
 
-                    setTimeout(async () => {
-                        await this.load();
-                    }, LOAD_RETRY_DELAY);
-                } else {
-                    this.loading = false;
-                }
+                        setTimeout(() => this.load(), LOAD_RETRY_DELAY);
+                    } else {
+                        this.loading = false;
+                    }
+                });
             },
 
             control(accessory) {

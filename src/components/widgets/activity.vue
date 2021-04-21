@@ -1,6 +1,6 @@
 <template>
     <div id="widget">
-        <line-chart :key="key" id="activity" height="100%" suffix="%" :discrete="true" :data="graph" :min="0" :max="100" :colors="colors" :curve="false" legend="bottom" />
+        <line-chart v-if="colors.length > 0" :key="key" id="activity" height="100%" suffix="%" :discrete="true" :data="graph" :min="0" :max="100" :colors="colors" :curve="false" legend="bottom" />
     </div>
 </template>
 
@@ -16,25 +16,19 @@
         },
 
         created() {
-            this.$store.subscribe(async (mutation) => {
+            this.$store.subscribe((mutation) => {
                 if (mutation.type === "THEME:SET") {
-                    const theme = await this.$theme.get();
-
-                    this.colors = [
-                        theme.application.highlight,
-                        theme.application.accent,
-                    ];
+                    this.$theme.get().then((theme) => {
+                        this.colors = [theme.application.highlight, theme.application.accent];
+                    });
                 }
             });
         },
 
-        async mounted() {
-            const theme = await this.$theme.get();
-
-            this.colors = [
-                theme.application.highlight,
-                theme.application.accent,
-            ];
+        mounted() {
+            this.$theme.get().then((theme) => {
+                this.colors = [theme.application.highlight, theme.application.accent];
+            });
         },
 
         computed: {

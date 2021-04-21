@@ -44,9 +44,10 @@
 
         data() {
             return {
-                loading: true,
-                bottom: true,
                 version: 0,
+                loading: true,
+                downloading: false,
+                bottom: true,
                 debug: false,
                 bridges: [],
                 plugins: [],
@@ -69,7 +70,7 @@
             next();
         },
 
-        async mounted() {
+        mounted() {
             const { bridges } = this.$store.state;
 
             this.bridges.push({
@@ -86,32 +87,33 @@
                 });
             }
 
-            const plugins = await this.$hoobs.plugins();
-
-            this.plugins.push({
-                value: "null",
-                text: this.$t("non_plugin"),
-                selected: true,
-            });
-
-            for (let i = 0; i < plugins.length; i += 1) {
-                if (this.plugins.findIndex((item) => item.value === plugins[i].identifier) === -1) {
-                    this.plugins.push({
-                        value: plugins[i].identifier,
-                        text: plugins[i].alias || plugins[i].name || plugins[i].identifier,
-                        selected: true,
-                    });
-                }
-            }
-
-            setTimeout(() => {
-                this.$refs.messages.addEventListener("scroll", this.position);
-
-                if (this.bottom && this.$refs.messages) this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
-            }, SCROLL_DELAY);
-
             this.$action.emit("log", "history");
-            this.loading = false;
+
+            this.$hoobs.plugins().then((plugins) => {
+                this.plugins.push({
+                    value: "null",
+                    text: this.$t("non_plugin"),
+                    selected: true,
+                });
+
+                for (let i = 0; i < plugins.length; i += 1) {
+                    if (this.plugins.findIndex((item) => item.value === plugins[i].identifier) === -1) {
+                        this.plugins.push({
+                            value: plugins[i].identifier,
+                            text: plugins[i].alias || plugins[i].name || plugins[i].identifier,
+                            selected: true,
+                        });
+                    }
+                }
+            }).finally(() => {
+                this.loading = false;
+
+                setTimeout(() => {
+                    this.$refs.messages.addEventListener("scroll", this.position);
+
+                    if (this.bottom && this.$refs.messages) this.$refs.messages.scrollTo(0, this.$refs.messages.scrollHeight);
+                }, SCROLL_DELAY);
+            });
         },
 
         updated() {
@@ -152,50 +154,48 @@
                 return true;
             },
 
-            async download() {
-                const log = await this.$hoobs.log(5000);
+            download() {
+                this.downloading = true;
 
-                let content = "";
+                this.$hoobs.log(5000).then((log) => {
+                    let content = "";
 
-                for (let i = 0; i < log.length; i += 1) {
-                    content += `${new Date(log[i].timestamp).toLocaleString()} `;
+                    for (let i = 0; i < log.length; i += 1) {
+                        content += `${new Date(log[i].timestamp).toLocaleString()} `;
 
-                    if (log[i].id !== "" && log[i].id !== "hub") {
-                        content += `${log[i].display} `;
+                        if (log[i].id !== "" && log[i].id !== "hub") content += `${log[i].display} `;
+                        if (log[i].plugin && log[i].plugin !== "") content += `${log[i].prefix} `;
+
+                        switch (log[i].level) {
+                            case "debug":
+                                content += `[ DEBUG ] ${log[i].message}`;
+                                break;
+
+                            case "error":
+                                content += `[ ERROR ] ${log[i].message}`;
+                                break;
+
+                            case "warn":
+                                content += `[ WARNING ] ${log[i].message}`;
+                                break;
+
+                            default:
+                                content += log[i].message;
+                                break;
+                        }
+
+                        content += "\r\n";
                     }
 
-                    if (log[i].plugin && log[i].plugin !== "") {
-                        content += `${log[i].prefix} `;
-                    }
+                    const link = document.createElement("a");
 
-                    switch (log[i].level) {
-                        case "debug":
-                            content += `[ DEBUG ] ${log[i].message}`;
-                            break;
+                    link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`;
+                    link.download = "log.txt";
 
-                        case "error":
-                            content += `[ ERROR ] ${log[i].message}`;
-                            break;
-
-                        case "warn":
-                            content += `[ WARNING ] ${log[i].message}`;
-                            break;
-
-                        default:
-                            content += log[i].message;
-                            break;
-                    }
-
-                    content += "\r\n";
-                }
-
-                const link = document.createElement("a");
-
-                this.loading = false;
-
-                link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`;
-                link.download = "log.txt";
-                link.click();
+                    link.click();
+                }).finally(() => {
+                    this.downloading = false;
+                });
             },
         },
     };

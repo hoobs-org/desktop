@@ -93,22 +93,36 @@
             return {
                 node: "",
                 version: "",
-                updated: "",
+                updated: true,
                 loading: true,
                 system: {},
             };
         },
 
-        async mounted() {
-            const status = await this.$hoobs.status();
+        mounted() {
+            const waits = [];
 
-            this.version = status.version;
-            this.node = status.node_version;
+            waits.push(new Promise((resolve) => {
+                this.$hoobs.status().then((status) => {
+                    this.version = status.version;
+                    this.node = status.node_version;
+                    this.updated = status.upgraded && status.cli_upgraded && status.node_upgraded;
+                }).finally(() => {
+                    resolve();
+                });
+            }));
 
-            this.updated = status.upgraded && status.cli_upgraded && status.node_upgraded;
-            this.system = (await this.$hoobs.system()).system;
+            waits.push(new Promise((resolve) => {
+                this.$hoobs.system().then((response) => {
+                    this.system = response.system;
+                }).finally(() => {
+                    resolve();
+                });
+            }));
 
-            this.loading = false;
+            Promise.all(waits).then(() => {
+                this.loading = false;
+            });
         },
     };
 </script>

@@ -229,65 +229,95 @@
                 await Promise.all(updates);
             },
 
-            async load(id) {
+            load(id) {
                 this.intermediate = true;
+                this.characteristics = [];
                 this.accessories = [];
+                this.identifier = "";
+                this.current = null;
                 this.display = "";
+                this.types = [];
 
-                if (!this.rooms || this.rooms.length === 0) await this.loadRooms();
+                this.loadRooms(true).finally(() => {
+                    this.features.off = false;
+                    this.features.light = false;
+                    this.features.brightness = false;
+                    this.features.hue = false;
 
-                this.features.off = false;
-                this.features.light = false;
-                this.features.brightness = false;
-                this.features.hue = false;
+                    if (id === "edit") {
+                        const index = this.rooms.findIndex((item) => item.id === this.room);
 
-                if (id === "edit") {
-                    const index = this.rooms.findIndex((item) => item.id === this.room);
-
-                    if (index >= 0) {
-                        this.current = await this.$hoobs.room(this.rooms[index].id);
-                        this.display = this.current.name || this.$t(this.current.id);
-                    }
-                } else if (id !== "add") {
-                    let index = this.rooms.findIndex((item) => item.id === id);
-
-                    if (index === -1 && this.rooms.length > 0) index = 0;
-
-                    if (index >= 0 && this.rooms[index].id && this.rooms[index].id !== "") {
-                        this.current = await this.$hoobs.room(this.rooms[index].id);
-                        this.characteristics = this.current.characteristics || [];
-                        this.accessories = this.current.accessories || [];
-                        this.identifier = this.current.id;
-                        this.display = this.current.name || this.$t(this.current.id);
-                        this.types = this.current.types || [];
-
-                        for (let i = 0; i < this.accessories.length; i += 1) {
-                            this.accessories[i].control = types(this.accessories[i]);
+                        if (index >= 0) {
+                            this.$hoobs.room(this.rooms[index].id).then((current) => {
+                                this.current = current;
+                                this.display = this.current.name || this.$t(this.current.id);
+                            }).finally(() => {
+                                this.loading = false;
+                                this.intermediate = false;
+                            });
+                        } else {
+                            this.loading = false;
+                            this.intermediate = false;
                         }
+                    } else if (id !== "add") {
+                        let index = this.rooms.findIndex((item) => item.id === id);
 
-                        this.features.off = (
-                            this.types.indexOf("light") >= 0
-                            || this.types.indexOf("switch") >= 0
-                            || this.types.indexOf("television") >= 0
-                            || this.types.indexOf("fan") >= 0
-                        ) && this.characteristics.indexOf("off") >= 0;
+                        if (index === -1 && this.rooms.length > 0) index = 0;
 
-                        this.features.light = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
-                        this.features.brightness = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
-                        this.features.hue = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
+                        if (index >= 0 && this.rooms[index].id && this.rooms[index].id !== "") {
+                            this.$hoobs.room(this.rooms[index].id).then((current) => {
+                                this.current = current;
+                                this.characteristics = this.current.characteristics || [];
+                                this.accessories = this.current.accessories || [];
+                                this.identifier = this.current.id;
+                                this.display = this.current.name || this.$t(this.current.id);
+                                this.types = this.current.types || [];
+
+                                for (let i = 0; i < this.accessories.length; i += 1) {
+                                    this.accessories[i].control = types(this.accessories[i]);
+                                }
+
+                                this.features.off = (
+                                    this.types.indexOf("light") >= 0
+                                    || this.types.indexOf("switch") >= 0
+                                    || this.types.indexOf("television") >= 0
+                                    || this.types.indexOf("fan") >= 0
+                                ) && this.characteristics.indexOf("off") >= 0;
+
+                                this.features.light = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
+                                this.features.brightness = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
+                                this.features.hue = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
+                            }).finally(() => {
+                                this.loading = false;
+                                this.intermediate = false;
+                            });
+                        } else {
+                            this.loading = false;
+                            this.intermediate = false;
+                        }
+                    } else {
+                        this.loading = false;
+                        this.intermediate = false;
                     }
-                }
-
-                this.loading = false;
-                this.intermediate = false;
+                });
             },
 
-            async loadRooms() {
-                this.rooms = await this.$hoobs.rooms.list();
+            loadRooms(partial) {
+                return new Promise((resolve) => {
+                    if (partial && this.rooms && this.rooms.length > 0) {
+                        resolve();
+                    } else {
+                        this.$hoobs.rooms.list().then((rooms) => {
+                            this.rooms = rooms;
 
-                for (let i = 0; i < this.rooms.length; i += 1) {
-                    if (!this.rooms[i].name || this.rooms[i].name === "") this.rooms[i].name = this.$t(this.rooms[i].id);
-                }
+                            for (let i = 0; i < this.rooms.length; i += 1) {
+                                if (!this.rooms[i].name || this.rooms[i].name === "") this.rooms[i].name = this.$t(this.rooms[i].id);
+                            }
+                        }).finally(() => {
+                            resolve();
+                        });
+                    }
+                });
             },
 
             async remove() {

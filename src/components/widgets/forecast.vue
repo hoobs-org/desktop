@@ -42,12 +42,28 @@
             };
         },
 
-        async mounted() {
-            const config = await this.$hoobs.config.get();
+        mounted() {
+            const waits = [];
 
-            this.location = (config.weather || {}).location;
-            this.forecast = await this.$hoobs.weather.forecast();
-            this.loading = false;
+            waits.push(new Promise((resolve) => {
+                this.$hoobs.config.get().then((config) => {
+                    this.location = (config.weather || {}).location;
+                }).finally(() => {
+                    resolve();
+                });
+            }));
+
+            waits.push(new Promise((resolve) => {
+                this.$hoobs.weather.forecast().then((forecast) => {
+                    this.forecast = forecast;
+                }).finally(() => {
+                    resolve();
+                });
+            }));
+
+            Promise.all(waits).then(() => {
+                this.loading = false;
+            });
         },
 
         methods: {

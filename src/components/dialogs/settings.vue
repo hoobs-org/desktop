@@ -84,7 +84,7 @@
 
 <script>
     import { Wait } from "@hoobs/sdk/lib/wait";
-    import Countries from "@/lang/country-codes.json";
+    import Countries from "@/lang/countries.json";
 
     import MessageComponent from "@/components/elements/message.vue";
     import RestoreComponent from "@/components/dialogs/restore.vue";

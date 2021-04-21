@@ -280,7 +280,7 @@
             }
 
             .panel {
-                border: 0 none;
+                border: 1px var(--widget-border) solid;
             }
         }
 

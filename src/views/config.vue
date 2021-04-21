@@ -138,10 +138,7 @@
         mounted() {
             this.$action.off("config", "update");
             this.$action.off("personalize", "update");
-
-            this.$action.on("config", "update", () => {
-                this.change(this.bridge);
-            });
+            this.$action.on("config", "update", () => this.change(this.bridge));
 
             this.$action.on("personalize", "update", () => {
                 if (this.identifier === "advanced") this.change(this.bridge);
@@ -183,9 +180,7 @@
                     if (config.api.disable_auth !== working.disable_auth) {
                         reload = true;
 
-                        if (!config.api.disable_auth) {
-                            logout = true;
-                        }
+                        if (!config.api.disable_auth) logout = true;
                     }
 
                     config.api = working;
@@ -321,13 +316,8 @@
                     this.foreground = theme.widget.text.default.replace("#", "");
                     this.background = "00000000";
 
-                    if (this.foreground.length === 3) {
-                        this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
-                    }
-
-                    if (this.background.length === 3) {
-                        this.background = this.background.split("").map((item) => `${item}${item}`).join("");
-                    }
+                    if (this.foreground.length === 3) this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
+                    if (this.background.length === 3) this.background = this.background.split("").map((item) => `${item}${item}`).join("");
 
                     this.saved = (await (await this.$hoobs.bridge(bridge)).config.get()) || {};
 
@@ -430,56 +420,47 @@
                 }
             },
 
-            async load(identifier) {
+            load(identifier) {
                 this.loading = true;
 
-                const plugins = await this.$hoobs.plugins();
+                this.$hoobs.plugins().then((plugins) => {
+                    for (let i = 0; i < plugins.length; i += 1) {
+                        const plugin = plugins[i];
 
-                for (let i = 0; i < plugins.length; i += 1) {
-                    const plugin = plugins[i];
+                        if (plugin && plugin.schema && plugin.schema.config) {
+                            const { bridge } = plugin;
+                            const { version } = plugin;
 
-                    if (plugin && plugin.schema && plugin.schema.config) {
-                        const { bridge } = plugin;
-                        const { version } = plugin;
+                            let index = this.plugins.findIndex((item) => item.identifier === plugin.identifier);
 
-                        let index = this.plugins.findIndex((item) => item.identifier === plugin.identifier);
+                            if (index === -1) {
+                                index = this.plugins.length;
+                                plugin.bridges = [];
+                                plugin.display = this.$hoobs.repository.title(plugin.name);
 
-                        if (index === -1) {
-                            index = this.plugins.length;
-                            plugin.bridges = [];
-                            plugin.display = this.$hoobs.repository.title(plugin.name);
+                                delete plugin.bridge;
+                                delete plugin.version;
 
-                            delete plugin.bridge;
-                            delete plugin.version;
+                                this.plugins.push(plugin);
+                            }
 
-                            this.plugins.push(plugin);
+                            this.plugins[index].bridges.push({ id: bridge, version });
                         }
-
-                        this.plugins[index].bridges.push({
-                            id: bridge,
-                            version,
-                        });
                     }
-                }
 
-                this.plugins.sort((a, b) => {
-                    if (a.display < b.display) return -1;
-                    if (a.display > b.display) return 1;
+                    this.plugins.sort((a, b) => {
+                        if (a.display < b.display) return -1;
+                        if (a.display > b.display) return 1;
 
-                    return 0;
+                        return 0;
+                    });
+
+                    this.plugins.unshift({ identifier: "hub", display: this.$t("hub") });
+
+                    if (!this.$mobile) this.plugins.push({ identifier: "advanced", display: this.$t("advanced") });
+
+                    this.switch(identifier);
                 });
-
-                this.plugins.unshift({
-                    identifier: "hub",
-                    display: this.$t("hub"),
-                });
-
-                this.plugins.push({
-                    identifier: "advanced",
-                    display: this.$t("advanced"),
-                });
-
-                this.switch(identifier);
             },
         },
     };

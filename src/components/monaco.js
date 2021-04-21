@@ -2,22 +2,10 @@ export default {
     name: "monaco",
 
     props: {
-        value: {
-            type: String,
-            required: true,
-        },
-        theme: {
-            type: String,
-            default: "dark",
-        },
-        foreground: {
-            type: String,
-            default: "999999",
-        },
-        background: {
-            type: String,
-            default: "141414",
-        },
+        value: { type: String, required: true },
+        theme: { type: String, default: "dark" },
+        foreground: { type: String, default: "999999" },
+        background: { type: String, default: "141414" },
     },
 
     model: {
@@ -31,16 +19,12 @@ export default {
     },
 
     mounted() {
-        const monaco = require("monaco-editor");
-
-        this.monaco = monaco;
-
-        this.init(monaco);
+        this.monaco = require("monaco-editor");
+        this.init(this.monaco);
     },
 
     beforeDestroy() {
-        if (this.watcher) this.watcher();
-
+        this.$action.off("window", "resize");
         this.editor && this.editor.dispose();
     },
 
@@ -51,13 +35,8 @@ export default {
             monaco.editor.defineTheme("theme", {
                 base: this.theme === "dark" ? "vs-dark" : "vs",
                 inherit: true,
-                colors: {
-                    "editor.foreground": `#${this.foreground}`,
-                    "editor.background": `#${this.background}`,
-                },
-                rules: [
-                    { token: "", foreground: this.foreground, background: this.background },
-                ],
+                colors: { "editor.foreground": `#${this.foreground}`, "editor.background": `#${this.background}` },
+                rules: [{ token: "", foreground: this.foreground, background: this.background }],
             });
 
             this.editor = monaco.editor.create(this.$el, {
@@ -69,26 +48,15 @@ export default {
                 renderLineHighlight: "none",
                 scrollBeyondLastLine: false,
                 contextmenu: false,
-                minimap: {
-                    enabled: false,
-                },
-                scrollbar: {
-                    useShadows: false,
-                    horizontal: "hidden",
-                    vertical: "hidden",
-                },
+                minimap: { enabled: false },
+                scrollbar: { useShadows: false, horizontal: "hidden", vertical: "hidden" },
                 lineNumbers: false,
             });
 
-            this.editor.onDidChangeModelContent((event) => {
-                this.$emit("change", this.editor.getValue(), event);
-            });
+            this.editor.onDidChangeModelContent((event) => this.$emit("change", this.editor.getValue(), event));
 
-            this.watcher = this.$store.subscribe((mutation) => {
-                if (mutation.type === "resizeWindow") {
-                    this.resize();
-                }
-            });
+            this.$action.off("window", "resize");
+            this.$action.on("window", "resize", this.resize);
 
             this.$emit("mounted", this.editor);
         },

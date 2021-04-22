@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('cache')" :draggable="true" width="680px" height="660px">
+    <modal :title="$t('cache')" :draggable="true" width="700px" height="687px">
         <div id="cache">
             <div v-if="!loading" class="content">
                 <div v-if="bridge && cache.length > 0" class="form">

@@ -1,5 +1,5 @@
 <template>
-    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="760px" height="720px">
+    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="780px" height="747px">
         <div id="accessory">
             <div v-if="!loading" class="content">
                 <icons v-if="accessory && show.icons" v-on:update="select" />

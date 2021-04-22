@@ -1,5 +1,5 @@
 <template>
-    <modal width="490px" height="220px">
+    <modal width="510px" height="247px">
         <div class="content message">{{ options.message }}</div>
         <div class="actions modal">
             <div class="button" v-on:click="cancel()">{{ $t("cancel") }}</div>

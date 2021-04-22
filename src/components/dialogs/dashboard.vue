@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('settings')" :draggable="true" width="760px" height="620px">
+    <modal :title="$t('settings')" :draggable="true" width="780px" height="647px">
         <div id="settings">
             <div v-if="!loading" class="content">
                 <div class="form">

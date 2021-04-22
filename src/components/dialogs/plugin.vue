@@ -1,5 +1,5 @@
 <template>
-    <modal-frame :draggable="true" width="760px" height="760px">
+    <modal-frame :draggable="true" width="780px" height="787px">
         <div id="plugin">
             <div class="content">
                 <iframe ref="frame" :src="source" class="frame" frameborder="0"></iframe>

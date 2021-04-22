@@ -54,13 +54,7 @@
         .messages {
             flex: 1;
             font-size: 10px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
             overflow: auto;
-
-            &::-webkit-scrollbar {
-                display: none;
-            }
         }
     }
 </style>

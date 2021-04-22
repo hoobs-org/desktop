@@ -561,12 +561,7 @@
                         padding: 20px;
                         max-width: 950px;
                         overflow-wrap: break-word;
-                        -ms-overflow-style: none;
                         overflow: auto;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                        }
 
                         .heading {
                             display: flex;

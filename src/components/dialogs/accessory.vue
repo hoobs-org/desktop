@@ -293,12 +293,6 @@
 
             .form {
                 overflow: auto;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                }
 
                 .title {
                     margin: 14px 0 0 0;

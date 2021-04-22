@@ -277,12 +277,7 @@
     #detail {
         max-width: 320px;
         user-select: none;
-        -ms-overflow-style: none;
         overflow: auto;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
 
         .title {
             margin: 20px 0 10px 0;

@@ -75,13 +75,7 @@
             backdrop-filter: var(--transparency);
             border-top: 7px var(--modal-highlight) solid;
             box-shadow: var(--elevation);
-            -ms-overflow-style: none;
-            scrollbar-width: none;
             overflow: auto;
-
-            &::-webkit-scrollbar {
-                display: none;
-            }
         }
 
         .content {

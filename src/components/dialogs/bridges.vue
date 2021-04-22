@@ -1,5 +1,5 @@
 <template>
-    <modal :title="title" :draggable="true" width="670px" height="670px">
+    <modal :title="title" :draggable="true" width="690px" height="697px">
         <div id="bridges">
             <div v-if="!loading" class="content">
                 <form v-if="options.type === 'install'" class="form">
@@ -235,12 +235,6 @@
 
             .bridge-list {
                 overflow: auto;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                }
             }
         }
 

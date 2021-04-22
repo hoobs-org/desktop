@@ -558,15 +558,11 @@
 
                     .section {
                         flex: 1;
-                        padding: 20px;
+                        padding: 20px 0 20px 20px;
+                        margin: 0 20px 0 0;
                         max-width: 950px;
                         overflow-wrap: break-word;
-                        -ms-overflow-style: none;
                         overflow: auto;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                        }
 
                         .heading {
                             display: flex;

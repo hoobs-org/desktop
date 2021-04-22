@@ -1,5 +1,5 @@
 <template>
-    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="760px" height="720px">
+    <modal :title="(accessory || {}).name || $t('accessory')" :draggable="true" width="780px" height="747px">
         <div id="accessory">
             <div v-if="!loading" class="content">
                 <icons v-if="accessory && show.icons" v-on:update="select" />
@@ -293,12 +293,6 @@
 
             .form {
                 overflow: auto;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                }
 
                 .title {
                     margin: 14px 0 0 0;

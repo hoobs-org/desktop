@@ -68,13 +68,7 @@
 
         .list {
             flex: 1;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
             overflow: auto;
-
-            &::-webkit-scrollbar {
-                display: none;
-            }
         }
 
         .empty {

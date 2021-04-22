@@ -217,13 +217,7 @@
         .messages {
             flex: 1;
             padding: 10px 20px 20px 20px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
             overflow: auto;
-
-            &::-webkit-scrollbar {
-                display: none;
-            }
         }
     }
 </style>

@@ -82,12 +82,7 @@
         background: var(--widget-background);
         backdrop-filter: var(--transparency);
         user-select: none;
-        -ms-overflow-style: none;
         overflow: auto;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
 
         .item {
             color: var(--application-text) !important;

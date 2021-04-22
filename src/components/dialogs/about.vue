@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('about')" :draggable="true" width="720px" height="520px">
+    <modal :title="$t('about')" :draggable="true" width="740px" height="547px">
         <div id="about">
             <div class="content">
                 <div class="form">

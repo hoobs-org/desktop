@@ -40,11 +40,6 @@
         display: flex;
         flex-direction: row;
         overflow-x: auto;
-        -ms-overflow-style: none;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
 
         .tab {
             padding: 0 20px;

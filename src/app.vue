@@ -77,6 +77,24 @@
             color: var(--application-text);
         }
 
+        ::-webkit-scrollbar {
+            background-color: transparent;
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--application-border);
+            border-radius: 0;
+        }
+
+        ::-webkit-scrollbar-button {
+            display:none;
+        }
+
         a {
             color: var(--application-highlight) !important;
             text-decoration: none !important;

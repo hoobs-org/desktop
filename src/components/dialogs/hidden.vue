@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('hidden_accessories')" :draggable="true" width="760px" height="660px">
+    <modal :title="$t('hidden_accessories')" :draggable="true" width="780px" height="687px">
         <div id="hidden">
             <div v-if="!loading" class="content">
                 <div class="form">
@@ -72,12 +72,6 @@
 
             .form {
                 overflow: auto;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                }
             }
         }
 

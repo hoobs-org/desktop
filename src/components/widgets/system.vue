@@ -135,14 +135,8 @@
         flex-direction: column;
         box-sizing: border-box;
         padding: 20px;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
         overflow: auto;
         cursor: default;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
 
         .status {
             display: flex;

@@ -224,6 +224,10 @@ export default new Vuex.Store({
             state.latest = null;
         },
 
+        "NOTIFICATION:DISMISS:ALL": (state: { [key: string]: any }) => {
+            state.notifications = [];
+        },
+
         "NOTIFICATION:DISMISS:OLD": (state: { [key: string]: any }) => {
             const now = (new Date()).getTime();
 

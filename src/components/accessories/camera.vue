@@ -74,6 +74,10 @@
 
                 return `${this.timelapse} ${this.$t("seconds")}`;
             },
+
+            streaming() {
+                return this.$store.state.streaming[this.accessory.accessory_identifier];
+            },
         },
 
         data() {
@@ -92,7 +96,7 @@
                 updater: Debounce(async () => {
                     this.display = this.subject.name;
 
-                    if (this.subject.supports_streaming) this.source = this.subject.stream();
+                    if (this.subject.supports_streaming && this.streaming) this.source = this.subject.stream();
 
                     this.cycle(true, true);
                 }, UPDATE_DELAY),

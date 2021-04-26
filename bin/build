@@ -24,44 +24,44 @@ Program.version(pjson.version, "-v, --version", "output the current version")
 Program.command("desktop", { isDefault: true })
     .description("build hoobs server")
     .option("-l, --lint", "lint the code before building")
+    .option("-t, --target [target...]", "specify the targets to build")
     .action((command) => {
-        prompt([{
-            type: "checkbox",
-            name: "target",
-            message: "Select the targets to build: (Press <space> to select)",
-            choices: [
-                {
-                    name: "Windows",
-                    value: "win",
-                },
-                {
-                    name: "macOS",
-                    value: "mac",
-                },
-            ],
-            default: [
-                "win",
-                "mac",
-            ],
-        }]).then((result) => {
+        const build = (options) => {
+            let { target } = options;
+
+            if (!target) target = [];
+            if (!Array.isArray(target)) target = [target];
+
             if (command.lint) execSync(`${join(root, "node_modules", ".bin", "vue-cli-service")} lint`, { cwd: root, stdio: "inherit" });
             if (existsSync(join(root, "dist"))) execSync(`${join(root, "node_modules", ".bin", "rimraf")} ${join(root, "dist")}`, { cwd: root, stdio: "inherit" });
 
             const flags = [];
 
-            if (result.target.indexOf("win") >= 0) flags.push("--win");
-            if (result.target.indexOf("mac") >= 0) flags.push("--mac");
+            if (target.indexOf("win") >= 0) flags.push("--win");
+            if (target.indexOf("mac") >= 0) flags.push("--mac");
 
             if (flags.length > 0) execSync(`${join(root, "node_modules", ".bin", "vue-cli-service")} electron:build ${flags.join(" ")}`, { cwd: root, stdio: "inherit" });
             if (!existsSync(join(root, "../builds"))) mkdirSync(join(root, "../builds"));
 
-            if (result.target.indexOf("win") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
-            if (result.target.indexOf("mac") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
-            if (result.target.indexOf("win") >= 0) moveSync(join(root, "dist", `HOOBS Setup ${pjson.version}.exe`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
-            if (result.target.indexOf("mac") >= 0) moveSync(join(root, "dist", `HOOBS-${pjson.version}.dmg`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
+            if (target.indexOf("win") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
+            if (target.indexOf("mac") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
+            if (target.indexOf("win") >= 0) moveSync(join(root, "dist", `HOOBS Setup ${pjson.version}.exe`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
+            if (target.indexOf("mac") >= 0) moveSync(join(root, "dist", `HOOBS-${pjson.version}.dmg`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
 
             if (existsSync(join(root, "dist"))) execSync(`${join(root, "node_modules", ".bin", "rimraf")} ${join(root, "dist")}`, { cwd: root, stdio: "inherit" });
-        });
+        };
+
+        if (command.target && Array.isArray(command.target) && command.target.length > 0) {
+            build(command);
+        } else {
+            prompt([{
+                type: "checkbox",
+                name: "target",
+                message: "Select the targets to build: (Press <space> to select)",
+                choices: [{ name: "Windows", value: "win" }, { name: "macOS", value: "mac" }],
+                default: ["win", "mac"],
+            }]).then((result) => build(result));
+        }
     });
 
 Program.parse(process.argv);

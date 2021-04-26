@@ -103,6 +103,15 @@
             };
         },
 
+        created() {
+            this.$store.subscribe(async (mutation) => {
+                if (mutation.type === "IO:ACCESSORY:CHANGE" && mutation.payload.data.accessory.accessory_identifier === this.subject.accessory_identifier) {
+                    this.subject = mutation.payload.data.accessory;
+                    this.updater();
+                }
+            });
+        },
+
         async mounted() {
             this.subject = await this.$hoobs.accessory(this.accessory.bridge, this.accessory.accessory_identifier);
             this.snapshot = this.$store.state.snapshots[this.accessory.accessory_identifier];

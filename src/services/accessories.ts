@@ -33,6 +33,9 @@ export function types(accessory: { [key: string]: any }): string | undefined {
         case "window_covering":
             return "blind-accessory";
 
+        case "television":
+            return "television-accessory";
+
         case "sensor":
             if (!accessory.main_sensor) return "unknown-accessory";
 
@@ -58,21 +61,22 @@ export function types(accessory: { [key: string]: any }): string | undefined {
 
 export function accessories(): { [key: string]: () => any } {
     return {
-        "off-accessory": () => import(/* webpackChunkName: "accessory-fan" */ "@/components/accessories/off.vue"),
-        "hue-accessory": () => import(/* webpackChunkName: "accessory-fan" */ "@/components/accessories/hue.vue"),
+        "off-accessory": () => import(/* webpackChunkName: "accessory-off" */ "@/components/accessories/off.vue"),
+        "hue-accessory": () => import(/* webpackChunkName: "accessory-hue" */ "@/components/accessories/hue.vue"),
         "fan-accessory": () => import(/* webpackChunkName: "accessory-fan" */ "@/components/accessories/fan.vue"),
         "lock-accessory": () => import(/* webpackChunkName: "accessory-lock" */ "@/components/accessories/lock.vue"),
         "light-accessory": () => import(/* webpackChunkName: "accessory-light" */ "@/components/accessories/light.vue"),
         "blind-accessory": () => import(/* webpackChunkName: "accessory-blind" */ "@/components/accessories/blind.vue"),
         "camera-accessory": () => import(/* webpackChunkName: "accessory-camera" */ "@/components/accessories/camera.vue"),
-        "sensor-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/sensor.vue"),
+        "sensor-accessory": () => import(/* webpackChunkName: "accessory-sensor" */ "@/components/accessories/sensor.vue"),
         "switch-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/switch.vue"),
         "garage-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/garage.vue"),
-        "security-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/security.vue"),
-        "sprinkler-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/sprinkler.vue"),
+        "security-accessory": () => import(/* webpackChunkName: "accessory-security" */ "@/components/accessories/security.vue"),
+        "sprinkler-accessory": () => import(/* webpackChunkName: "accessory-sprinkler" */ "@/components/accessories/sprinkler.vue"),
+        "television-accessory": () => import(/* webpackChunkName: "accessory-television" */ "@/components/accessories/television.vue"),
         "thermostat-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/thermostat.vue"),
-        "brightness-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/brightness.vue"),
-        "unavailable-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/unavailable.vue"),
-        "unknown-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/unknown.vue"),
+        "brightness-accessory": () => import(/* webpackChunkName: "accessory-brightness" */ "@/components/accessories/brightness.vue"),
+        "unavailable-accessory": () => import(/* webpackChunkName: "accessory-unavailable" */ "@/components/accessories/unavailable.vue"),
+        "unknown-accessory": () => import(/* webpackChunkName: "accessory-unknown" */ "@/components/accessories/unknown.vue"),
     };
 }

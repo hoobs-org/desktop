@@ -941,6 +941,7 @@ import {
     mdiWindowMinimize,
     mdiWindowMaximize,
     mdiWindowRestore,
+    mdiTelevisionClassic,
 } from "@mdi/js";
 
 const tags: { [key: string]: string } = {
@@ -1886,6 +1887,7 @@ const tags: { [key: string]: string } = {
     minimize: mdiWindowMinimize,
     maximize: mdiWindowMaximize,
     restore: mdiWindowRestore,
+    television: mdiTelevisionClassic,
 };
 
 export function icons(): string[] {

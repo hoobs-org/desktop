@@ -257,7 +257,8 @@
 
                 this.$dialog.close("accessory");
                 this.$action.emit("dashboard", "update");
-                this.$router.push({ path: "/" });
+
+                setTimeout(() => this.$router.push({ path: "/" }), 250);
             },
 
             async remove() {

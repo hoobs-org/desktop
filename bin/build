@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const Program = require("commander");
 const Inquirer = require("inquirer");
 const { join } = require("path");

@@ -55,13 +55,17 @@
 
         created() {
             this.$action.on("settings", "update", () => {
-                this.load();
-                this.render();
+                setTimeout(() => {
+                    this.load();
+                    this.render();
+                }, 250);
             });
 
             this.$action.on("dashboard", "update", () => {
-                this.load();
-                this.render();
+                setTimeout(() => {
+                    this.load();
+                    this.render();
+                }, 250);
             });
         },
 

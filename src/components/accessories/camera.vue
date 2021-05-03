@@ -52,24 +52,7 @@
             },
 
             span() {
-                if (!this.timelapse) return "";
-
-                if (this.timelapse >= 3600) {
-                    const hours = Math.round(this.timelapse / 3600);
-
-                    if (hours <= 1) return `1 ${this.$t("hours")}`;
-
-                    return `${hours} ${this.$t("hour")}`;
-                }
-
-                if (this.timelapse >= 60) {
-                    const minutes = Math.round(this.timelapse / 3600);
-
-                    if (minutes <= 1) return `1 ${this.$t("minute")}`;
-
-                    return `${minutes} ${this.$t("minutes")}`;
-                }
-
+                if (!this.timelapse || this.timelapse >= 60) return "";
                 if (this.timelapse < 10) return this.$t("now");
 
                 return `${this.timelapse} ${this.$t("seconds")}`;

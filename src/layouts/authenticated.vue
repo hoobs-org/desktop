@@ -24,7 +24,7 @@
     import NavigationComponent from "@/components/navigation.vue";
     import NotificationComponent from "@/components/elements/notification.vue";
 
-    const SOCKET_RECONNECT_DELAY = 10 * 1000;
+    const SOCKET_RECONNECT_DELAY = 0.5 * 1000;
 
     export default {
         name: "authenticated",

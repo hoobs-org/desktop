@@ -3,6 +3,12 @@
         <component :is="$route.meta.layout">
             <router-view class="view" />
         </component>
+        <div class="chrome">
+            <icon class="icon window-control spaced" v-on:click="minimize" name="minimize" />
+            <icon v-if="maximized" v-on:click="restore" class="icon window-control spaced" name="restore" />
+            <icon v-else class="icon window-control spaced" v-on:click="maximize" name="maximize" />
+            <icon class="icon window-control" v-on:click="close" name="close" />
+        </div>
     </div>
 </template>
 
@@ -24,12 +30,40 @@
             },
         },
 
+        data() {
+            return {
+                maximized: false,
+            };
+        },
+
         async created() {
             this.$theme.load();
+            this.maximized = this.$electron.maximized;
 
             window.addEventListener("resize", () => {
                 this.$action.emit("window", "resize");
             }, true);
+        },
+
+        methods: {
+            minimize() {
+                this.$electron.minimize();
+                setTimeout(() => { this.maximized = this.$electron.maximized; }, 250);
+            },
+
+            maximize() {
+                this.$electron.maximize();
+                setTimeout(() => { this.maximized = this.$electron.maximized; }, 250);
+            },
+
+            restore() {
+                this.$electron.restore();
+                setTimeout(() => { this.maximized = this.$electron.maximized; }, 250);
+            },
+
+            close() {
+                this.$electron.close();
+            },
         },
     };
 </script>
@@ -93,6 +127,45 @@
 
         ::-webkit-scrollbar-button {
             display:none;
+        }
+
+        .chrome {
+            display: flex;
+            position: absolute;
+            top: 0;
+            right: 0;
+            flex-direction: row;
+            align-content: center;
+            z-index: 3100;
+            padding: 2px 7px 0 0;
+
+            .icon {
+                height: 15px;
+                padding: 7px;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                position: relative;
+                border-radius: 100%;
+                margin: 5px 0;
+                cursor: pointer;
+
+                &.spaced {
+                    margin: 5px 7px 5px 0;
+                }
+
+                .active {
+                    font-size: 32px;
+                    position: absolute;
+                    right: 4px;
+                    top: 2px;
+                    color: var(--application-error-text);
+                }
+
+                &:hover {
+                    color: var(--application-highlight-text);
+                }
+            }
         }
 
         a {

@@ -48,7 +48,7 @@
         backdrop-filter: var(--transparency);
         box-shadow: var(--elevation);
         border-radius: 0;
-        z-index: 3000;
+        z-index: 3100;
 
         .close {
             position: absolute;

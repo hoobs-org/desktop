@@ -107,9 +107,7 @@
         }
 
         .content {
-            display: flex;
-            flex-direction: row;
-            white-space: nowrap;
+            white-space: pre-wrap;
 
             span {
                 margin: 0 7px 0 0;

@@ -10,10 +10,7 @@
             </icon>
             <icon v-if="!login" v-on:click.stop="$menu.open('application')" class="icon" name="dots-vertical" />
             <div v-if="!login" class="seperator"></div>
-            <icon class="icon window-control spaced" v-on:click="minimize" name="minimize" />
-            <icon v-if="$electron.maximized" v-on:click="restore" class="icon window-control spaced" name="restore" />
-            <icon v-else class="icon window-control spaced" v-on:click="maximize" name="maximize" />
-            <icon class="icon window-control" v-on:click="close" name="close" />
+            <div class="placeholder"></div>
         </div>
     </div>
 </template>
@@ -30,24 +27,6 @@
         computed: {
             notifications() {
                 return this.$store.state.notifications;
-            },
-        },
-
-        methods: {
-            minimize() {
-                this.$electron.minimize();
-            },
-
-            maximize() {
-                this.$electron.maximize();
-            },
-
-            restore() {
-                this.$electron.restore();
-            },
-
-            close() {
-                this.$electron.close();
             },
         },
     };
@@ -97,6 +76,11 @@
             margin: 10px 7px;
         }
 
+        .placeholder {
+            width: 100.94px;
+            height: 38.98px;
+        }
+
         .icon {
             padding: 5px;
             height: 18px;
@@ -107,15 +91,6 @@
             border-radius: 100%;
             margin: 5px 0;
             cursor: pointer;
-
-            &.window-control {
-                height: 15px;
-                padding: 7px;
-            }
-
-            &.spaced {
-                margin: 5px 7px 5px 0;
-            }
 
             .active {
                 font-size: 32px;

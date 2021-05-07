@@ -42,7 +42,7 @@
                         <spinner />
                     </div>
                     <div class="messages" style="height: 50%;">
-                        <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" />
+                        <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" :compact="true" />
                     </div>
                 </div>
             </div>

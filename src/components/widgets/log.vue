@@ -1,7 +1,7 @@
 <template>
     <div id="widget">
         <div ref="messages" class="messages">
-            <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" />
+            <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" :compact="true" />
         </div>
     </div>
 </template>

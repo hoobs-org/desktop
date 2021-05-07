@@ -68,7 +68,7 @@
                     <spinner :value="message" />
                 </div>
                 <div class="messages" style="height: 70%;">
-                    <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" />
+                    <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" :compact="true" />
                 </div>
             </div>
             <div v-if="!loading && (show.restore || show.location)" class="actions modal">

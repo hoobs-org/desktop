@@ -184,7 +184,7 @@
                 this.loading = true;
 
                 if (this.validate()) {
-                    const device = await this.$scanner.detect(this.ip, this.port);
+                    const device = await this.$scanner.detect(this.ip, this.port, 2 * 60 * 1000);
 
                     if (device) {
                         this.select(device);

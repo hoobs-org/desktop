@@ -153,7 +153,7 @@ export default class Scanner extends EventEmitter {
         return subnets;
     }
 
-    detect(ip: string, port: number): Promise<Active | undefined> {
+    detect(ip: string, port: number, timeout?: number): Promise<Active | undefined> {
         return new Promise((resolve) => {
             let data: Active | undefined;
 
@@ -161,7 +161,7 @@ export default class Scanner extends EventEmitter {
 
             setTimeout(() => {
                 source.cancel();
-            }, this.timeout);
+            }, timeout || this.timeout);
 
             this.emit("message", `Checking: ${ip}:${port}`);
 

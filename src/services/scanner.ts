@@ -47,7 +47,7 @@ export default class Scanner extends EventEmitter {
         this.count = 0;
         this.errors = 0;
 
-        this.timeout = 5 * 1000;
+        this.timeout = 7 * 1000;
     }
 
     async start(devices: Active[], ...ports: number[]): Promise<void> {

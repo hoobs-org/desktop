@@ -1,7 +1,7 @@
 <template>
     <div :key="version" id="login">
-        <modal :welcome="current ? $t('login') : null" :title="current ? null : $t('devices')" width="420px">
-            <div v-if="errors.length > 0" class="errors">
+        <modal :welcome="current ? $t('login') : null" :title="title" width="420px">
+            <div v-if="errors.length > 0 && !manual" class="errors">
                 <span v-for="(error, index) in errors" :key="`error:${index}`">{{ error }}</span>
             </div>
             <form v-if="!loading && current" class="modal" autocomplete="false" method="post" action="/login" v-on:submit.prevent="login()">
@@ -20,7 +20,7 @@
                     <checkbox id="remember" :title="$t('remember_me')" v-model="remember" />
                 </div>
             </form>
-            <div v-else-if="!loading" class="devices">
+            <div v-else-if="!loading && !manual" class="devices">
                 <div v-for="(device) in devices" :key="device.mac" v-on:click="select(device)" class="device">
                     <div class="title">{{ device.ip }}</div>
                     <div class="sub">{{ device.mac }}</div>
@@ -41,16 +41,32 @@
                     <div class="scanner-message">{{ message }}</div>
                 </div>
             </div>
+            <div v-else-if="!loading && manual" class="devices">
+                <p v-if="errors.length > 0" class="directions error">
+                    <span v-for="(error, index) in errors" :key="`error:${index}`">{{ error }}</span>
+                </p>
+                <p v-else class="directions">
+                    <span>{{ $t("device_add_message") }}</span>
+                </p>
+                <div class="row">
+                    <text-field :title="$t('device_ip')" style="flex: 1;" v-model="ip" :required="true" :autofocus="true" />
+                    <port-field :title="$t('device_port')" style="width: 20%; padding-right: 5px" v-model="port" />
+                </div>
+            </div>
             <div v-else class="loading">
                 <spinner />
             </div>
             <div class="actions modal">
                 <div class="copyright">
-                    Copyright &copy; {{ (new Date()).getFullYear() }} HOOBS, Inc. All rights reserved.
+                    Copyright &copy; {{ (new Date()).getFullYear() }} HOOBS, Inc.<br>All rights reserved.
                 </div>
-                <div v-if="!loading && !current && !scanning" class="button" v-on:click="rescan()">{{ $t("rescan") }}</div>
-                <div v-if="!loading && current" class="button" v-on:click="select(null)">{{ $t("devices") }}</div>
-                <div v-if="!loading && current" class="button primary" v-on:click="login()">{{ $t("login") }}</div>
+                <div v-if="!loading && !current && !manual" class="button" v-on:click="advanced(true)">{{ $t("advanced") }}</div>
+                <div v-if="!loading && !current && !scanning && !manual" class="button" v-on:click="rescan()">{{ $t("rescan") }}</div>
+                <div v-if="!loading && current && !manual" class="button" v-on:click="select(null)">{{ $t("devices") }}</div>
+                <div v-if="!loading && current && !manual" class="button primary" v-on:click="login()">{{ $t("login") }}</div>
+
+                <div v-if="!loading && manual" class="button" v-on:click="advanced(false)">{{ $t("cancel") }}</div>
+                <div v-if="!loading && manual" class="button primary" v-on:click="connect()">{{ $t("connect") }}</div>
             </div>
         </modal>
     </div>
@@ -65,6 +81,13 @@
                 return this.$store.state.current;
             },
 
+            title() {
+                if (this.$store.state.current && !this.manual) return null;
+                if (this.manual) return this.$t("advanced");
+
+                return this.$t("devices");
+            },
+
             devices() {
                 return this.$store.state.devices;
             },
@@ -73,7 +96,10 @@
         data() {
             return {
                 url: "/",
+                ip: "",
+                port: 80,
                 scan: false,
+                manual: false,
                 message: "",
                 marque: null,
                 progress: 0,
@@ -137,8 +163,84 @@
         },
 
         methods: {
+            advanced(state) {
+                this.ip = "";
+                this.port = 80;
+                this.errors = [];
+                this.manual = state;
+
+                if (state) {
+                    this.$scanner.stop();
+                } else {
+                    this.$scanner.start(this.$store.state.devices, 80, 50826);
+                }
+            },
+
             rescan() {
                 this.$scanner.start(this.$store.state.devices, 80, 50826);
+            },
+
+            async connect() {
+                this.loading = true;
+
+                if (this.validate()) {
+                    const device = await this.$scanner.detect(this.ip, this.port);
+
+                    if (device) {
+                        this.select(device);
+                    } else {
+                        this.loading = false;
+                        this.errors.push(this.$t("invalid_ip"));
+                    }
+                } else {
+                    this.loading = false;
+                }
+            },
+
+            validate() {
+                this.errors = [];
+
+                if (!this.ip || this.ip === "") {
+                    this.errors.push(this.$t("invalid_ip"));
+
+                    return false;
+                }
+
+                const blocks = this.ip.split(".").map((item) => parseInt(item, 10));
+
+                if (blocks.length !== 4) {
+                    this.errors.push(this.$t("invalid_ip"));
+
+                    return false;
+                }
+
+                for (let i = 0; i < blocks.length; i += 1) {
+                    if (Number.isNaN(blocks[i])) {
+                        this.errors.push(this.$t("invalid_ip"));
+
+                        return false;
+                    }
+
+                    if (blocks[i] < 0 || blocks[i] > 255) {
+                        this.errors.push(this.$t("invalid_ip"));
+
+                        return false;
+                    }
+                }
+
+                if (Number.isNaN(parseInt(this.port, 10))) {
+                    this.errors.push(this.$t("invalid_port"));
+
+                    return false;
+                }
+
+                if (this.port < 1 || this.port > 65535) {
+                    this.errors.push(this.$t("invalid_port"));
+
+                    return false;
+                }
+
+                return true;
             },
 
             async select(device) {
@@ -159,6 +261,7 @@
                 if (this.status === "uninitialized") this.$router.push({ path: "/setup" });
                 if (this.status === "disabled") this.$router.push({ path: "/" });
 
+                this.manual = false;
                 this.loading = false;
 
                 setTimeout(() => {
@@ -275,6 +378,24 @@
                 align-items: center;
             }
 
+            .row {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .directions {
+                display: flex;
+                flex-direction: column;
+                font-size: 14px;
+                padding: 0 20% 0 0;
+                opacity: 0.7;
+
+                &.error {
+                    color: var(--modal-error-text);
+                    opacity: 1;
+                }
+            }
+
             .device {
                 padding: 14px;
                 margin: 10px 0 0 0;
@@ -289,6 +410,22 @@
                 .title {
                     font-size: 20px;
                     color: var(--modal-highlight);
+                }
+
+                &.manual {
+                    width: 25px;
+                    padding: 0 7px;
+                    border: 0 none;
+
+                    .title {
+                        color: var(--modal-text);
+                    }
+
+                    &:hover {
+                        .title {
+                            color: var(--modal-highlight);
+                        }
+                    }
                 }
 
                 .sub {

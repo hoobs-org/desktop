@@ -237,15 +237,16 @@
 
                     if (this.subject) {
                         this.status = await this.subject.status();
+                        this.port = this.status.bridge_port;
                         this.display = this.subject.display;
                         this.pin = this.subject.pin;
                         this.username = this.subject.username;
                         this.autostart = parseInt(this.subject.autostart, 10) || 0;
                         this.advertiser = this.subject.advertiser || "bonjour";
 
-                        if (this.subject.ports) {
-                            this.start = this.subject.ports.start;
-                            this.end = this.subject.ports.end;
+                        if (this.status.ports) {
+                            this.start = this.status.ports.start;
+                            this.end = this.status.ports.end;
                         }
                     }
                 } else {

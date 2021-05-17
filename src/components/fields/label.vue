@@ -62,7 +62,7 @@
 
         .value {
             flex: 1;
-            padding: 4px 0;
+            padding: 4px 0 0 0;
             font-size: 14px;
             color: var(--application-input-text);
         }

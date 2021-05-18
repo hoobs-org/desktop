@@ -155,7 +155,7 @@
             this.scan = this.$route.query.scan === "true";
 
             if (!this.current) {
-                this.$scanner.start(this.$store.state.devices, 80, 50826);
+                this.$scanner.start(this.$store.state.devices, 80);
             }
 
             if (this.url.startsWith("/login")) this.url = "/";
@@ -172,12 +172,12 @@
                 if (state) {
                     this.$scanner.stop();
                 } else {
-                    this.$scanner.start(this.$store.state.devices, 80, 50826);
+                    this.$scanner.start(this.$store.state.devices, 80);
                 }
             },
 
             rescan() {
-                this.$scanner.start(this.$store.state.devices, 80, 50826);
+                this.$scanner.start(this.$store.state.devices, 80);
             },
 
             async connect() {
@@ -250,7 +250,7 @@
                     this.$hoobs.config.host.set(device.ip, device.port);
                     this.$scanner.stop();
                 } else {
-                    this.$scanner.start(this.$store.state.devices, 80, 50826);
+                    this.$scanner.start(this.$store.state.devices, 80);
                 }
 
                 this.status = await this.$hoobs.auth.status();

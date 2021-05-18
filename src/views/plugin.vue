@@ -58,6 +58,7 @@
 
 <script>
     import { Wait } from "@hoobs/sdk/lib/wait";
+    import { shell } from "electron";
     import Semver from "compare-versions";
     import crypto from "crypto";
     import identicon from "identicon.js";
@@ -70,6 +71,10 @@
 
     const SOCKET_RECONNECT_DELAY = 2 * 1000;
     const BRIDGE_CREATE_DELAY = 8 * 1000;
+
+    window.$open = (href) => {
+        shell.openExternal(href);
+    };
 
     export default {
         name: "plugin",

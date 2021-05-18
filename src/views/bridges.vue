@@ -34,10 +34,6 @@
             <form v-else-if="subject" class="screen form">
                 <div class="wrapper">
                     <div class="row title">{{ display }}</div>
-                    <div class="row section">{{ $t("memory") }}</div>
-                    <div class="row">
-                        {{ heap }}
-                    </div>
                     <div class="row section">{{ $t("pairing") }}</div>
                     <div v-if="!loading && running && (status || {}).setup_id" class="row">
                         <p style="margin-top: 0">{{ $t("pairing_description") }}</p>
@@ -56,6 +52,10 @@
                         <div v-on:click="backup()" class="button">{{ $t("export_bridge") }}</div>
                     </div>
                     <div class="row section">{{ $t("details") }}</div>
+                    <div class="row">
+                        <label-field :title="$t('bridge_port')" style="flex: 1; padding-right: 5px;" :value="port" />
+                        <label-field :title="$t('memory')" style="flex: 1; padding-right: 0; padding-left: 5px;" :value="heap" />
+                    </div>
                     <div class="row">
                         <text-field :title="$t('name')" style="flex: 1; padding-right: 5px" v-model="display" />
                         <text-field :title="$t('bridge_pin')" style="flex: 1; padding-right: 0; padding-left: 5px" v-model="pin" />
@@ -237,15 +237,16 @@
 
                     if (this.subject) {
                         this.status = await this.subject.status();
+                        this.port = this.status.bridge_port;
                         this.display = this.subject.display;
                         this.pin = this.subject.pin;
                         this.username = this.subject.username;
                         this.autostart = parseInt(this.subject.autostart, 10) || 0;
                         this.advertiser = this.subject.advertiser || "bonjour";
 
-                        if (this.subject.ports) {
-                            this.start = this.subject.ports.start;
-                            this.end = this.subject.ports.end;
+                        if (this.status.ports) {
+                            this.start = this.status.ports.start;
+                            this.end = this.status.ports.end;
                         }
                     }
                 } else {
@@ -299,6 +300,8 @@
             async save(create) {
                 const validation = Validators.bridge(create, await this.$hoobs.bridges.list(), this.display, this.pin, this.port, this.username, this.autostart, this.start, this.end);
 
+                let restart = false;
+
                 if (validation.valid) {
                     if (create) {
                         this.loading = true;
@@ -321,11 +324,15 @@
                         await this.subject.update(this.display, this.autostart, this.pin, this.username, this.advertiser);
 
                         if (this.start && this.end) {
+                            restart = true;
+
                             await this.subject.ports(this.start, this.end);
                         }
 
                         setTimeout(async () => {
                             await Wait();
+
+                            if (restart) await this.subject.restart();
 
                             this.load(this.id);
                         }, SOCKET_RECONNECT_DELAY);

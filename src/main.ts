@@ -14,6 +14,7 @@ import NumberComponent from "@/components/fields/number.vue";
 import IntegerComponent from "@/components/fields/integer.vue";
 import SearchComponent from "@/components/fields/search.vue";
 import SelectComponent from "@/components/fields/select.vue";
+import LabelComponent from "@/components/fields/label.vue";
 import PortComponent from "@/components/fields/port.vue";
 import SpinnerComponent from "@/components/elements/spinner.vue";
 
@@ -105,6 +106,7 @@ Vue.component("number-field", NumberComponent);
 Vue.component("integer-field", IntegerComponent);
 Vue.component("search-field", SearchComponent);
 Vue.component("select-field", SelectComponent);
+Vue.component("label-field", LabelComponent);
 Vue.component("port-field", PortComponent);
 Vue.component("spinner", SpinnerComponent);
 

@@ -72,7 +72,7 @@
         </div>
         <div v-if="support" class="item">
             <div class="value">
-                <a :href="support" target="_blank">
+                <a href="#" :onclick="`window.$open('${support}');`">
                     <icon name="help-circle" class="icon" />
                     {{ $t("plugin_issues") }}
                 </a>
@@ -83,11 +83,11 @@
         </div>
         <div class="item">
             <div class="value">
-                <a v-if="homepage" :href="homepage" target="_blank">
+                <a v-if="homepage" href="#" :onclick="`window.$open('${homepage}');`">
                     <icon name="link" class="icon" />
                     {{ domain(homepage) }}
                 </a>
-                <a :href="`https://plugins.hoobs.org/plugin/${plugin.name}`" target="_blank">
+                <a href="#" :onclick="`window.$open('https://plugins.hoobs.org/plugin/${plugin.name}');`">
                     <icon name="link" class="icon" />
                     hoobs.org
                 </a>
@@ -98,7 +98,7 @@
         </div>
         <div v-if="repository" class="item">
             <div class="value">
-                <a :href="repository" target="_blank">
+                <a href="#" :onclick="`window.$open('${repository}');`">
                     <icon name="code-tags" class="icon" />
                     {{ domain(repository) }}
                 </a>

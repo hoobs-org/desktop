@@ -1,4 +1,4 @@
-import Request from "axios";
+import Request from "@hoobs/sdk/lib/request";
 import EventEmitter from "events";
 import Scan from "evilscan";
 
@@ -70,9 +70,9 @@ export default class Scanner extends EventEmitter {
             this.emit("message", "Checking Existing Connections");
 
             for (let i = 0; i < active.length; i += 1) {
-                const data = await this.detect(active[i].ip, active[i].port);
-
-                if (data) this.emit("device", data);
+                this.detect(active[i].ip, active[i].port).then((data) => {
+                    if (data) this.emit("device", data);
+                });
             }
 
             this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
@@ -104,18 +104,18 @@ export default class Scanner extends EventEmitter {
                 }));
             }
 
-            Promise.all(scanners).then(async () => {
+            Promise.all(scanners).then(() => {
                 this.emit("message", `Checking ${canidates.length} Host(s)`);
 
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
-                    const data = await this.detect(canidates[i].ip, canidates[i].port);
+                    this.detect(canidates[i].ip, canidates[i].port).then((data) => {
+                        if (data) this.emit("device", data);
 
-                    if (data) this.emit("device", data);
-
-                    this.count += 1;
-                    this.emit("progress", Math.round((this.count * 100) / this.total));
+                        this.count += 1;
+                        this.emit("progress", Math.round((this.count * 100) / this.total));
+                    });
                 }
 
                 this.stopped = true;

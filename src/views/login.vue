@@ -38,7 +38,7 @@
                         <div class="marque" :style="`width: ${skip}%`"></div>
                         <div class="marker" :style="`width: ${progress}%`"></div>
                     </div>
-                    <div class="scanner-message">{{ message }}</div>
+                    <div class="scanner-message">{{ !marque ? `${progress}% ` : "" }}{{ message }}</div>
                 </div>
             </div>
             <div v-else-if="!loading && manual" class="devices">
@@ -97,6 +97,7 @@
             return {
                 url: "/",
                 ip: "",
+                active: "",
                 port: 80,
                 scan: false,
                 manual: false,
@@ -120,29 +121,23 @@
                 this.scanning = true;
             });
 
+            this.$scanner.on("clear", () => {
+                this.progress = 0;
+                this.skip = 0;
+
+                this.updateProgress(0);
+            });
+
             this.$scanner.on("stop", () => {
                 this.scanning = false;
             });
 
             this.$scanner.on("progress", (value) => {
-                if (this.marque) clearInterval(this.marque);
+                this.updateProgress(value);
+            });
 
-                if (value === 0) {
-                    this.marque = setInterval(() => {
-                        if (this.progress < 25 && this.skip < 75) this.progress += 1;
-                        if (this.progress > 0 && this.skip >= 75) this.progress -= 1;
-                        if (this.progress === 25 && this.skip < 75) this.skip += 1;
-                        if (this.skip >= 75) this.skip += 1;
-
-                        if (this.skip === 100) {
-                            this.progress = 0;
-                            this.skip = 0;
-                        }
-                    }, 30);
-                } else {
-                    this.skip = 0;
-                    this.progress = value;
-                }
+            this.$scanner.on("ip", (value) => {
+                this.active = value;
             });
 
             this.$scanner.on("message", (value) => {
@@ -163,6 +158,28 @@
         },
 
         methods: {
+            updateProgress(value) {
+                if (this.marque) clearInterval(this.marque);
+
+                if (value === 0) {
+                    this.marque = setInterval(() => {
+                        if (this.progress < 25 && this.skip < 75) this.progress += 1;
+                        if (this.progress > 0 && this.skip >= 75) this.progress -= 1;
+                        if (this.progress === 25 && this.skip < 75) this.skip += 1;
+                        if (this.skip >= 75) this.skip += 1;
+
+                        if (this.skip === 100) {
+                            this.progress = 0;
+                            this.skip = 0;
+                        }
+                    }, 30);
+                } else {
+                    this.marque = null;
+                    this.skip = 0;
+                    this.progress = value;
+                }
+            },
+
             advanced(state) {
                 this.ip = "";
                 this.port = 80;

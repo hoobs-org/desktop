@@ -92,7 +92,8 @@ export default class Scanner extends EventEmitter {
                         if (data.status === "open") {
                             canidates.push({ ip: data.ip, port: data.port });
                         } else {
-                            this.total -= 1;
+                            this.count += 1;
+                            this.emit("progress", Math.round((this.count * 100) / this.total));
                         }
                     });
 

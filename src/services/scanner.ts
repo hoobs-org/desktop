@@ -104,7 +104,7 @@ export default class Scanner extends EventEmitter {
                 }));
             }
 
-            Promise.all(scanners).then(() => {
+            Promise.allSettled(scanners).then(() => {
                 this.emit("message", `Checking ${canidates.length} Host(s)`);
 
                 for (let i = 0; i < canidates.length; i += 1) {

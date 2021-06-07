@@ -1,4 +1,4 @@
-import Request from "axios";
+import Request from "@hoobs/sdk/lib/request";
 import EventEmitter from "events";
 import Scan from "evilscan";
 
@@ -70,16 +70,16 @@ export default class Scanner extends EventEmitter {
             this.emit("message", "Checking Existing Connections");
 
             for (let i = 0; i < active.length; i += 1) {
-                const data = await this.detect(active[i].ip, active[i].port);
+                this.emit("ip", active[i].ip);
 
-                if (data) this.emit("device", data);
+                this.detect(active[i].ip, active[i].port).then((data) => {
+                    if (data) this.emit("device", data);
+                });
             }
 
             this.total = subnets.map((item) => item.hosts).reduce((a, b) => a + b, 0) * ports.length;
 
             for (let i = 0; i < subnets.length; i += 1) {
-                this.emit("message", `Scanning Network: ${subnets[i].network}`);
-
                 scanners.push(new Promise((resolve) => {
                     const scan = new Scan({
                         target: subnets[i].network,
@@ -89,10 +89,14 @@ export default class Scanner extends EventEmitter {
                     });
 
                     scan.on("result", (data: { [key: string]: any }) => {
+                        this.emit("message", "Scanning Network");
+                        this.emit("ip", data.ip);
+
                         if (data.status === "open") {
                             canidates.push({ ip: data.ip, port: data.port });
                         } else {
-                            this.total -= 1;
+                            this.count += 1;
+                            this.emit("progress", Math.round((this.count * 100) / this.total));
                         }
                     });
 
@@ -104,22 +108,25 @@ export default class Scanner extends EventEmitter {
                 }));
             }
 
-            Promise.all(scanners).then(async () => {
+            Promise.allSettled(scanners).then(() => {
                 this.emit("message", `Checking ${canidates.length} Host(s)`);
 
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
-                    const data = await this.detect(canidates[i].ip, canidates[i].port);
+                    this.detect(canidates[i].ip, canidates[i].port).then((data) => {
+                        this.emit("ip", canidates[i].ip);
 
-                    if (data) this.emit("device", data);
+                        if (data) this.emit("device", data);
 
-                    this.count += 1;
-                    this.emit("progress", Math.round((this.count * 100) / this.total));
+                        this.count += 1;
+                        this.emit("progress", Math.round((this.count * 100) / this.total));
+                    });
                 }
 
                 this.stopped = true;
 
+                this.emit("ip", "");
                 this.emit("message", "Scan Complete");
                 this.emit("stop");
             });
@@ -163,8 +170,6 @@ export default class Scanner extends EventEmitter {
                 source.cancel();
             }, timeout || this.timeout);
 
-            this.emit("message", `Checking: ${ip}:${port}`);
-
             Request({
                 method: "get",
                 url: `http://${ip}:${port}/api`,
@@ -172,8 +177,6 @@ export default class Scanner extends EventEmitter {
                 cancelToken: source.token,
             }).then(async (response) => {
                 if (response && response.data && response.data.application === "hoobsd" && response.data.version) {
-                    this.emit("message", `Found HOOBS Device: ${ip}:${port}`);
-
                     data = {
                         ip,
                         port,

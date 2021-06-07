@@ -75,6 +75,7 @@ module.exports = {
                 "quote-props": "off",
                 "import/no-cycle": "off",
                 "@typescript-eslint/indent": "off",
+                "import/no-extraneous-dependencies": "off",
             },
         },
         {

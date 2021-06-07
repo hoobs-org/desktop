@@ -12,7 +12,7 @@ class Markdown {
         this.converter = new Showdown.Converter({
             extensions: [
                 Emoji,
-                Highlight,
+                Highlight({ pre: true }),
             ],
             tables: true,
             simplifiedAutoLink: true,

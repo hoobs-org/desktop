@@ -83,8 +83,6 @@
                 }
 
                 .icon {
-                    width: 43.3px;
-                    height: 43.3px;
                     display: inline-flex;
                     box-sizing: border-box;
                     flex-direction: row;
@@ -94,8 +92,9 @@
                     cursor: pointer;
 
                     .current {
+                        height: 35px;
                         margin: 0 7px 7px 0;
-                        padding: 4px;
+                        padding: 12px;
                         opacity: 0.7;
                         border: 1px var(--application-border) solid;
                     }

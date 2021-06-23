@@ -1,6 +1,6 @@
 {
     "name": "hoobs",
-    "version": "4.0.33",
+    "version": "4.0.34",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,
     "author": {
@@ -73,6 +73,7 @@
         "@vue/eslint-config-airbnb": "^5.0.2",
         "@vue/eslint-config-typescript": "^7.0.0",
         "commander": "^7.2.0",
+        "electron-notarize": "^1.0.0",
         "eslint": "^6.7.2",
         "eslint-plugin-import": "^2.20.2",
         "eslint-plugin-vue": "^6.2.2",

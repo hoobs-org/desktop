@@ -1,14 +1,20 @@
 productName: "HOOBS"
 appId: "org.hoobs.desktop"
+afterSign: "build/notarize.js"
 
 mac:
   icon: "build/icon.icns"
+  hardenedRuntime : true
+  gatekeeperAssess: false
+  entitlements: "build/entitlements.mac.plist"
+  entitlementsInherit: "build/entitlements.mac.plist"
 
 dmg:
   title: "HOOBS"
   icon: "build/icon.icns"
   background: "build/background.png"
   backgroundColor: #141414
+  sign: false
   window:
     width: 512
     height: 348

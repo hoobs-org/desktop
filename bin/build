@@ -41,12 +41,12 @@ Program.command("desktop", { isDefault: true })
             if (target.indexOf("mac") >= 0) flags.push("--mac");
 
             if (flags.length > 0) execSync(`${join(root, "node_modules", ".bin", "vue-cli-service")} electron:build ${flags.join(" ")}`, { cwd: root, stdio: "inherit" });
-            if (!existsSync(join(root, "../builds"))) mkdirSync(join(root, "../builds"));
+            if (!existsSync(join(root, "../repo/bin"))) mkdirSync(join(root, "../repo/bin"));
 
-            if (target.indexOf("win") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
-            if (target.indexOf("mac") >= 0 && existsSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`))) unlinkSync(join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
-            if (target.indexOf("win") >= 0) moveSync(join(root, "dist", `HOOBS Setup ${pjson.version}.exe`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.exe`));
-            if (target.indexOf("mac") >= 0) moveSync(join(root, "dist", `HOOBS-${pjson.version}.dmg`), join(root, "../builds", `hoobs-desktop-v${pjson.version}.dmg`));
+            if (target.indexOf("win") >= 0 && existsSync(join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.exe`))) unlinkSync(join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.exe`));
+            if (target.indexOf("mac") >= 0 && existsSync(join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.dmg`))) unlinkSync(join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.dmg`));
+            if (target.indexOf("win") >= 0) moveSync(join(root, "dist", `HOOBS Setup ${pjson.version}.exe`), join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.exe`));
+            if (target.indexOf("mac") >= 0) moveSync(join(root, "dist", `HOOBS-${pjson.version}.dmg`), join(root, "../repo/bin", `hoobs-desktop-v${pjson.version}.dmg`));
 
             if (existsSync(join(root, "dist"))) execSync(`${join(root, "node_modules", ".bin", "rimraf")} ${join(root, "dist")}`, { cwd: root, stdio: "inherit" });
         };

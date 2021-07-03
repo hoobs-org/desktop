@@ -17,9 +17,6 @@
         <div ref="messages" class="messages">
             <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" />
         </div>
-        <div>
-            <spinner />
-        </div>
     </div>
 </template>
 

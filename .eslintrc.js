@@ -168,6 +168,15 @@ module.exports = {
         },
         {
             files: [
+                "src/plugins/electron.ts",
+            ],
+            rules: {
+                "@typescript-eslint/no-var-requires": "off",
+                "global-require": "off",
+            },
+        },
+        {
+            files: [
                 "src/plugins/emoji.ts",
             ],
             rules: {

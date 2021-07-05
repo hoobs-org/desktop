@@ -3,7 +3,15 @@
         <div id="updates">
             <div class="content">
                 <div v-if="!updating" class="form">
-                    <div class="row section">{{ $t("software") }}</div>
+                    <div v-if="!loading && client" class="row section">{{ $t("desktop") }}</div>
+                    <div v-if="!loading && client" class="row">
+                        {{ $t("version_desktop") }}: {{ desktop.version }}
+                        <span class="value">{{ $t("available") }}</span>
+                    </div>
+                    <div v-if="!loading &&client" class="row" style="margin-top: 7px;">
+                        <div v-on:click="download()" class="button">{{ $t("download") }}</div>
+                    </div>
+                    <div v-if="!loading && stack" class="row section">{{ $t("server") }}</div>
                     <div v-if="!loading && !status.upgraded" class="row">
                         {{ $t("version_server") }}: {{ status.current }}
                         <span class="value">{{ $t("available") }}</span>
@@ -20,14 +28,16 @@
                         {{ $t("version_node") }}: {{ status.node_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
+                    <div v-if="!loading && stack" class="row" style="margin-top: 7px;">
+                        <div v-on:click="upgrade()" class="button">{{ $t("update_now") }}</div>
+                    </div>
+                    <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
                     <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
                         {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && !updated" class="row" style="margin-top: 7px;">
-                        <a v-if="stack" class="button" href="https://github.com/hoobs-org/HOOBS" target="_blank">{{ $t("changelog") }}</a>
-                        <div v-if="stack" v-on:click="upgrade()" class="button">{{ $t("update_now") }}</div>
-                        <div v-if="plugins.length > 0" v-on:click="update()" class="button">{{ $t("update_plugins") }}</div>
+                    <div v-if="!loading && plugins.length > 0" class="row" style="margin-top: 7px;">
+                        <div v-on:click="update()" class="button">{{ $t("update_plugins") }}</div>
                     </div>
                     <div v-if="!loading && updated" class="row updated">
                         <icon name="update" class="icon" />
@@ -55,6 +65,7 @@
 
 <script>
     import Semver from "compare-versions";
+    import Request from "@hoobs/sdk/lib/request";
 
     import MessageComponent from "@/components/elements/message.vue";
 
@@ -71,9 +82,11 @@
             return {
                 loading: true,
                 logging: false,
+                desktop: {},
                 status: {},
                 version: "",
                 plugins: [],
+                client: false,
                 stack: false,
                 updated: false,
                 updating: false,
@@ -89,6 +102,7 @@
             async load() {
                 this.loading = true;
 
+                this.desktop = (((await Request.get("https://support.hoobs.org/api/releases/desktop/latest")).data) || {}).results;
                 this.status = await this.$hoobs.status();
                 this.version = await this.$hoobs.version();
 
@@ -96,11 +110,23 @@
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;
 
+                this.client = !Semver.compare(this.$version, this.desktop.version || this.$version, ">=");
                 this.stack = !(this.status.upgraded && this.status.cli_upgraded && this.status.node_upgraded && this.status.gui_upgraded);
-                this.updated = !(this.stack || this.plugins.length > 0);
+                this.updated = !(this.client || this.stack || this.plugins.length > 0);
 
                 this.loading = false;
                 this.updating = false;
+            },
+
+            download() {
+                const url = this.desktop[`download_${this.$os}`];
+
+                if (url) {
+                    const link = document.createElement("a");
+
+                    link.href = url;
+                    link.click();
+                }
             },
 
             async upgrade() {
@@ -210,7 +236,10 @@
         }
 
         .updated {
+            flex: 1;
             align-items: center;
+            margin: 0 auto;
+            padding-bottom: 10%;
 
             .icon {
                 height: 37px;

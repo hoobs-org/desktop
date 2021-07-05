@@ -122,8 +122,6 @@
             padding-left: 7px;
             font-size: 14px;
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
             user-select: none;
             cursor: pointer;
         }

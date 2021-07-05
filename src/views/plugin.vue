@@ -16,6 +16,7 @@
                 </div>
                 <div class="header">
                     <div class="actions">
+                        <router-link :to="navigate('plugins', from, query)" class="button">{{ $t("back") }}</router-link>
                         <div v-if="installed.length > 0" v-on:click="uninstall()" class="button">{{ $t("plugin_uninstall") }}</div>
                         <div v-if="!updated" v-on:click="update()" class="button">{{ $t("plugin_update") }}</div>
                         <div v-on:click="install()" :class="installed.length > 0 ? 'button' : 'button primary'">{{ $t("plugin_install") }}</div>

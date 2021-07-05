@@ -10,6 +10,7 @@ import {
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
+import context from "electron-context-menu";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -119,6 +120,7 @@ app.on("ready", async () => {
         }
     }
     createWindow();
+    context({});
 });
 
 if (isDevelopment) {

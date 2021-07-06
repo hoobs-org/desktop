@@ -21,3 +21,4 @@ dmg:
 
 win:
   icon: "build/icon.ico"
+  sign: "build/sign.js"

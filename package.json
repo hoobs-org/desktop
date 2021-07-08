@@ -1,6 +1,6 @@
 {
     "name": "hoobs",
-    "version": "4.0.40",
+    "version": "4.0.41",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,
     "author": {
@@ -16,7 +16,7 @@
     "main": "background.js",
     "dependencies": {
         "@chenfengyuan/vue-qrcode": "^1.0.2",
-        "@hoobs/sdk": "^4.4.10",
+        "@hoobs/sdk": "^4.4.11",
         "@jaames/iro": "^5.4.0",
         "@mdi/js": "^5.9.55",
         "cancel-token": "^0.1.1",

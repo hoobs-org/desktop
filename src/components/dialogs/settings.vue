@@ -1,5 +1,5 @@
 <template>
-    <modal :title="$t('hub_settings')" :draggable="true" width="780px" height="902px">
+    <modal :title="$t('hub_settings')" :draggable="true" width="780px" height="917px">
         <div id="settings">
             <div v-if="!loading" class="content">
                 <restore v-if="show.restore" v-on:restore="() => { show.cancel = false; }" />

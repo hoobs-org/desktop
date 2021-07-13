@@ -343,6 +343,7 @@
         "version_cli": "Verze CLI",
         "version_desktop": "Desktop Version",
         "version_gui": "Verze GUI",
+        "version_homebridge": "Homebridge Version",
         "version_node": "Verze Node",
         "version_server": "Verze serveru",
         "versions": "Verze",

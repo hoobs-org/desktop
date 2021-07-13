@@ -1,6 +1,6 @@
 {
     "name": "hoobs",
-    "version": "4.0.42",
+    "version": "4.0.43",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,
     "author": {

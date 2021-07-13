@@ -1,10 +1,26 @@
 import { remote } from "electron";
 import Vue, { VueConstructor } from "vue";
+import OS from "os";
+
+const pjson = require("../../package.json");
+
+const platforms: { [key: string]: string } = {
+    win32: "win",
+    darwin: "mac",
+};
 
 export default {
     install(vue: VueConstructor<Vue>): void {
         vue.mixin({
             computed: {
+                $version() {
+                    return pjson.version;
+                },
+
+                $os(): string {
+                    return platforms[OS.platform()];
+                },
+
                 $electron() {
                     return {
                         get maximized() {

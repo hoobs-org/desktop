@@ -110,8 +110,6 @@
             font-size: 14px;
             border-bottom: 1px var(--application-border) solid;
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
 
             &.collapsed {
                 margin: 0;

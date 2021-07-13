@@ -105,8 +105,6 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            white-space: nowrap;
-            text-overflow: ellipsis;
 
             &.colapsed {
                 margin: 0 0 10px 0;

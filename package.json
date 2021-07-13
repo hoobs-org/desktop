@@ -1,6 +1,6 @@
 {
     "name": "hoobs",
-    "version": "4.0.34",
+    "version": "4.0.42",
     "description": "Interface component for the certified HOOBS stack.",
     "private": true,
     "author": {
@@ -16,7 +16,7 @@
     "main": "background.js",
     "dependencies": {
         "@chenfengyuan/vue-qrcode": "^1.0.2",
-        "@hoobs/sdk": "^4.4.7",
+        "@hoobs/sdk": "^4.4.11",
         "@jaames/iro": "^5.4.0",
         "@mdi/js": "^5.9.55",
         "cancel-token": "^0.1.1",
@@ -27,6 +27,7 @@
         "core-js": "^3.6.5",
         "electron": "^12.0.4",
         "electron-builder": "^22.10.5",
+        "electron-context-menu": "^3.1.1",
         "electron-devtools-installer": "^3.1.0",
         "electron-window-state": "^5.0.3",
         "emojer": "^1.1.5",

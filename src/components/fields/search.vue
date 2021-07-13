@@ -107,8 +107,6 @@
         .title {
             font-size: 14px;
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
             margin: 0 0 7px 0;
             user-select: none;
 

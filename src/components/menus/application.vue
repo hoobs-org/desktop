@@ -21,6 +21,8 @@
 </template>
 
 <script>
+    import { shell } from "electron";
+
     export default {
         name: "application",
 
@@ -44,7 +46,7 @@
             help() {
                 this.$menu.close();
 
-                window.open("https://support.hoobs.org/docs");
+                shell.openExternal("https://support.hoobs.org/docs");
             },
 
             terminal() {

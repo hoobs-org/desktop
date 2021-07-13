@@ -71,6 +71,9 @@
                     <div class="row">
                         <integer-field :title="$t('bridge_autostart')" :description="$t('bridge_autostart_description')" :min="-1" :max="300" v-model="autostart" />
                     </div>
+                    <div class="row" style="padding: 0 0 0 5px;">
+                        <checkbox id="debugging" :title="$t('enable_debugging')" v-model="debugging" />
+                    </div>
                     <div class="row section" style="margin-bottom: 10px">{{ $t("bridge_port_pool") }}</div>
                     <p style="margin-top: 0">{{ $t("bridge_port_pool_description") }}</p>
                     <div class="row">
@@ -162,6 +165,7 @@
                 username: "",
                 port: 51826,
                 autostart: 0,
+                debugging: false,
                 start: null,
                 end: null,
                 timer: null,
@@ -228,6 +232,7 @@
                 this.username = "";
                 this.port = 51826;
                 this.autostart = 0;
+                this.debugging = false;
                 this.advertiser = "bonjour";
                 this.start = null;
                 this.end = null;
@@ -242,6 +247,7 @@
                         this.pin = this.subject.pin;
                         this.username = this.subject.username;
                         this.autostart = parseInt(this.subject.autostart, 10) || 0;
+                        this.debugging = this.subject.debugging;
                         this.advertiser = this.subject.advertiser || "bonjour";
 
                         if (this.status.ports) {
@@ -321,7 +327,7 @@
                     } else if (this.subject) {
                         this.loading = true;
 
-                        await this.subject.update(this.display, this.autostart, this.pin, this.username, this.advertiser);
+                        await this.subject.update(this.display, this.autostart, this.pin, this.username, this.advertiser, this.debugging);
 
                         if (this.start && this.end) {
                             restart = true;

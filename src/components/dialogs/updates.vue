@@ -120,15 +120,16 @@
                 this.$action.emit("dashboard", "update");
             },
 
-            download() {
+            async download() {
+                this.updating = true;
+
                 const url = this.desktop[`download_${this.$os}`];
+                const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
-                if (url) {
-                    const link = document.createElement("a");
+                if (file) this.$electron.open(file);
+                if (file) this.$electron.close();
 
-                    link.href = url;
-                    link.click();
-                }
+                this.updating = false;
             },
 
             async upgrade() {

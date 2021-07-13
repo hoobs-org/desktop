@@ -32,6 +32,10 @@
                     <td>{{ node }}</td>
                 </tr>
                 <tr>
+                    <td>{{ $t("version_homebridge") }}</td>
+                    <td>{{ homebridge }}</td>
+                </tr>
+                <tr>
                     <td>{{ $t("cpu") }}</td>
                     <td>{{ cpu.load || 0 }}%</td>
                 </tr>
@@ -93,6 +97,7 @@
             return {
                 node: "",
                 version: "",
+                homebridge: "",
                 updated: true,
                 loading: true,
                 system: {},
@@ -105,6 +110,7 @@
             waits.push(new Promise((resolve) => {
                 this.$hoobs.status().then((status) => {
                     this.version = status.version;
+                    this.homebridge = status.homebridge_version;
                     this.node = status.node_version;
                     this.updated = status.upgraded && status.cli_upgraded && status.node_upgraded;
                 }).finally(() => {

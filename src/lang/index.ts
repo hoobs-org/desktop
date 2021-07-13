@@ -32,7 +32,7 @@ function supported(locale: string) {
 }
 
 function current(locale?: string) {
-    if ((!locale || locale === "") && window.navigator && window.navigator.language) return supported(Languages[window.navigator.language]);
+    if ((!locale || locale === "") && window.navigator && window.navigator.language) return supported(Languages[(`${window.navigator.language}`).toLowerCase()]);
     if (!locale || locale === "") return supported("en");
 
     return supported(Languages[locale]);

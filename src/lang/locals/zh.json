@@ -343,6 +343,7 @@
         "version_cli": "CLI版本",
         "version_desktop": "桌面版本",
         "version_gui": "GUI版本",
+        "version_homebridge": "Homebridge Version",
         "version_node": "Node版本",
         "version_server": "服务器版本",
         "versions": "版本",

@@ -343,6 +343,7 @@
         "version_cli": "CLI verzija",
         "version_desktop": "Desktop Version",
         "version_gui": "GUI verzija",
+        "version_homebridge": "Homebridge Version",
         "version_node": "Node Version",
         "version_server": "Verzija servera",
         "versions": "Verzije",

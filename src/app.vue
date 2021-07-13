@@ -3,7 +3,21 @@
         <component :is="$route.meta.layout">
             <router-view class="view" />
         </component>
-        <div class="chrome">
+        <div v-if="$os === 'mac'" class="chrome mac">
+            <div class="window-control" v-on:click="close" name="close">
+                <icon class="overlay" name="close" />
+            </div>
+            <div class="window-control spaced" v-on:click="minimize" name="minimize">
+                <icon class="overlay" v-on:click="minimize" name="minimize" />
+            </div>
+            <div v-if="maximized" v-on:click="restore" class="window-control spaced" name="restore">
+                <icon class="overlay" name="restore" />
+            </div>
+            <div v-else class="window-control spaced" v-on:click="maximize" name="maximize">
+                <icon class="overlay" name="maximize" />
+            </div>
+        </div>
+        <div v-else class="chrome windows">
             <icon class="icon window-control spaced" v-on:click="minimize" name="minimize" />
             <icon v-if="maximized" v-on:click="restore" class="icon window-control spaced" name="restore" />
             <icon v-else class="icon window-control spaced" v-on:click="maximize" name="maximize" />
@@ -138,6 +152,53 @@
             align-content: center;
             z-index: 3100;
             padding: 2px 7px 0 0;
+
+            &.mac {
+                top: 10px;
+                left: 14px;
+                width: 75px;
+
+                .window-control {
+                    position: relative;
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 100%;
+                    margin: 0 10px 0 0;
+
+                    &[name='close'] {
+                        background: #ff5f56;
+                    }
+
+                    &[name='minimize'] {
+                        background: #fdbc2e;
+                    }
+
+                    &[name='restore'] {
+                        background: #26c940;
+                    }
+
+                    &[name='maximize'] {
+                        background: #26c940;
+                    }
+
+                    .overlay {
+                        position: absolute;
+                        top: -1.2px;
+                        left: 2.4px;
+                        color: #000;
+                        height: 10px;
+                        user-select: none;
+                        pointer-events: none;
+                        opacity: 0;
+                    }
+
+                    &:hover {
+                        .overlay {
+                            opacity: 0.8;
+                        }
+                    }
+                }
+            }
 
             .icon {
                 height: 15px;

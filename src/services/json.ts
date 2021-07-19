@@ -16,35 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.                          *
  **************************************************************************************************/
 
-export default class Dates {
-    static weekday(value: Date): string {
-        const day = value.getDay();
-
-        if (!Number.isInteger(day)) {
-            return "";
-        }
-
-        switch (day % 7) {
-            case 1:
-                return "monday";
-
-            case 2:
-                return "tuesday";
-
-            case 3:
-                return "wednesday";
-
-            case 4:
-                return "thursday";
-
-            case 5:
-                return "friday";
-
-            case 6:
-                return "saturday";
-
-            default:
-                return "sunday";
-        }
+export function parseJson<T>(value: string, replacement: T): T {
+    try {
+        return <T>JSON.parse(value);
+    } catch (_error) {
+        return replacement;
     }
+}
+
+export function jsonEquals(source: { [key: string]: any }, value: { [key: string]: any }): boolean {
+    if (JSON.stringify(source) === JSON.stringify(value)) return true;
+
+    return false;
+}
+
+export function cloneJson(object: { [key: string]: any }): any {
+    return JSON.parse(JSON.stringify(object));
+}
+
+export function formatJson(object: { [key: string]: any }, pretty?: boolean): string {
+    if (pretty) return JSON.stringify(object, null, 4);
+
+    return JSON.stringify(object);
 }

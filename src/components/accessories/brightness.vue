@@ -1,3 +1,21 @@
+<!-------------------------------------------------------------------------------------------------
+ | hoobs-desktop                                                                                  |
+ | Copyright (C) 2020 HOOBS                                                                       |
+ |                                                                                                |
+ | This program is free software: you can redistribute it and/or modify                           |
+ | it under the terms of the GNU General Public License as published by                           |
+ | the Free Software Foundation, either version 3 of the License, or                              |
+ | (at your option) any later version.                                                            |
+ |                                                                                                |
+ | This program is distributed in the hope that it will be useful,                                |
+ | but WITHOUT ANY WARRANTY; without even the implied warranty of                                 |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                  |
+ | GNU General Public License for more details.                                                   |
+ |                                                                                                |
+ | You should have received a copy of the GNU General Public License                              |
+ | along with this program.  If not, see <http://www.gnu.org/licenses/>.                          |
+ -------------------------------------------------------------------------------------------------->
+
 <template>
     <div id="control" :class="on ? 'on' : 'off'">
         <div :class="style">
@@ -23,6 +41,7 @@
 
 <script>
     import Debounce from "lodash.debounce";
+    import { cloneJson } from "../../services/json";
 
     const UPDATE_DELAY = 150;
     const LOCAL_DELAY = 1000;
@@ -107,7 +126,7 @@
                 updater: Debounce(() => {
                     if (this.room && !this.local) {
                         if (this.subject && this.subject.type === "light") {
-                            const { ...subject } = this.subject;
+                            const subject = cloneJson(this.subject);
                             const index = this.accessories.findIndex((item) => item.accessory_identifier === subject.accessory_identifier);
 
                             if (index >= 0) this.accessories[index] = subject;

@@ -1,3 +1,21 @@
+<!-------------------------------------------------------------------------------------------------
+ | hoobs-desktop                                                                                  |
+ | Copyright (C) 2020 HOOBS                                                                       |
+ |                                                                                                |
+ | This program is free software: you can redistribute it and/or modify                           |
+ | it under the terms of the GNU General Public License as published by                           |
+ | the Free Software Foundation, either version 3 of the License, or                              |
+ | (at your option) any later version.                                                            |
+ |                                                                                                |
+ | This program is distributed in the hope that it will be useful,                                |
+ | but WITHOUT ANY WARRANTY; without even the implied warranty of                                 |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                  |
+ | GNU General Public License for more details.                                                   |
+ |                                                                                                |
+ | You should have received a copy of the GNU General Public License                              |
+ | along with this program.  If not, see <http://www.gnu.org/licenses/>.                          |
+ -------------------------------------------------------------------------------------------------->
+
 <template>
     <div :key="version" v-if="user.permissions.config" id="config">
         <context />
@@ -64,6 +82,7 @@
     import ListComponent from "@/components/elements/list.vue";
     import SchemaComponent from "@/components/form.vue";
     import Monaco from "../components/monaco";
+    import { cloneJson } from "../services/json";
 
     const BRIDGE_RESTART_DELAY = 4000;
 
@@ -172,7 +191,7 @@
 
                 if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
                     const config = await this.$hoobs.config.get();
-                    const { ...working } = this.working;
+                    const working = cloneJson(this.working);
 
                     let reload = false;
                     let logout = false;
@@ -202,7 +221,7 @@
                     const bridge = await this.$hoobs.bridge(this.bridge);
                     const plugins = await bridge.plugins.list();
 
-                    const { ...working } = this.working;
+                    const working = cloneJson(this.working);
 
                     working.accessories = working.accessories || [];
                     working.platforms = working.platforms || [];
@@ -240,7 +259,7 @@
                 } else {
                     const bridge = await this.$hoobs.bridge(this.bridge);
                     const config = await bridge.config.get();
-                    const { ...working } = this.working;
+                    const working = cloneJson(this.working);
 
                     let index = -1;
 
@@ -300,7 +319,7 @@
 
                 if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
                     this.saved = (await this.$hoobs.config.get()).api || {};
-                    this.working = { ...this.saved };
+                    this.working = cloneJson(this.saved);
 
                     this.working.inactive_logoff = this.working.inactive_logoff || 30;
                     this.working.disable_auth = this.working.disable_auth || false;
@@ -329,7 +348,7 @@
                         delete this.saved.platforms[i].plugin_map;
                     }
 
-                    this.working = { ...this.saved };
+                    this.working = cloneJson(this.saved);
                     this.loading = false;
                     this.dirty = false;
                 } else {
@@ -348,7 +367,7 @@
                             break;
                     }
 
-                    this.working = { ...this.saved };
+                    this.working = cloneJson(this.saved);
                     this.loading = false;
                     this.dirty = false;
                 }

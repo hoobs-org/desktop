@@ -132,6 +132,13 @@ export default class Validators {
                 };
             }
 
+            if (parseInt(port, 10) < 1 || parseInt(port, 10) > 65535) {
+                return {
+                    error: "bridge_port_required",
+                    valid: false,
+                };
+            }
+
             if (pin && pin !== "" && !Validators.pin(pin)) {
                 return {
                     error: "bridge_pin_invalid",

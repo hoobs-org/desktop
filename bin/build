@@ -43,9 +43,13 @@ Program.command("desktop", { isDefault: true })
     .description("build hoobs server")
     .option("-l, --lint", "lint the code before building")
     .option("-t, --target [target...]", "specify the targets to build")
+    .option("-p, --password <password>", "password to unlock keychain")
     .action((command) => {
         const build = (options) => {
+            const { password } = options;
             let { target } = options;
+
+            execSync(`security unlock-keychain -p '${password}' login.keychain`, { cwd: root, stdio: "inherit" });
 
             if (!target) target = [];
             if (!Array.isArray(target)) target = [target];
@@ -69,7 +73,7 @@ Program.command("desktop", { isDefault: true })
             if (existsSync(join(root, "dist"))) execSync(`${join(root, "node_modules", ".bin", "rimraf")} ${join(root, "dist")}`, { cwd: root, stdio: "inherit" });
         };
 
-        if (command.target && Array.isArray(command.target) && command.target.length > 0) {
+        if (command.target && Array.isArray(command.target) && command.target.length > 0 && command.pass && command.pass !== "") {
             build(command);
         } else {
             prompt([{
@@ -78,6 +82,10 @@ Program.command("desktop", { isDefault: true })
                 message: "Select the targets to build: (Press <space> to select)",
                 choices: [{ name: "Windows", value: "win" }, { name: "macOS", value: "mac" }],
                 default: ["win", "mac"],
+            }, {
+                type: "password",
+                name: "password",
+                message: "Enter your password to unlock the keychain",
             }]).then((result) => build(result));
         }
     });

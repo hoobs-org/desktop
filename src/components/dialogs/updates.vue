@@ -122,10 +122,10 @@
             async load() {
                 this.loading = true;
 
-                this.desktop = (((await Request.get("https://support.hoobs.org/api/releases/desktop/latest")).data) || {}).results;
                 this.status = await this.$hoobs.status();
                 this.version = await this.$hoobs.version();
 
+                this.desktop = (((await Request.get(`https://support.hoobs.org/api/releases/desktop/${this.status.repo === "edge" || this.status.repo === "bleeding" ? "beta" : "latest"}`)).data) || {}).results;
                 this.plugins = ((await this.$hoobs.plugins()) || []).filter((item) => !Semver.compare(item.version, item.latest, ">="));
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;

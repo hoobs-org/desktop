@@ -146,8 +146,17 @@
                 const url = this.desktop[`download_${this.$os}`];
                 const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
-                if (file) this.$electron.open(file);
-                if (file) this.$electron.close();
+                if (file) {
+                    const error = await this.$electron.open(file);
+
+                    if (error && error !== "") {
+                        this.$alert(error);
+                    } else {
+                        this.$electron.close();
+                    }
+                } else {
+                    this.$alert("Unable to download update.");
+                }
 
                 this.updating = false;
             },

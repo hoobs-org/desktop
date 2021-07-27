@@ -16,6 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.                          *
  **************************************************************************************************/
 
+import OffAccessory from "@/components/accessories/off.vue";
+import HueAccessory from "@/components/accessories/hue.vue";
+import FanAccessory from "@/components/accessories/fan.vue";
+import LockAccessory from "@/components/accessories/lock.vue";
+import LightAccessory from "@/components/accessories/light.vue";
+import BlindAccessory from "@/components/accessories/blind.vue";
+import CameraAccessory from "@/components/accessories/camera.vue";
+import SensorAccessory from "@/components/accessories/sensor.vue";
+import SwitchAccessory from "@/components/accessories/switch.vue";
+import GarageAccessory from "@/components/accessories/garage.vue";
+import SecurityAccessory from "@/components/accessories/security.vue";
+import SprinklerAccessory from "@/components/accessories/sprinkler.vue";
+import TelevisionAccessory from "@/components/accessories/television.vue";
+import ThermostatAccessory from "@/components/accessories/thermostat.vue";
+import BrightnessAccessory from "@/components/accessories/brightness.vue";
+import UnavailableAccessory from "@/components/accessories/unavailable.vue";
+import UnknownAccessory from "@/components/accessories/unknown.vue";
+
 export function types(accessory: { [key: string]: any }): string | undefined {
     let sensors: [string];
 
@@ -77,24 +95,24 @@ export function types(accessory: { [key: string]: any }): string | undefined {
     }
 }
 
-export function accessories(): { [key: string]: () => any } {
+export function accessories(): { [key: string]: any } {
     return {
-        "off-accessory": () => import(/* webpackChunkName: "accessory-off" */ "@/components/accessories/off.vue"),
-        "hue-accessory": () => import(/* webpackChunkName: "accessory-hue" */ "@/components/accessories/hue.vue"),
-        "fan-accessory": () => import(/* webpackChunkName: "accessory-fan" */ "@/components/accessories/fan.vue"),
-        "lock-accessory": () => import(/* webpackChunkName: "accessory-lock" */ "@/components/accessories/lock.vue"),
-        "light-accessory": () => import(/* webpackChunkName: "accessory-light" */ "@/components/accessories/light.vue"),
-        "blind-accessory": () => import(/* webpackChunkName: "accessory-blind" */ "@/components/accessories/blind.vue"),
-        "camera-accessory": () => import(/* webpackChunkName: "accessory-camera" */ "@/components/accessories/camera.vue"),
-        "sensor-accessory": () => import(/* webpackChunkName: "accessory-sensor" */ "@/components/accessories/sensor.vue"),
-        "switch-accessory": () => import(/* webpackChunkName: "accessory-switch" */ "@/components/accessories/switch.vue"),
-        "garage-accessory": () => import(/* webpackChunkName: "accessory-garage" */ "@/components/accessories/garage.vue"),
-        "security-accessory": () => import(/* webpackChunkName: "accessory-security" */ "@/components/accessories/security.vue"),
-        "sprinkler-accessory": () => import(/* webpackChunkName: "accessory-sprinkler" */ "@/components/accessories/sprinkler.vue"),
-        "television-accessory": () => import(/* webpackChunkName: "accessory-television" */ "@/components/accessories/television.vue"),
-        "thermostat-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/thermostat.vue"),
-        "brightness-accessory": () => import(/* webpackChunkName: "accessory-brightness" */ "@/components/accessories/brightness.vue"),
-        "unavailable-accessory": () => import(/* webpackChunkName: "accessory-unavailable" */ "@/components/accessories/unavailable.vue"),
-        "unknown-accessory": () => import(/* webpackChunkName: "accessory-unknown" */ "@/components/accessories/unknown.vue"),
+        "off-accessory": OffAccessory,
+        "hue-accessory": HueAccessory,
+        "fan-accessory": FanAccessory,
+        "lock-accessory": LockAccessory,
+        "light-accessory": LightAccessory,
+        "blind-accessory": BlindAccessory,
+        "camera-accessory": CameraAccessory,
+        "sensor-accessory": SensorAccessory,
+        "switch-accessory": SwitchAccessory,
+        "garage-accessory": GarageAccessory,
+        "security-accessory": SecurityAccessory,
+        "sprinkler-accessory": SprinklerAccessory,
+        "television-accessory": TelevisionAccessory,
+        "thermostat-accessory": ThermostatAccessory,
+        "brightness-accessory": BrightnessAccessory,
+        "unavailable-accessory": UnavailableAccessory,
+        "unknown-accessory": UnknownAccessory,
     };
 }

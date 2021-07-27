@@ -29,8 +29,6 @@
 </template>
 
 <script>
-    import { Wait } from "@hoobs/sdk/lib/wait";
-
     export default {
         name: "unavailable-accessory",
 
@@ -51,7 +49,6 @@
                 if (index >= 0) config.dashboard.items.splice(index, 1);
 
                 await this.$hoobs.config.update(config);
-                await Wait();
 
                 this.$action.emit("dashboard", "update");
             },

@@ -43,7 +43,6 @@
 
 <script>
     import Sanitize from "@hoobs/sdk/lib/sanitize";
-    import { Wait } from "@hoobs/sdk/lib/wait";
     import Validators from "../../services/validators";
 
     const SOCKET_RECONNECT_DELAY = 500;
@@ -78,8 +77,6 @@
                     await this.$hoobs.rooms.add(this.display);
 
                     setTimeout(async () => {
-                        await Wait();
-
                         this.rooms = await this.$hoobs.rooms.list();
                         this.loading = false;
                         this.select(this.rooms.find((item) => item.id === Sanitize(this.display)).id);

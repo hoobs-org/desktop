@@ -43,8 +43,6 @@
 </template>
 
 <script>
-    import { Wait } from "@hoobs/sdk/lib/wait";
-
     export default {
         name: "cache",
 
@@ -67,8 +65,6 @@
         methods: {
             async load(bridge) {
                 this.loading = true;
-
-                await Wait();
 
                 this.cache = [];
                 this.bridge = await this.$hoobs.bridge(bridge);

@@ -122,10 +122,10 @@
             async load() {
                 this.loading = true;
 
-                this.desktop = (((await Request.get("https://support.hoobs.org/api/releases/desktop/latest")).data) || {}).results;
                 this.status = await this.$hoobs.status();
                 this.version = await this.$hoobs.version();
 
+                this.desktop = (((await Request.get(`https://support.hoobs.org/api/releases/desktop/${this.status.repo === "edge" || this.status.repo === "bleeding" ? "beta" : "latest"}`)).data) || {}).results;
                 this.plugins = ((await this.$hoobs.plugins()) || []).filter((item) => !Semver.compare(item.version, item.latest, ">="));
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;
@@ -146,8 +146,17 @@
                 const url = this.desktop[`download_${this.$os}`];
                 const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
-                if (file) this.$electron.open(file);
-                if (file) this.$electron.close();
+                if (file) {
+                    const error = await this.$electron.open(file);
+
+                    if (error && error !== "") {
+                        this.$alert(error);
+                    } else {
+                        this.$electron.close();
+                    }
+                } else {
+                    this.$alert("Unable to download update.");
+                }
 
                 this.updating = false;
             },

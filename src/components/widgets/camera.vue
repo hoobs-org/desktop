@@ -27,13 +27,15 @@
 </template>
 
 <script>
+    import CameraAccessory from "@/components/accessories/camera.vue";
+
     const LOAD_RETRY_DELAY = 5 * 1000;
 
     export default {
         name: "camera-widget",
 
         components: {
-            "camera-accessory": () => import(/* webpackChunkName: "accessory-thermostat" */ "@/components/accessories/camera.vue"),
+            "camera-accessory": CameraAccessory,
         },
 
         props: {

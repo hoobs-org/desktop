@@ -76,8 +76,10 @@ export default {
                             if (window) window.unmaximize();
                         },
 
-                        open(file: string) {
-                            shell.openPath(file);
+                        async open(file: string): Promise<string> {
+                            const results = await shell.openPath(file);
+
+                            return results;
                         },
 
                         download(url: string | undefined, filename: string): Promise<string | undefined> {

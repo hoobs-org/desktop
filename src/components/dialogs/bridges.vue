@@ -142,7 +142,7 @@
                     bridges = await this.$hoobs.bridges.list();
 
                     while (bridges.findIndex((item) => parseInt(`${item.port}`, 10) === this.port) >= 0) {
-                        this.port += 1000;
+                        this.port += 10;
                     }
 
                     while (bridges.findIndex((item) => item.id === Sanitize(this.display)) >= 0) {

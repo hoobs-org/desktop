@@ -101,7 +101,6 @@
 </template>
 
 <script>
-    import { Wait } from "@hoobs/sdk/lib/wait";
     import Countries from "@/lang/countries.json";
 
     import MessageComponent from "@/components/elements/message.vue";
@@ -408,8 +407,6 @@
                 await this.$hoobs.config.update(config);
 
                 this.message = `${this.$t("applying_changes")}...`;
-
-                await Wait();
 
                 this.$dialog.close("settings");
                 this.$action.emit("settings", "update");

@@ -124,7 +124,6 @@
 
 <script>
     import Sanitize from "@hoobs/sdk/lib/sanitize";
-    import { Wait } from "@hoobs/sdk/lib/wait";
 
     import QRCodeComponent from "@chenfengyuan/vue-qrcode";
     import ListComponent from "@/components/elements/list.vue";
@@ -280,7 +279,7 @@
                     const bridges = await this.$hoobs.bridges.list();
 
                     while (bridges.findIndex((item) => parseInt(`${item.port}`, 10) === this.port) >= 0) {
-                        this.port += 1000;
+                        this.port += 10;
                     }
                 }
 
@@ -337,8 +336,6 @@
                         }
 
                         setTimeout(async () => {
-                            await Wait();
-
                             this.bridges = await this.$hoobs.bridges.list();
                             this.$router.push({ path: `/bridges/${this.bridges.find((item) => item.id === Sanitize(this.display)).id}` });
                         }, SOCKET_RECONNECT_DELAY);
@@ -354,8 +351,6 @@
                         }
 
                         setTimeout(async () => {
-                            await Wait();
-
                             if (restart) await this.subject.restart();
 
                             this.load(this.id);
@@ -378,8 +373,6 @@
                         await this.subject.remove();
 
                         setTimeout(async () => {
-                            await Wait();
-
                             this.$router.push({ path: "/bridges" });
                         }, SOCKET_RECONNECT_DELAY);
                     });

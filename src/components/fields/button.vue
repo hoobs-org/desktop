@@ -73,12 +73,10 @@
 
                 switch (this.schema.action) {
                     case "oauth":
-                        this.$emit("save");
                         this.$action.emit("window", "open", `${url}?token=${token}`);
                         break;
 
                     case "window":
-                        this.$emit("save");
                         this.$action.emit("window", "open", `${url}?token=${token}`);
                         break;
 
@@ -89,6 +87,7 @@
                             items: this.items,
                             update: this.update,
                             bridge: this.bridge,
+                            plugin: this.identifier,
                         });
 
                         break;

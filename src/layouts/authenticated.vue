@@ -37,8 +37,6 @@
 </template>
 
 <script>
-    import { Wait } from "@hoobs/sdk/lib/wait";
-
     import NavigationComponent from "@/components/navigation.vue";
     import NotificationComponent from "@/components/elements/notification.vue";
 
@@ -83,8 +81,6 @@
 
                 this.$action.on("io", "connected", () => {
                     setTimeout(async () => {
-                        await Wait();
-
                         if (this.reload) {
                             window.location.reload();
                         } else {
@@ -117,8 +113,6 @@
             if (this.current) {
                 this.$scanner.detect(this.current.ip, this.current.port).then(async (response) => {
                     if (response) {
-                        await Wait();
-
                         this.loading = false;
                     } else {
                         this.exit();

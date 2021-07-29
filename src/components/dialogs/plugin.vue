@@ -69,6 +69,10 @@
                 this.$refs.frame.contentWindow.$bridge = this.options.bridge;
                 this.$refs.frame.contentWindow.$plugin = this.options.plugin;
 
+                this.$refs.frame.contentWindow.$open = (url) => {
+                    this.$action.emit("window", "open", url);
+                };
+
                 this.$refs.frame.contentWindow.$close = (reload) => {
                     this.$dialog.close("plugin");
 

@@ -67,6 +67,7 @@
 
             loader() {
                 this.$refs.frame.contentWindow.$bridge = this.options.bridge;
+                this.$refs.frame.contentWindow.$plugin = this.options.plugin;
 
                 this.$refs.frame.contentWindow.$close = (reload) => {
                     this.$dialog.close("plugin");

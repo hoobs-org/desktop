@@ -87,6 +87,7 @@
                             items: this.items,
                             update: this.update,
                             bridge: this.bridge,
+                            plugin: this.identifier,
                         });
 
                         break;

@@ -173,7 +173,7 @@
 
             &.mac {
                 top: 10px;
-                left: 14px;
+                right: 0;
                 width: 75px;
 
                 .window-control {

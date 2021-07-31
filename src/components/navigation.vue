@@ -19,7 +19,7 @@
 <template>
     <div id="navigation">
         <div class="links">
-            <div :class="`${$os === 'mac' ? 'logo mac' : 'logo'}`">
+            <div class="logo">
                 <svg viewBox="0 0 80 80.92" xmlns="http://www.w3.org/2000/svg">
                     <rect class="background" x="1.25" y="1.25" width="77" height="78" rx="16.3" />
                     <path
@@ -121,10 +121,6 @@
 
         .logo {
             margin: 0 0 14px 0;
-
-            &.mac {
-                visibility: hidden !important;
-            }
 
             svg {
                 width: 24px;

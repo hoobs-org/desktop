@@ -55,7 +55,7 @@
                 </tr>
                 <tr>
                     <td>{{ $t("cpu") }}</td>
-                    <td>{{ cpu.load || 0 }}%</td>
+                    <td>{{ cpu.used || 0 }}%</td>
                 </tr>
                 <tr>
                     <td>{{ $t("memory") }}</td>

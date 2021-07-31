@@ -21,7 +21,7 @@
         <div v-if="!login" :class="override ? `page ${override}` : 'page'">
             <slot />
         </div>
-        <div class="header"></div>
+        <div :class="override ? `header ${override}` : 'header'"></div>
         <div :class="override ? `system ${override}` : 'system'">
             <icon v-if="!login" v-on:click.stop="$menu.open('notifications')" name="bell-outline" class="icon">
                 <div v-if="notifications.length > 0" class="active">&bull;</div>

@@ -99,7 +99,7 @@
             height: 38.98px;
 
             &.mac {
-                width: 50px;
+                width: 85px;
             }
         }
 

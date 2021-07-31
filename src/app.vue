@@ -172,8 +172,7 @@
             padding: 2px 7px 0 0;
 
             &.mac {
-                top: 10px;
-                right: 0;
+                top: 12px;
                 width: 75px;
 
                 .window-control {

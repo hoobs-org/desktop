@@ -959,6 +959,7 @@ import {
     mdiWindowMinimize,
     mdiWindowMaximize,
     mdiWindowRestore,
+    mdiArrowExpand,
     mdiTelevisionClassic,
 } from "@mdi/js";
 
@@ -1905,6 +1906,7 @@ const tags: { [key: string]: string } = {
     minimize: mdiWindowMinimize,
     maximize: mdiWindowMaximize,
     restore: mdiWindowRestore,
+    "mac-restore": mdiArrowExpand,
     television: mdiTelevisionClassic,
 };
 

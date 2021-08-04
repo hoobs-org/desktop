@@ -169,18 +169,14 @@
                     }
                 }
 
-                if (!this.$route.query.search || this.$route.query.search === "") {
+                if (id && id !== "library") {
+                    const bridge = await this.$hoobs.bridge(id);
+
+                    if (bridge) this.installed = await bridge.plugins.list();
+                } else if (!this.$route.query.search || this.$route.query.search === "") {
                     this.query = "";
                     this.featured = await this.$hoobs.repository.featured();
                     this.popular = await this.$hoobs.repository.popular();
-
-                    if (id && id !== "") {
-                        const bridge = await this.$hoobs.bridge(id);
-
-                        if (bridge) {
-                            this.installed = await bridge.plugins.list();
-                        }
-                    }
                 } else {
                     const skip = parseInt(this.$route.query.skip, 10) || 0;
                     const limit = parseInt(this.$route.query.limit, 10) || 27;
@@ -209,9 +205,7 @@
                         start = end - 4;
                     }
 
-                    if (start < 0) {
-                        start = 0;
-                    }
+                    if (start < 0) start = 0;
 
                     for (let i = start; i < end; i += 1) {
                         this.pagination.push(i);

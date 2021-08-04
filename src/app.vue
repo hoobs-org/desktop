@@ -22,17 +22,17 @@
             <router-view class="view" />
         </component>
         <div v-if="$os === 'mac'" class="chrome mac">
-            <div class="window-control" v-on:click="close" name="close">
-                <icon class="overlay" name="close" />
+            <div v-if="maximized" v-on:click="restore" class="window-control" name="restore">
+                <icon class="overlay" name="mac-restore" />
+            </div>
+            <div v-else class="window-control" v-on:click="maximize" name="maximize">
+                <icon class="overlay" name="mac-restore" />
             </div>
             <div class="window-control spaced" v-on:click="minimize" name="minimize">
                 <icon class="overlay" v-on:click="minimize" name="minimize" />
             </div>
-            <div v-if="maximized" v-on:click="restore" class="window-control spaced" name="restore">
-                <icon class="overlay" name="restore" />
-            </div>
-            <div v-else class="window-control spaced" v-on:click="maximize" name="maximize">
-                <icon class="overlay" name="maximize" />
+            <div class="window-control spaced" v-on:click="close" name="close">
+                <icon class="overlay" name="close" />
             </div>
         </div>
         <div v-else class="chrome windows">
@@ -172,8 +172,7 @@
             padding: 2px 7px 0 0;
 
             &.mac {
-                top: 10px;
-                left: 14px;
+                top: 12px;
                 width: 75px;
 
                 .window-control {

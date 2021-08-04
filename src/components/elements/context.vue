@@ -18,19 +18,17 @@
 
 <template>
     <div id="context">
-        <div v-if="$os === 'mac'" class="placeholder mac"></div>
-        <div v-if="!login && $os === 'mac'" class="seperator"></div>
         <div v-if="!login" :class="override ? `page ${override}` : 'page'">
             <slot />
         </div>
-        <div class="header"></div>
+        <div :class="override ? `header ${override}` : 'header'"></div>
         <div :class="override ? `system ${override}` : 'system'">
             <icon v-if="!login" v-on:click.stop="$menu.open('notifications')" name="bell-outline" class="icon">
                 <div v-if="notifications.length > 0" class="active">&bull;</div>
             </icon>
             <icon v-if="!login" v-on:click.stop="$menu.open('application')" class="icon" name="dots-vertical" />
-            <div v-if="!login && $os === 'win'" class="seperator"></div>
-            <div v-if="$os === 'win'" class="placeholder"></div>
+            <div v-if="!login" class="seperator"></div>
+            <div :class="$os === 'mac' ? 'placeholder mac' : 'placeholder'"></div>
         </div>
     </div>
 </template>
@@ -101,7 +99,7 @@
             height: 38.98px;
 
             &.mac {
-                width: 50px;
+                width: 85px;
             }
         }
 

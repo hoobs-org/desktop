@@ -21,7 +21,7 @@
         <context />
         <div v-if="!loading" class="content">
             <list value="identifier" display="display" :values="plugins" :selected="identifier" initial="hub" controller="config" />
-            <div v-if="identifier && identifier !== 'hub' && identifier !== 'advanced'" class="screen">
+            <div v-if="screen === 'schema'" class="screen">
                 <div class="wrapper">
                     <div class="section">{{ plugin.display }}</div>
                     <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs" />
@@ -32,7 +32,16 @@
                     </div>
                 </div>
             </div>
-            <div v-else-if="identifier && identifier === 'advanced'" class="screen">
+            <div v-else-if="screen === 'manual'" class="screen">
+                <div class="section">{{ plugin.display }}</div>
+                <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
+                <monaco class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
+                <div class="row actions">
+                    <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
+                    <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
+                </div>
+            </div>
+            <div v-else-if="screen === 'advanced'" class="screen">
                 <tabs v-if="bridges.length > 0" :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
                 <monaco v-if="bridges.length > 0" class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
                 <div class="row actions">
@@ -104,6 +113,15 @@
         computed: {
             user() {
                 return this.$store.state.user;
+            },
+
+            screen() {
+                if (this.identifier === "hub" || this.identifier === "") return "hub";
+                if (this.identifier === "advanced") return "advanced";
+                if (this.identifier && this.schema) return "schema";
+                if (this.identifier) return "manual";
+
+                return "hub";
             },
 
             code() {
@@ -189,119 +207,134 @@
             async save() {
                 this.loading = true;
 
-                if (!this.identifier || this.identifier === "" || this.identifier === "hub") {
-                    const config = await this.$hoobs.config.get();
-                    const working = cloneJson(this.working);
+                let index;
+                let config;
+                let working;
+                let bridge;
+                let plugins;
 
-                    let reload = false;
-                    let logout = false;
+                let reload = false;
+                let logout = false;
 
-                    if (config.api.disable_auth !== working.disable_auth) {
-                        reload = true;
+                switch (this.screen) {
+                    case "hub":
+                        config = await this.$hoobs.config.get();
+                        working = cloneJson(this.working);
+                        reload = false;
+                        logout = false;
 
-                        if (!config.api.disable_auth) logout = true;
-                    }
+                        if (config.api.disable_auth !== working.disable_auth) {
+                            reload = true;
 
-                    config.api = working;
-                    config.api.origin = config.api.origin || "*";
+                            if (!config.api.disable_auth) logout = true;
+                        }
 
-                    this.$hoobs.config.update(config);
+                        config.api = working;
+                        config.api.origin = config.api.origin || "*";
 
-                    if (logout) await this.$hoobs.auth.logout();
+                        this.$hoobs.config.update(config);
 
-                    setTimeout(() => {
-                        if (reload) {
-                            window.location.reload();
-                        } else {
+                        if (logout) await this.$hoobs.auth.logout();
+
+                        setTimeout(() => {
+                            if (reload) {
+                                window.location.reload();
+                            } else {
+                                this.dirty = false;
+                                this.change(this.bridge);
+                            }
+                        }, BRIDGE_RESTART_DELAY);
+
+                        break;
+
+                    case "advanced":
+                        bridge = await this.$hoobs.bridge(this.bridge);
+                        plugins = await bridge.plugins.list();
+                        working = cloneJson(this.working);
+
+                        working.accessories = working.accessories || [];
+                        working.platforms = working.platforms || [];
+
+                        for (let i = 0; i < working.platforms.length; i += 1) {
+                            const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
+
+                            if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
+                        }
+
+                        for (let i = 0; i < working.accessories.length; i += 1) {
+                            const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
+
+                            if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
+                        }
+
+                        for (let i = 0; i < working.platforms.length; i += 1) {
+                            const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
+
+                            if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
+                        }
+
+                        for (let i = 0; i < working.accessories.length; i += 1) {
+                            const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
+
+                            if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
+                        }
+
+                        await bridge.config.update(working);
+
+                        setTimeout(() => {
                             this.dirty = false;
                             this.change(this.bridge);
-                        }
-                    }, BRIDGE_RESTART_DELAY);
-                } else if (this.identifier === "advanced") {
-                    const bridge = await this.$hoobs.bridge(this.bridge);
-                    const plugins = await bridge.plugins.list();
+                        }, BRIDGE_RESTART_DELAY);
 
-                    const working = cloneJson(this.working);
+                        break;
 
-                    working.accessories = working.accessories || [];
-                    working.platforms = working.platforms || [];
+                    default:
+                        bridge = await this.$hoobs.bridge(this.bridge);
+                        config = await bridge.config.get();
+                        working = cloneJson(this.working);
+                        index = -1;
 
-                    for (let i = 0; i < working.platforms.length; i += 1) {
-                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
-
-                        if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
-                    }
-
-                    for (let i = 0; i < working.accessories.length; i += 1) {
-                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
-
-                        if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
-                    }
-
-                    for (let i = 0; i < working.platforms.length; i += 1) {
-                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.platforms[i].platform)) || {});
-
-                        if (identifier) working.platforms[i].plugin_map = { plugin_name: identifier };
-                    }
-
-                    for (let i = 0; i < working.accessories.length; i += 1) {
-                        const { identifier } = ((plugins.find((plugin) => plugin.alias === working.accessories[i].accessory)) || {});
-
-                        if (identifier) working.accessories[i].plugin_map = { plugin_name: identifier };
-                    }
-
-                    await bridge.config.update(working);
-
-                    setTimeout(() => {
-                        this.dirty = false;
-                        this.change(this.bridge);
-                    }, BRIDGE_RESTART_DELAY);
-                } else {
-                    const bridge = await this.$hoobs.bridge(this.bridge);
-                    const config = await bridge.config.get();
-                    const working = cloneJson(this.working);
-
-                    let index = -1;
-
-                    switch (this.type) {
-                        case "accessory":
-                            index = config.accessories.findIndex((item) => item.accessory === this.alias);
-                            working.accessories = working.accessories || [];
-
-                            while (index >= 0) {
-                                config.accessories.splice(index, 1);
+                        switch (this.type) {
+                            case "accessory":
                                 index = config.accessories.findIndex((item) => item.accessory === this.alias);
-                            }
+                                working.accessories = working.accessories || [];
 
-                            for (let i = 0; i < working.accessories.length; i += 1) {
-                                working.accessories[i].accessory = this.alias;
-                                working.accessories[i].plugin_map = { plugin_name: this.identifier };
-                            }
+                                while (index >= 0) {
+                                    config.accessories.splice(index, 1);
+                                    index = config.accessories.findIndex((item) => item.accessory === this.alias);
+                                }
 
-                            config.accessories = [...config.accessories, ...working.accessories];
-                            break;
+                                for (let i = 0; i < working.accessories.length; i += 1) {
+                                    working.accessories[i].accessory = this.alias;
+                                    working.accessories[i].plugin_map = { plugin_name: this.identifier };
+                                }
 
-                        default:
-                            index = config.platforms.findIndex((item) => item.platform === this.alias);
+                                config.accessories = [...config.accessories, ...working.accessories];
+                                break;
 
-                            while (index >= 0) {
-                                config.platforms.splice(index, 1);
+                            default:
                                 index = config.platforms.findIndex((item) => item.platform === this.alias);
-                            }
 
-                            working.platform = this.alias;
-                            working.plugin_map = { plugin_name: this.identifier };
+                                while (index >= 0) {
+                                    config.platforms.splice(index, 1);
+                                    index = config.platforms.findIndex((item) => item.platform === this.alias);
+                                }
 
-                            config.platforms = [...config.platforms, working];
-                            break;
-                    }
+                                working.platform = this.alias;
+                                working.plugin_map = { plugin_name: this.identifier };
 
-                    await bridge.config.update(config);
+                                config.platforms = [...config.platforms, working];
+                                break;
+                        }
 
-                    setTimeout(() => {
-                        this.dirty = false;
-                        this.change(this.bridge);
-                    }, BRIDGE_RESTART_DELAY);
+                        await bridge.config.update(config);
+
+                        setTimeout(() => {
+                            this.dirty = false;
+                            this.change(this.bridge);
+                        }, BRIDGE_RESTART_DELAY);
+
+                        break;
                 }
             },
 
@@ -367,6 +400,19 @@
                             break;
                     }
 
+                    delete this.saved.plugin_map;
+
+                    if (!(((this.plugin || {}).schema || {}).config)) {
+                        const theme = await this.$hoobs.theme.get(this.$store.state.theme);
+
+                        this.theme = theme.mode;
+                        this.foreground = theme.widget.text.default.replace("#", "");
+                        this.background = "00000000";
+
+                        if (this.foreground.length === 3) this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
+                        if (this.background.length === 3) this.background = this.background.split("").map((item) => `${item}${item}`).join("");
+                    }
+
                     this.working = cloneJson(this.saved);
                     this.loading = false;
                     this.dirty = false;
@@ -401,7 +447,7 @@
 
                     if (this.plugin && this.plugin.schema && this.plugin.schema.config) {
                         this.type = this.plugin.schema.pluginType || (this.plugin.schema.accessory ? "accessory" : "platform");
-                        this.alias = this.plugin.alias || this.plugin.schema.pluginAlias;
+                        this.alias = this.plugin.alias || this.plugin.schema.pluginAlias || this.$hoobs.repository.title(this.plugin.identifier);
                         this.bridges = this.bridges.filter((bridge) => this.plugin.bridges.findIndex((item) => item.id === bridge.id) >= 0);
 
                         switch (this.type) {
@@ -432,7 +478,9 @@
                                 break;
                         }
                     } else {
-                        this.$router.push("/config");
+                        this.type = (this.plugin.details[0] || {}).type || "platform";
+                        this.alias = this.plugin.alias || (this.plugin.details[0] || {}).alias || this.$hoobs.repository.title(this.plugin.identifier);
+                        this.bridges = this.bridges.filter((bridge) => this.plugin.bridges.findIndex((item) => item.id === bridge.id) >= 0);
                     }
 
                     this.change(((this.bridges || [])[0] || {}).id || "");
@@ -446,7 +494,7 @@
                     for (let i = 0; i < plugins.length; i += 1) {
                         const plugin = plugins[i];
 
-                        if (plugin && plugin.schema && plugin.schema.config) {
+                        if (plugin) {
                             const { bridge } = plugin;
                             const { version } = plugin;
 

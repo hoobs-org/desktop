@@ -38,7 +38,7 @@
                         <div v-if="installed.length > 0" v-on:click="uninstall()" class="button">{{ $t("plugin_uninstall") }}</div>
                         <div v-if="!updated" v-on:click="update()" class="button">{{ $t("plugin_update") }}</div>
                         <div v-on:click="install()" :class="installed.length > 0 ? 'button' : 'button primary'">{{ $t("plugin_install") }}</div>
-                        <router-link v-if="installed.length > 0 && schema" :to="`/config/${identifier}`" class="button primary">{{ $t("configuration") }}</router-link>
+                        <router-link v-if="installed.length > 0" :to="`/config/${identifier}`" class="button primary">{{ $t("configuration") }}</router-link>
                     </div>
                 </div>
                 <tabs :values="tabs" v-on:change="change" :value="section" class="tabs" />
@@ -151,7 +151,6 @@
                 installed: [],
                 available: [],
                 plugin: {},
-                schema: false,
                 releases: {},
                 query: "",
                 from: "",
@@ -226,8 +225,6 @@
                                                         version: plugin.version,
                                                         updated: Semver.compare(plugin.version, plugin.latest, ">="),
                                                     });
-
-                                                    this.schema = (plugin.schema && plugin.schema.config);
                                                 }
 
                                                 resolve();

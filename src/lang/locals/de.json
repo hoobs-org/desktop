@@ -221,6 +221,7 @@
         "permissions": "Rechte",
         "personalize": "Personalisieren",
         "plugin": "Plugin",
+        "plugin_deleted": "This plugin is no longer available.",
         "plugin_install": "Installieren",
         "plugin_install_add_bridge": "Erstelle eine neue Bridge um dieses Plugin dort zu installieren.",
         "plugin_install_bridge": "Oder wähle eine Bridge zum installieren dieses Plugins.",

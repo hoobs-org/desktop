@@ -221,6 +221,7 @@
         "permissions": "权限",
         "personalize": "个性化",
         "plugin": "插件",
+        "plugin_deleted": "This plugin is no longer available.",
         "plugin_install": "安装",
         "plugin_install_add_bridge": "创建新的桥接器来安装这个插件。",
         "plugin_install_bridge": "或者选择一个桥接器来安装这个插件。",

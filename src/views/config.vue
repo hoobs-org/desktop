@@ -150,23 +150,6 @@
 
                 this.intermediate = false;
             },
-
-            manual() {
-                if (!this.intermediate) {
-                    if (this.dirty) {
-                        this.$confirm(this.$t("ok"), this.$t("unsaved_changes_warning"), () => {
-                            this.change(this.bridge);
-                        }, () => {
-                            this.intermediate = true;
-                            this.manual = !this.manual;
-                        });
-                    } else {
-                        this.change(this.bridge);
-                    }
-                }
-
-                this.intermediate = false;
-            },
         },
 
         data() {

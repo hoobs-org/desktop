@@ -409,16 +409,14 @@
 
                     delete this.saved.plugin_map;
 
-                    if (this.manual || !(((this.plugin || {}).schema || {}).config)) {
-                        const theme = await this.$hoobs.theme.get(this.$store.state.theme);
+                    const theme = await this.$hoobs.theme.get(this.$store.state.theme);
 
-                        this.theme = theme.mode;
-                        this.foreground = theme.widget.text.default.replace("#", "");
-                        this.background = "00000000";
+                    this.theme = theme.mode;
+                    this.foreground = theme.widget.text.default.replace("#", "");
+                    this.background = "00000000";
 
-                        if (this.foreground.length === 3) this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
-                        if (this.background.length === 3) this.background = this.background.split("").map((item) => `${item}${item}`).join("");
-                    }
+                    if (this.foreground.length === 3) this.foreground = this.foreground.split("").map((item) => `${item}${item}`).join("");
+                    if (this.background.length === 3) this.background = this.background.split("").map((item) => `${item}${item}`).join("");
 
                     this.working = cloneJson(this.saved);
                     this.loading = false;

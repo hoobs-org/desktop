@@ -29,6 +29,7 @@
                     <div class="row actions">
                         <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
                         <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
+                        <div v-on:click="toggle" class="button">{{ $t("advanced") }}</div>
                     </div>
                 </div>
             </div>
@@ -39,6 +40,7 @@
                 <div class="row actions">
                     <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
                     <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
+                    <div v-if="schema" v-on:click="toggle" class="button">{{ $t("visual") }}</div>
                 </div>
             </div>
             <div v-else-if="screen === 'advanced'" class="screen">
@@ -118,7 +120,7 @@
             screen() {
                 if (this.identifier === "hub" || this.identifier === "") return "hub";
                 if (this.identifier === "advanced") return "advanced";
-                if (this.identifier && this.schema) return "schema";
+                if (this.identifier && this.schema && !this.manual) return "schema";
                 if (this.identifier) return "manual";
 
                 return "hub";
@@ -148,6 +150,23 @@
 
                 this.intermediate = false;
             },
+
+            manual() {
+                if (!this.intermediate) {
+                    if (this.dirty) {
+                        this.$confirm(this.$t("ok"), this.$t("unsaved_changes_warning"), () => {
+                            this.change(this.bridge);
+                        }, () => {
+                            this.intermediate = true;
+                            this.manual = !this.manual;
+                        });
+                    } else {
+                        this.change(this.bridge);
+                    }
+                }
+
+                this.intermediate = false;
+            },
         },
 
         data() {
@@ -159,6 +178,7 @@
                 intermediate: false,
                 loading: true,
                 dirty: false,
+                manual: false,
                 identifier: "",
                 type: null,
                 alias: null,
@@ -187,6 +207,10 @@
         methods: {
             updated(value) {
                 if (JSON.stringify(value) !== JSON.stringify(this.saved)) this.dirty = true;
+            },
+
+            toggle() {
+                this.manual = !this.manual;
             },
 
             parse(value) {
@@ -402,7 +426,7 @@
 
                     delete this.saved.plugin_map;
 
-                    if (!(((this.plugin || {}).schema || {}).config)) {
+                    if (this.manual || !(((this.plugin || {}).schema || {}).config)) {
                         const theme = await this.$hoobs.theme.get(this.$store.state.theme);
 
                         this.theme = theme.mode;
@@ -426,6 +450,7 @@
                 this.schema = null;
                 this.plugin = null;
                 this.dirty = false;
+                this.manual = false;
 
                 this.bridges.sort((a, b) => {
                     if (a.display < b.display) return -1;

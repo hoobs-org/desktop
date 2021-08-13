@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div v-else-if="screen === 'manual'" class="screen">
+            <div v-else-if="screen === 'manual'" class="screen tight">
                 <div class="section">{{ plugin.display }}</div>
                 <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
                 <monaco class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
@@ -43,7 +43,7 @@
                     <div v-if="schema" v-on:click="toggle" class="button">{{ $t("visual") }}</div>
                 </div>
             </div>
-            <div v-else-if="screen === 'advanced'" class="screen">
+            <div v-else-if="screen === 'advanced'" class="screen tight">
                 <tabs v-if="bridges.length > 0" :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
                 <monaco v-if="bridges.length > 0" class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
                 <div class="row actions">
@@ -579,6 +579,10 @@
                 backdrop-filter: var(--transparency);
                 overflow: auto;
 
+                &.tight {
+                    margin: 0 0 20px 0;
+                }
+
                 .section {
                     display: flex;
                     flex-direction: row;
@@ -601,7 +605,7 @@
                     margin: 20px 0;
 
                     &.tight {
-                        margin: 0 0 7px 0;
+                        margin: 0 0 7px 10px;
                     }
                 }
 

@@ -117,7 +117,6 @@ async function createWindow() {
     }
 }
 
-app.setAppUserModelId(process.execPath);
 app.commandLine.appendSwitch("disable-site-isolation-trials");
 
 app.on("activate", () => {
@@ -167,6 +166,8 @@ app.on("ready", async () => {
 });
 
 if (isDevelopment) {
+    app.setAppUserModelId(process.execPath);
+
     if (process.platform === "win32") {
         process.on("message", (data) => {
             if (data === "graceful-exit") {

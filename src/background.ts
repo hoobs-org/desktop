@@ -133,8 +133,8 @@ app.on("ready", async () => {
             console.error("Vue Devtools failed to install:", e.toString());
         }
     }
-
-    tray = new Tray(process.platform === "win32" ? `${__dirname}/Tray.ico` : `${__dirname}/TrayTemplate.png`);
+    console.log(__dirname);
+    tray = new Tray(process.platform === "win32" ? `${__dirname}/../public/Tray.ico` : `${__dirname}/../public/TrayTemplate.png`);
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

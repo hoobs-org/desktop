@@ -135,7 +135,7 @@ app.on("ready", async () => {
         }
     }
 
-    tray = new Tray(process.platform === "win32" ? `${__dirname}/../public/favicon.ico` : `${__dirname}/../public/TrayTemplate.png`);
+    tray = new Tray(process.platform === "win32" ? `${__dirname}/../public/favicon.ico` : `${__dirname}/../public/icons/TrayTemplate.png`);
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

@@ -140,13 +140,13 @@ app.on("ready", async () => {
 
     tray.setContextMenu(Menu.buildFromTemplate([
         {
-            label: "Bring to Foreground",
+            label: "Dashboard",
             click: () => {
                 if (window) window.show();
             },
         },
         {
-            label: "Exit HOOBS",
+            label: "Quit HOOBS Desktop",
             click: () => {
                 app.exit(0);
             },

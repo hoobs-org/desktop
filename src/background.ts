@@ -126,15 +126,19 @@ app.on("activate", () => {
 let tray: Tray | undefined;
 
 app.on("ready", async () => {
+    let resources = `${__dirname}/../`;
+
     if (isDevelopment && !process.env.IS_TEST) {
+        resources = `${__dirname}/../public`;
+
         try {
             await installExtension(VUEJS_DEVTOOLS);
         } catch (e) {
             console.error("Vue Devtools failed to install:", e.toString());
         }
     }
-    console.log(__dirname);
-    tray = new Tray(process.platform === "win32" ? `${__dirname}/../public/Tray.ico` : `${__dirname}/../public/TrayTemplate.png`);
+
+    tray = new Tray(process.platform === "win32" ? `${resources}/icons/Tray.ico` : `${resources}/icons/TrayTemplate.png`);
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

@@ -1,12 +1,6 @@
 productName: "HOOBS"
 appId: "org.hoobs.desktop"
 afterSign: "build/notarize.js"
-asar: true
-
-extraResources:
-  - "public/Tray.ico"
-  - "public/TrayTemplate.png"
-  - "public/TrayTemplate@2x.png"
 
 mac:
   icon: "build/icon.icns"

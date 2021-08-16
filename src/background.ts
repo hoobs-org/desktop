@@ -146,6 +146,15 @@ app.on("ready", async () => {
             },
         },
         {
+            label: "Enable on Startup",
+            type: "checkbox",
+            checked: app.getLoginItemSettings().openAtLogin,
+            click: () => {
+                app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin });
+            },
+        },
+        { type: "separator" },
+        {
             label: "Quit HOOBS Desktop",
             click: () => {
                 app.exit(0);

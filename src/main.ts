@@ -18,7 +18,7 @@
 
 import hoobs from "@hoobs/sdk";
 import Vue from "vue";
-import { shell, remote } from "electron";
+import { shell } from "electron";
 
 import IconComponent from "@/components/elements/icon.vue";
 import ModalComponent from "@/components/elements/modal.vue";
@@ -64,7 +64,7 @@ scanner.on("clear", () => store.commit("IO:DEVICE:CLEAR"));
 
 io.on("log", (data) => store.commit("IO:LOG", data));
 io.on("monitor", (data) => store.commit("IO:MONITOR", data));
-io.on("notification", (payload) => new remote.Notification({ title: payload.data.title, body: payload.data.description }).show());
+io.on("notification", (payload) => electron.helpers.notify(payload.data.title, payload.data.description));
 io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
 io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
 

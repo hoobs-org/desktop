@@ -30,7 +30,80 @@ const platforms: { [key: string]: string } = {
     darwin: "mac",
 };
 
+const helpers = {
+    notify(title: string, body: string): void {
+        new remote.Notification({ title, body }).show();
+    },
+
+    get maximized(): boolean {
+        const window = remote.getCurrentWindow();
+
+        if (window) return window.isMaximized();
+
+        return false;
+    },
+
+    close(): void {
+        const window = remote.getCurrentWindow();
+
+        if (window) window.hide();
+    },
+
+    minimize(): void {
+        const window = remote.getCurrentWindow();
+
+        if (window) window.hide();
+    },
+
+    maximize(): void {
+        const window = remote.getCurrentWindow();
+
+        if (window) window.maximize();
+    },
+
+    restore(): void {
+        const window = remote.getCurrentWindow();
+
+        if (window) window.unmaximize();
+    },
+
+    async open(file: string): Promise<string> {
+        const results = await shell.openPath(file);
+
+        return results;
+    },
+
+    download(url: string | undefined, filename: string): Promise<string | undefined> {
+        return new Promise((resolve) => {
+            if (url && url !== "") {
+                Request({
+                    url,
+                    method: "GET",
+                    responseType: "blob",
+                }).then((response) => {
+                    response.data.arrayBuffer().then((buffer: Buffer) => {
+                        const file = join(OS.tmpdir(), filename);
+
+                        if (existsSync(file)) unlinkSync(file);
+
+                        writeFileSync(file, Buffer.from(buffer));
+                        resolve(file);
+                    }).catch(() => {
+                        resolve(undefined);
+                    });
+                }).catch(() => {
+                    resolve(undefined);
+                });
+            } else {
+                resolve(undefined);
+            }
+        });
+    },
+};
+
 export default {
+    helpers,
+
     install(vue: VueConstructor<Vue>): void {
         vue.mixin({
             computed: {
@@ -43,76 +116,7 @@ export default {
                 },
 
                 $electron() {
-                    return {
-                        notify(title: string, body: string): void {
-                            new remote.Notification({ title, body }).show();
-                        },
-
-                        get maximized() {
-                            const window = remote.getCurrentWindow();
-
-                            if (window) return window.isMaximized();
-
-                            return false;
-                        },
-
-                        close() {
-                            const window = remote.getCurrentWindow();
-
-                            if (window) window.hide();
-                        },
-
-                        minimize() {
-                            const window = remote.getCurrentWindow();
-
-                            if (window) window.hide();
-                        },
-
-                        maximize() {
-                            const window = remote.getCurrentWindow();
-
-                            if (window) window.maximize();
-                        },
-
-                        restore() {
-                            const window = remote.getCurrentWindow();
-
-                            if (window) window.unmaximize();
-                        },
-
-                        async open(file: string): Promise<string> {
-                            const results = await shell.openPath(file);
-
-                            return results;
-                        },
-
-                        download(url: string | undefined, filename: string): Promise<string | undefined> {
-                            return new Promise((resolve) => {
-                                if (url && url !== "") {
-                                    Request({
-                                        url,
-                                        method: "GET",
-                                        responseType: "blob",
-                                    }).then((response) => {
-                                        response.data.arrayBuffer().then((buffer: Buffer) => {
-                                            const file = join(OS.tmpdir(), filename);
-
-                                            if (existsSync(file)) unlinkSync(file);
-
-                                            writeFileSync(file, Buffer.from(buffer));
-                                            resolve(file);
-                                        }).catch(() => {
-                                            resolve(undefined);
-                                        });
-                                    }).catch(() => {
-                                        resolve(undefined);
-                                    });
-                                } else {
-                                    resolve(undefined);
-                                }
-                            });
-                        },
-                    };
+                    return helpers;
                 },
             },
         });

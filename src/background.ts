@@ -22,10 +22,13 @@ import {
     protocol,
     BrowserWindow,
     MenuItemConstructorOptions,
+    NativeImage,
+    nativeImage,
     Menu,
     Tray,
 } from "electron";
 
+import { join } from "path";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
@@ -39,9 +42,13 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
-let resources = "./";
+function createNativeImage(path: string): NativeImage {
+    const image = nativeImage.createFromPath(`${join(__dirname, "../src", path)}`);
 
-if (isDevelopment && !process.env.IS_TEST) resources = `${__dirname}/../public/`;
+    image.setTemplateImage(true);
+
+    return image;
+}
 
 async function createWindow() {
     const template: MenuItemConstructorOptions[] = [];
@@ -91,7 +98,7 @@ async function createWindow() {
 
     window = new BrowserWindow({
         title: "HOOBS",
-        icon: `${resources}favicon.ico`,
+        icon: createNativeImage("./assets/Tray.ico"),
         x: state.x,
         y: state.y,
         frame: false,
@@ -138,7 +145,7 @@ app.on("ready", async () => {
         }
     }
 
-    tray = new Tray(process.platform === "win32" ? `${resources}icons/Tray.ico` : `${resources}icons/TrayTemplate.png`);
+    tray = new Tray(process.platform === "win32" ? createNativeImage("./assets/Tray.ico") : createNativeImage("./assets/TrayTemplate.png"));
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

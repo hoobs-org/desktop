@@ -79,6 +79,8 @@
 
         methods: {
             minimize() {
+                if (this.$route.path !== "/") this.$router.push({ path: "/" });
+
                 this.$electron.minimize();
                 setTimeout(() => { this.maximized = this.$electron.maximized; }, 250);
             },
@@ -94,6 +96,8 @@
             },
 
             close() {
+                if (this.$route.path !== "/") this.$router.push({ path: "/" });
+
                 this.$electron.close();
             },
         },

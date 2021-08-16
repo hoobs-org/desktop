@@ -59,10 +59,8 @@ export default new Vuex.Store({
             permissions: {},
         },
         auth: false,
-        notifications: [],
         snapshots: {},
         streaming: {},
-        latest: null,
         navigation: false,
         accessory: null,
         room: null,
@@ -140,33 +138,6 @@ export default new Vuex.Store({
             state.heap = payload.data.heap;
         },
 
-        "IO:NOTIFICATION": (state: { [key: string]: any }, payload: any) => {
-            const now = (new Date()).getTime();
-
-            const notification = {
-                id: `${now}:${Math.random()}`,
-                time: now,
-                event: payload.event,
-                bridge: payload.bridge,
-                type: payload.data.type,
-                title: payload.data.title,
-                description: payload.data.description,
-                icon: payload.data.icon,
-                ttl: now + (1 * 60 * 60 * 1000),
-            };
-
-            if (state.latest) clearTimeout(state.latest.timer);
-
-            state.latest = {
-                timer: setTimeout(() => {
-                    state.latest = null;
-                }, 10 * 1000),
-                notification,
-            };
-
-            state.notifications.unshift(notification);
-        },
-
         "IO:SNAPSHOT:UPDATE": (state: { [key: string]: any }, payload: any) => {
             state.snapshots[payload.id] = payload.data;
         },
@@ -223,37 +194,6 @@ export default new Vuex.Store({
             state.log = state.log.slice(1).slice(-5000);
         },
 
-        "NOTIFICATION:ADD": (state: { [key: string]: any }, payload: any) => {
-            const now = (new Date()).getTime();
-            const notification = cloneJson(payload);
-
-            notification.id = `${now}:${Math.random()}`;
-            notification.time = now;
-            notification.ttl = now + (1 * 60 * 60 * 1000);
-
-            state.notifications.unshift(notification);
-        },
-
-        "NOTIFICATION:DISMISS": (state: { [key: string]: any }, id: string) => {
-            state.notifications = state.notifications.filter((item: { [key: string]: any }) => (item.id || "") !== "" && (item.id || "") !== id);
-        },
-
-        "NOTIFICATION:DISMISS:LATEST": (state: { [key: string]: any }) => {
-            if (state.latest) clearTimeout(state.latest.timer);
-
-            state.latest = null;
-        },
-
-        "NOTIFICATION:DISMISS:ALL": (state: { [key: string]: any }) => {
-            state.notifications = [];
-        },
-
-        "NOTIFICATION:DISMISS:OLD": (state: { [key: string]: any }) => {
-            const now = (new Date()).getTime();
-
-            state.notifications = state.notifications.filter((item: { [key: string]: any }) => (item.ttl || 0) > now);
-        },
-
         "NAVIGATION:STATE": (state: { [key: string]: any }, value: boolean) => {
             state.navigation = value;
         },
@@ -287,7 +227,6 @@ export default new Vuex.Store({
             temp: state.temp,
             session: state.session,
             user: state.user,
-            notifications: state.notifications,
             snapshots: state.snapshots,
             streaming: state.streaming,
             navigation: state.navigation,

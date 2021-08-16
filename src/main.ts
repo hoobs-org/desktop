@@ -18,7 +18,7 @@
 
 import hoobs from "@hoobs/sdk";
 import Vue from "vue";
-import { shell } from "electron";
+import { shell, remote } from "electron";
 
 import IconComponent from "@/components/elements/icon.vue";
 import ModalComponent from "@/components/elements/modal.vue";
@@ -50,7 +50,6 @@ import dialogs from "./services/dialogs";
 import router from "./services/router";
 import menus from "./services/menus";
 import store from "./services/store";
-import tasks from "./services/tasks";
 import lang from "./lang";
 
 const scanner = new Scanner();
@@ -65,7 +64,7 @@ scanner.on("clear", () => store.commit("IO:DEVICE:CLEAR"));
 
 io.on("log", (data) => store.commit("IO:LOG", data));
 io.on("monitor", (data) => store.commit("IO:MONITOR", data));
-io.on("notification", (data) => store.commit("IO:NOTIFICATION", data));
+io.on("notification", (payload) => new remote.Notification({ title: payload.data.title, body: payload.data.description }).show());
 io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
 io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
 
@@ -127,8 +126,6 @@ Vue.component("select-field", SelectComponent);
 Vue.component("label-field", LabelComponent);
 Vue.component("port-field", PortComponent);
 Vue.component("spinner", SpinnerComponent);
-
-tasks(store);
 
 new Vue({
     router,

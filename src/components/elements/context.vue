@@ -23,9 +23,6 @@
         </div>
         <div :class="override ? `header ${override}` : 'header'"></div>
         <div :class="override ? `system ${override}` : 'system'">
-            <icon v-if="!login" v-on:click.stop="$menu.open('notifications')" name="bell-outline" class="icon">
-                <div v-if="notifications.length > 0" class="active">&bull;</div>
-            </icon>
             <icon v-if="!login" v-on:click.stop="$menu.open('application')" class="icon" name="dots-vertical" />
             <div v-if="!login" class="seperator"></div>
             <div :class="$os === 'mac' ? 'placeholder mac' : 'placeholder'"></div>
@@ -40,12 +37,6 @@
         props: {
             override: String,
             login: Boolean,
-        },
-
-        computed: {
-            notifications() {
-                return this.$store.state.notifications;
-            },
         },
     };
 </script>
@@ -113,14 +104,6 @@
             border-radius: 100%;
             margin: 5px 0;
             cursor: pointer;
-
-            .active {
-                font-size: 32px;
-                position: absolute;
-                right: 4px;
-                top: 2px;
-                color: var(--application-error-text);
-            }
 
             &:hover {
                 color: var(--application-highlight-text);

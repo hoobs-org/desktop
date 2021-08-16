@@ -21,9 +21,6 @@
         <navigation :class="(loading || dialogs > 0) ? 'disable' : 'enable'" />
         <div v-if="!loading" :class="dialogs > 0 ? 'screen disable' : 'screen'">
             <slot />
-            <div v-if="snack" class="snack">
-                <notification :message="snack.notification" :snack="true" />
-            </div>
             <menu-view />
         </div>
         <div v-else class="disconnected">
@@ -38,7 +35,6 @@
 
 <script>
     import NavigationComponent from "@/components/navigation.vue";
-    import NotificationComponent from "@/components/elements/notification.vue";
 
     const SOCKET_RECONNECT_DELAY = 0.5 * 1000;
 
@@ -47,20 +43,11 @@
 
         components: {
             "navigation": NavigationComponent,
-            "notification": NotificationComponent,
         },
 
         computed: {
             current() {
                 return this.$store.state.current;
-            },
-
-            notifications() {
-                return this.$store.state.notifications;
-            },
-
-            snack() {
-                return this.$store.state.latest;
             },
         },
 
@@ -210,51 +197,6 @@
                     user-select: none;
                 }
             }
-        }
-
-        .tray {
-            position: absolute;
-            top: 2px;
-            right: 0;
-            display: flex;
-            padding: 0 0 0 10px;
-            justify-content: flex-end;
-            z-index: 1100;
-
-            .icon {
-                width: 28px;
-                height: 20px;
-                padding: 4px 0;
-                display: flex;
-                justify-content: space-around;
-                align-items: center;
-                position: relative;
-                border-radius: 100%;
-                margin: 5px 0;
-                cursor: pointer;
-
-                .active {
-                    font-size: 32px;
-                    position: absolute;
-                    right: 4px;
-                    color: var(--application-error-text);
-                }
-
-                &:last-child {
-                    margin: 5px 10px 5px 0;
-                }
-
-                &:hover {
-                    color: var(--application-highlight-text);
-                }
-            }
-        }
-
-        .snack {
-            width: 370px;
-            position: absolute;
-            bottom: 7px;
-            right: 0;
         }
     }
 </style>

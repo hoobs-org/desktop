@@ -44,6 +44,10 @@ export default {
 
                 $electron() {
                     return {
+                        notify(title: string, body: string): void {
+                            new remote.Notification({ title, body }).show();
+                        },
+
                         get maximized() {
                             const window = remote.getCurrentWindow();
 
@@ -55,13 +59,13 @@ export default {
                         close() {
                             const window = remote.getCurrentWindow();
 
-                            if (window) window.close();
+                            if (window) window.hide();
                         },
 
                         minimize() {
                             const window = remote.getCurrentWindow();
 
-                            if (window) window.minimize();
+                            if (window) window.hide();
                         },
 
                         maximize() {

@@ -23,6 +23,7 @@ import {
     BrowserWindow,
     MenuItemConstructorOptions,
     Menu,
+    Tray,
 } from "electron";
 
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
@@ -35,6 +36,8 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 protocol.registerSchemesAsPrivileged([
     { scheme: "app", privileges: { secure: true, standard: true } },
 ]);
+
+let window: BrowserWindow | undefined;
 
 async function createWindow() {
     const template: MenuItemConstructorOptions[] = [];
@@ -80,12 +83,9 @@ async function createWindow() {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
-    const state = windowState({
-        defaultWidth: 1000,
-        defaultHeight: 800,
-    });
+    const state = windowState({ defaultWidth: 1000, defaultHeight: 800 });
 
-    const window = new BrowserWindow({
+    window = new BrowserWindow({
         title: "HOOBS",
         icon: `${__dirname}/../public/favicon.ico`,
         x: state.x,
@@ -117,17 +117,14 @@ async function createWindow() {
     }
 }
 
+app.setAppUserModelId(process.execPath);
 app.commandLine.appendSwitch("disable-site-isolation-trials");
-
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
 
 app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
+
+let tray: Tray | undefined;
 
 app.on("ready", async () => {
     if (isDevelopment && !process.env.IS_TEST) {
@@ -137,6 +134,25 @@ app.on("ready", async () => {
             console.error("Vue Devtools failed to install:", e.toString());
         }
     }
+
+    tray = new Tray(process.platform === "win32" ? `${__dirname}/../public/favicon.ico` : `${__dirname}/../public/tray.png`);
+    tray.setToolTip("HOOBS");
+
+    tray.setContextMenu(Menu.buildFromTemplate([
+        {
+            label: "Bring to Foreground",
+            click: () => {
+                if (window) window.show();
+            },
+        },
+        {
+            label: "Exit HOOBS",
+            click: () => {
+                app.exit(0);
+            },
+        },
+    ]));
+
     createWindow();
     context({});
 });
@@ -145,12 +161,12 @@ if (isDevelopment) {
     if (process.platform === "win32") {
         process.on("message", (data) => {
             if (data === "graceful-exit") {
-                app.quit();
+                app.exit(0);
             }
         });
     } else {
         process.on("SIGTERM", () => {
-            app.quit();
+            app.exit(0);
         });
     }
 }

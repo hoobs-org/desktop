@@ -39,9 +39,9 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
-let resources = `${__dirname}/../`;
+let resources = "app://./";
 
-if (isDevelopment && !process.env.IS_TEST) resources = `${__dirname}/../public`;
+if (isDevelopment && !process.env.IS_TEST) resources = `${__dirname}/../public/`;
 
 async function createWindow() {
     const template: MenuItemConstructorOptions[] = [];
@@ -91,7 +91,7 @@ async function createWindow() {
 
     window = new BrowserWindow({
         title: "HOOBS",
-        icon: `${resources}/favicon.ico`,
+        icon: `${resources}favicon.ico`,
         x: state.x,
         y: state.y,
         frame: false,
@@ -138,7 +138,7 @@ app.on("ready", async () => {
         }
     }
 
-    tray = new Tray(process.platform === "win32" ? `${resources}/icons/Tray.ico` : `${resources}/icons/TrayTemplate.png`);
+    tray = new Tray(process.platform === "win32" ? `${resources}icons/Tray.ico` : `${resources}icons/TrayTemplate.png`);
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

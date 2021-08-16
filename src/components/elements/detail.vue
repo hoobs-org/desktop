@@ -17,7 +17,7 @@
  -------------------------------------------------------------------------------------------------->
 
 <template>
-    <div id="detail">
+    <div v-if="!plugin.deleted" id="detail">
         <div v-if="installed.length > 0" class="title">
             <h1>{{ $t("installed") }}</h1>
         </div>
@@ -61,10 +61,10 @@
                 <span>{{ plugin.author.name || plugin.author.username }}</span>
             </div>
         </div>
-        <div v-if="downloads.data" class="title">
+        <div v-if="plugin.downloads && downloads.data" class="title">
             <h1>{{ $t("average_weekly_downloads") }}</h1>
         </div>
-        <div v-if="downloads.data" class="item" style="padding: 0;">
+        <div v-if="plugin.downloads && downloads.data" class="item" style="padding: 0;">
             <div class="count">
                 <div style="flex: 1;">
                     <span v-if="active && current">{{ current }}</span>
@@ -83,7 +83,7 @@
         </div>
         <div class="item">
             <div class="value">{{ plugin.version || plugin.tags.latest }}</div>
-            <div class="value">{{ plugin.license || "" }}</div>
+            <div v-if="plugin.license" class="value">{{ plugin.license || "" }}</div>
         </div>
         <div v-if="support" class="title">
             <h1>{{ $t("support") }}</h1>
@@ -180,7 +180,7 @@
             let average = 0;
             let last = null;
 
-            if (this.plugin.downloads.length > 0) {
+            if (this.plugin.downloads && this.plugin.downloads.length > 0) {
                 for (let i = 0; i < this.plugin.downloads.length; i += 1) {
                     if (this.plugin.downloads[i].downloads > 0 || sum > 0) {
                         sum += this.plugin.downloads[i].downloads;

@@ -23,27 +23,35 @@
             <list value="id" display="display" :values="sections" :selected="from" initial="library" controller="plugins" :query="query" />
             <div v-if="!loading" class="screen">
                 <div class="header">
-                    <div class="image">
+                    <div v-if="!plugin.deleted" class="image">
                         <img :src="icon()" />
                     </div>
-                    <div class="title">
+                    <div v-if="plugin.deleted" class="title">
+                        <h1>{{ $hoobs.repository.title(plugin.name) }}</h1>
+                    </div>
+                    <div v-else class="title">
                         <rating :value="plugin.rating" />
                         <h1>{{ $hoobs.repository.title(plugin.name) }}</h1>
-                        <div v-if="(plugin.tags && plugin.tags.latest) || plugin.version" class="version">{{ plugin.version || plugin.tags.latest }} • Published {{ $hoobs.dates.age(plugin.published) }}</div>
+                        <div v-if="((plugin.tags && plugin.tags.latest) || plugin.version)" class="version">{{ plugin.version || plugin.tags.latest }} • Published {{ $hoobs.dates.age(plugin.published) }}</div>
                     </div>
                 </div>
                 <div class="header">
-                    <div class="actions">
+                    <div v-if="plugin.deleted" class="actions">
+                        <router-link :to="navigate('plugins', from, query)" class="button">{{ $t("back") }}</router-link>
+                        <div v-on:click="uninstall()" class="button">{{ $t("plugin_uninstall") }}</div>
+                        <router-link :to="`/config/${identifier}`" class="button primary">{{ $t("configuration") }}</router-link>
+                    </div>
+                    <div v-else class="actions">
                         <router-link :to="navigate('plugins', from, query)" class="button">{{ $t("back") }}</router-link>
                         <div v-if="installed.length > 0" v-on:click="uninstall()" class="button">{{ $t("plugin_uninstall") }}</div>
                         <div v-if="!updated" v-on:click="update()" class="button">{{ $t("plugin_update") }}</div>
                         <div v-on:click="install()" :class="installed.length > 0 ? 'button' : 'button primary'">{{ $t("plugin_install") }}</div>
-                        <router-link v-if="installed.length > 0 && schema" :to="`/config/${identifier}`" class="button primary">{{ $t("configuration") }}</router-link>
+                        <router-link v-if="installed.length > 0" :to="`/config/${identifier}`" class="button primary">{{ $t("configuration") }}</router-link>
                     </div>
                 </div>
-                <tabs :values="tabs" v-on:change="change" :value="section" class="tabs" />
+                <tabs v-if="!plugin.deleted" :values="tabs" v-on:change="change" :value="section" class="tabs" />
                 <div ref="layout" class="layout">
-                    <div v-if="section === 'details'" class="section">
+                    <div v-if="section === 'details'" :class="plugin.deleted ? 'section tight' : 'section'">
                         <div class="markdown" v-html="readme()"></div>
                     </div>
                     <div v-if="section === 'reviews'" class="section">
@@ -151,7 +159,6 @@
                 installed: [],
                 available: [],
                 plugin: {},
-                schema: false,
                 releases: {},
                 query: "",
                 from: "",
@@ -208,45 +215,48 @@
 
                     if (this.plugin) {
                         this.releases = this.versions(this.plugin);
-
-                        const waits = [];
-
-                        for (let i = 0; i < this.bridges.length; i += 1) {
-                            if (this.bridges[i].type === "bridge") {
-                                waits.push(new Promise((resolve) => {
-                                    this.$hoobs.bridge(this.bridges[i].id).then((bridge) => {
-                                        if (bridge) {
-                                            bridge.plugins.list().then((results) => {
-                                                const plugin = results.find((item) => item.identifier === identifier);
-
-                                                if (plugin) {
-                                                    this.installed.push({
-                                                        id: this.bridges[i].id,
-                                                        display: this.bridges[i].display,
-                                                        version: plugin.version,
-                                                        updated: Semver.compare(plugin.version, plugin.latest, ">="),
-                                                    });
-
-                                                    this.schema = (plugin.schema && plugin.schema.config);
-                                                }
-
-                                                resolve();
-                                            });
-                                        } else {
-                                            resolve();
-                                        }
-                                    });
-                                }));
-                            }
-                        }
-
-                        Promise.all(waits).then(() => {
-                            this.intersect();
-                            this.loading = false;
-                        });
                     } else {
-                        this.loading = false;
+                        this.plugin = {
+                            deleted: true,
+                            name: identifier,
+                            version: "0.1",
+                            latest: "0.1",
+                        };
                     }
+
+                    const waits = [];
+
+                    for (let i = 0; i < this.bridges.length; i += 1) {
+                        if (this.bridges[i].type === "bridge") {
+                            waits.push(new Promise((resolve) => {
+                                this.$hoobs.bridge(this.bridges[i].id).then((bridge) => {
+                                    if (bridge) {
+                                        bridge.plugins.list().then((results) => {
+                                            const plugin = results.find((item) => item.identifier === identifier);
+
+                                            if (plugin) {
+                                                this.installed.push({
+                                                    id: this.bridges[i].id,
+                                                    display: this.bridges[i].display,
+                                                    version: plugin.version,
+                                                    updated: Semver.compare(plugin.version, plugin.latest, ">="),
+                                                });
+                                            }
+
+                                            resolve();
+                                        });
+                                    } else {
+                                        resolve();
+                                    }
+                                });
+                            }));
+                        }
+                    }
+
+                    Promise.all(waits).then(() => {
+                        this.intersect();
+                        this.loading = false;
+                    });
                 } else {
                     this.loading = false;
                 }
@@ -348,7 +358,15 @@
 
                             Promise.all(waits).then(() => {
                                 setTimeout(() => {
-                                    if (success) {
+                                    if (success && this.plugin.deleted) {
+                                        this.$dialog.close("bridges");
+
+                                        if (bridge) {
+                                            this.$router.push({ path: `/plugins/${bridge.id}` });
+                                        } else {
+                                            this.$router.push({ path: "/plugins" });
+                                        }
+                                    } else if (success) {
                                         this.$dialog.close("bridges");
                                         this.load(this.identifier);
                                     } else {
@@ -449,16 +467,20 @@
             },
 
             readme() {
+                if (this.plugin.deleted) return this.$t("plugin_deleted");
+
                 const { latest } = (this.plugin.tags || {});
 
                 if (this.plugin.override_readme && this.plugin.curated && this.plugin.curated !== "") return this.$markdown(this.plugin.curated);
                 if (latest && this.plugin.versions[latest] && this.plugin.versions[latest].readme && this.plugin.versions[latest].readme !== "") return this.$markdown(this.plugin.versions[latest].readme);
 
-                const keys = Object.keys(this.plugin.versions).reverse();
+                if (this.plugin.versions) {
+                    const keys = Object.keys(this.plugin.versions).reverse();
 
-                for (let i = 0; i < keys.length; i += 1) {
-                    if ((!latest || Semver.compare(keys[i], latest, "<=")) && this.plugin.versions[keys[i]].readme && this.plugin.versions[keys[i]].readme !== "") {
-                        return this.$markdown(this.plugin.versions[keys[i]].readme);
+                    for (let i = 0; i < keys.length; i += 1) {
+                        if ((!latest || Semver.compare(keys[i], latest, "<=")) && this.plugin.versions[keys[i]].readme && this.plugin.versions[keys[i]].readme !== "") {
+                            return this.$markdown(this.plugin.versions[keys[i]].readme);
+                        }
                     }
                 }
 
@@ -477,9 +499,8 @@
             },
 
             icon() {
-                if (this.plugin.icon) {
-                    return this.plugin.icon;
-                }
+                if (this.plugin.deleted) return "";
+                if (this.plugin.icon) return this.plugin.icon;
 
                 const hash = crypto.createHash("md5").update(this.plugin.name).digest("hex");
 
@@ -578,6 +599,10 @@
                         max-width: 950px;
                         overflow-wrap: break-word;
                         overflow: auto;
+
+                        &.tight {
+                            padding: 0 0 20px 20px;
+                        }
 
                         .heading {
                             display: flex;

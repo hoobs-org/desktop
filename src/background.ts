@@ -39,7 +39,7 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
-let resources = "app://./";
+let resources = "./";
 
 if (isDevelopment && !process.env.IS_TEST) resources = `${__dirname}/../public/`;
 

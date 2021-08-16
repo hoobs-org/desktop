@@ -154,6 +154,15 @@ module.exports = {
         },
         {
             files: [
+                "src/background.ts",
+            ],
+            rules: {
+                "@typescript-eslint/explicit-module-boundary-types": ["error"],
+                "no-underscore-dangle": "off",
+            },
+        },
+        {
+            files: [
                 "vue.config.js",
             ],
             rules: {

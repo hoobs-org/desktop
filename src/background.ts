@@ -28,12 +28,13 @@ import {
     Tray,
 } from "electron";
 
-import { join } from "path";
+import { join, resolve } from "path";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
 import context from "electron-context-menu";
 
+declare const __static: string;
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 protocol.registerSchemesAsPrivileged([
@@ -42,8 +43,16 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
+function getStatic(path: string): string {
+    if (isDevelopment) {
+        return join(__dirname, "../static", path);
+    }
+
+    return resolve(__static, path);
+}
+
 function createNativeImage(path: string): NativeImage {
-    const image = nativeImage.createFromPath(`${join(__dirname, "../src", path)}`);
+    const image = nativeImage.createFromPath(`${getStatic(path)}`);
 
     image.setTemplateImage(true);
 
@@ -98,7 +107,7 @@ async function createWindow() {
 
     window = new BrowserWindow({
         title: "HOOBS",
-        icon: createNativeImage("./assets/Tray.ico"),
+        icon: createNativeImage("Tray.ico"),
         x: state.x,
         y: state.y,
         frame: false,
@@ -145,7 +154,7 @@ app.on("ready", async () => {
         }
     }
 
-    tray = new Tray(process.platform === "win32" ? createNativeImage("./assets/Tray.ico") : createNativeImage("./assets/TrayTemplate.png"));
+    tray = new Tray(process.platform === "win32" ? createNativeImage("Tray.ico") : createNativeImage("TrayTemplate.png"));
     tray.setToolTip("HOOBS");
 
     tray.setContextMenu(Menu.buildFromTemplate([

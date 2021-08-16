@@ -39,6 +39,10 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
+let resources = `${__dirname}/../`;
+
+if (isDevelopment && !process.env.IS_TEST) resources = `${__dirname}/../public`;
+
 async function createWindow() {
     const template: MenuItemConstructorOptions[] = [];
 
@@ -87,7 +91,7 @@ async function createWindow() {
 
     window = new BrowserWindow({
         title: "HOOBS",
-        icon: `${__dirname}/../public/favicon.ico`,
+        icon: `${resources}/favicon.ico`,
         x: state.x,
         y: state.y,
         frame: false,
@@ -126,11 +130,7 @@ app.on("activate", () => {
 let tray: Tray | undefined;
 
 app.on("ready", async () => {
-    let resources = `${__dirname}/../`;
-
     if (isDevelopment && !process.env.IS_TEST) {
-        resources = `${__dirname}/../public`;
-
         try {
             await installExtension(VUEJS_DEVTOOLS);
         } catch (e) {

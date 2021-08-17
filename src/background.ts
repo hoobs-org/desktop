@@ -152,7 +152,10 @@ app.on("ready", async () => {
         {
             label: "Dashboard",
             click: () => {
-                if (window) window.show();
+                if (window) {
+                    window.show();
+                    window.setSkipTaskbar(false);
+                }
             },
         },
         {
@@ -171,6 +174,13 @@ app.on("ready", async () => {
             },
         },
     ]));
+
+    tray.on("double-click", () => {
+        if (window) {
+            window.show();
+            window.setSkipTaskbar(false);
+        }
+    });
 
     createWindow();
     context({});

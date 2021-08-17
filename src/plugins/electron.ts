@@ -46,25 +46,37 @@ const helpers = {
     close(): void {
         const window = remote.getCurrentWindow();
 
-        if (window) window.hide();
+        if (window) {
+            window.hide();
+            window.setSkipTaskbar(false);
+        }
     },
 
     minimize(): void {
         const window = remote.getCurrentWindow();
 
-        if (window) window.hide();
+        if (window) {
+            window.hide();
+            window.setSkipTaskbar(true);
+        }
     },
 
     maximize(): void {
         const window = remote.getCurrentWindow();
 
-        if (window) window.maximize();
+        if (window) {
+            window.maximize();
+            window.setSkipTaskbar(false);
+        }
     },
 
     restore(): void {
         const window = remote.getCurrentWindow();
 
-        if (window) window.unmaximize();
+        if (window) {
+            window.unmaximize();
+            window.setSkipTaskbar(false);
+        }
     },
 
     async open(file: string): Promise<string> {

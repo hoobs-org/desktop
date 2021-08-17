@@ -122,7 +122,7 @@ async function createWindow() {
 if (!gotLock) {
     app.exit(0);
 } else {
-    app.setAppUserModelId(process.execPath);
+    app.setAppUserModelId("HOOBS");
     app.commandLine.appendSwitch("disable-site-isolation-trials");
 
     app.on("activate", () => {

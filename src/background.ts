@@ -42,14 +42,8 @@ protocol.registerSchemesAsPrivileged([
 
 let window: BrowserWindow | undefined;
 
-function getStatic(path: string): string {
-    // if (isDevelopment) return join(__dirname, "../static", path);
-
-    return resolve(__static, path);
-}
-
 function createNativeImage(path: string): NativeImage {
-    const image = nativeImage.createFromPath(`${getStatic(path)}`);
+    const image = nativeImage.createFromPath(resolve(__static, path));
 
     image.setTemplateImage(true);
 

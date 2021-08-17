@@ -39,7 +39,7 @@ const platforms: { [key: string]: string } = {
 const helpers = {
     notify(title: string, body: string): void {
         new remote.Notification({
-            icon: process.platform === "win32" ? this.image("Tray.ico") : this.image("TrayTemplate.png"),
+            icon: process.platform === "win32" ? this.image("Notification.ico") : this.image("Notification.png"),
             title,
             body,
         }).show();

@@ -75,6 +75,10 @@ const helpers = {
         }
     },
 
+    quit(): void {
+        remote.app.exit(0);
+    },
+
     minimize(): void {
         const window = remote.getCurrentWindow();
 

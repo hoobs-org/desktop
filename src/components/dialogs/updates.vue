@@ -152,7 +152,7 @@
                     if (error && error !== "") {
                         this.$alert(error);
                     } else {
-                        this.$electron.close();
+                        this.$electron.quit();
                     }
                 } else {
                     this.$alert("Unable to download update.");

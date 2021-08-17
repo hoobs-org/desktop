@@ -28,7 +28,7 @@ import {
     Tray,
 } from "electron";
 
-import { join, resolve } from "path";
+import { resolve } from "path";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";

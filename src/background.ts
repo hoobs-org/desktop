@@ -154,7 +154,12 @@ app.on("ready", async () => {
             click: () => {
                 if (window) {
                     window.show();
-                    window.setSkipTaskbar(false);
+
+                    if (process.platform === "win32") {
+                        window.setSkipTaskbar(false);
+                    } else {
+                        app.dock.show();
+                    }
                 }
             },
         },
@@ -178,7 +183,12 @@ app.on("ready", async () => {
     tray.on("double-click", () => {
         if (window) {
             window.show();
-            window.setSkipTaskbar(false);
+
+            if (process.platform === "win32") {
+                window.setSkipTaskbar(false);
+            } else {
+                app.dock.show();
+            }
         }
     });
 

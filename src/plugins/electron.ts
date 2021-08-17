@@ -48,7 +48,12 @@ const helpers = {
 
         if (window) {
             window.hide();
-            window.setSkipTaskbar(false);
+
+            if (process.platform === "win32") {
+                window.setSkipTaskbar(true);
+            } else {
+                remote.app.dock.hide();
+            }
         }
     },
 
@@ -57,7 +62,12 @@ const helpers = {
 
         if (window) {
             window.hide();
-            window.setSkipTaskbar(true);
+
+            if (process.platform === "win32") {
+                window.setSkipTaskbar(true);
+            } else {
+                remote.app.dock.hide();
+            }
         }
     },
 
@@ -66,7 +76,12 @@ const helpers = {
 
         if (window) {
             window.maximize();
-            window.setSkipTaskbar(false);
+
+            if (process.platform === "win32") {
+                window.setSkipTaskbar(false);
+            } else {
+                remote.app.dock.show();
+            }
         }
     },
 
@@ -75,7 +90,12 @@ const helpers = {
 
         if (window) {
             window.unmaximize();
-            window.setSkipTaskbar(false);
+
+            if (process.platform === "win32") {
+                window.setSkipTaskbar(false);
+            } else {
+                remote.app.dock.show();
+            }
         }
     },
 

@@ -131,7 +131,11 @@ async function createWindow() {
 app.commandLine.appendSwitch("disable-site-isolation-trials");
 
 app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    } else if (window) {
+        window.show();
+    }
 });
 
 let tray: Tray | undefined;

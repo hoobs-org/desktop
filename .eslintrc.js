@@ -154,7 +154,7 @@ module.exports = {
         },
         {
             files: [
-                "src/background.ts",
+                "src/shims-tsx.d.ts",
             ],
             rules: {
                 "@typescript-eslint/explicit-module-boundary-types": ["error"],

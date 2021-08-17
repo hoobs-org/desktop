@@ -34,7 +34,6 @@ import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
 import context from "electron-context-menu";
 
-declare const __static: string;
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 protocol.registerSchemesAsPrivileged([
@@ -44,9 +43,7 @@ protocol.registerSchemesAsPrivileged([
 let window: BrowserWindow | undefined;
 
 function getStatic(path: string): string {
-    if (isDevelopment) {
-        return join(__dirname, "../static", path);
-    }
+    // if (isDevelopment) return join(__dirname, "../static", path);
 
     return resolve(__static, path);
 }

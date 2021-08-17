@@ -26,4 +26,6 @@ declare global {
 
         interface IntrinsicElements { [elem: string]: any }
     }
+
+    const __static: string;
 }

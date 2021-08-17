@@ -22,18 +22,17 @@ import {
     protocol,
     BrowserWindow,
     MenuItemConstructorOptions,
-    NativeImage,
-    nativeImage,
     Menu,
     Tray,
 } from "electron";
 
-import { resolve } from "path";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import windowState from "electron-window-state";
 import context from "electron-context-menu";
+import electron from "./plugins/electron";
 
+const gotLock = app.requestSingleInstanceLock();
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 protocol.registerSchemesAsPrivileged([
@@ -41,14 +40,6 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 let window: BrowserWindow | undefined;
-
-function createNativeImage(path: string): NativeImage {
-    const image = nativeImage.createFromPath(resolve(__static, path));
-
-    image.setTemplateImage(true);
-
-    return image;
-}
 
 async function createWindow() {
     const template: MenuItemConstructorOptions[] = [];
@@ -98,7 +89,7 @@ async function createWindow() {
 
     window = new BrowserWindow({
         title: "HOOBS",
-        icon: createNativeImage("Tray.ico"),
+        icon: electron.helpers.image("Tray.ico"),
         x: state.x,
         y: state.y,
         frame: false,
@@ -128,90 +119,103 @@ async function createWindow() {
     }
 }
 
-app.commandLine.appendSwitch("disable-site-isolation-trials");
+if (!gotLock) {
+    app.exit(0);
+} else {
+    app.setAppUserModelId(process.execPath);
+    app.commandLine.appendSwitch("disable-site-isolation-trials");
 
-app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    } else if (window) {
-        window.show();
-    }
-});
-
-let tray: Tray | undefined;
-
-app.on("ready", async () => {
-    if (isDevelopment && !process.env.IS_TEST) {
-        try {
-            await installExtension(VUEJS_DEVTOOLS);
-        } catch (e) {
-            console.error("Vue Devtools failed to install:", e.toString());
-        }
-    }
-
-    tray = new Tray(process.platform === "win32" ? createNativeImage("Tray.ico") : createNativeImage("TrayTemplate.png"));
-    tray.setToolTip("HOOBS");
-
-    tray.setContextMenu(Menu.buildFromTemplate([
-        {
-            label: "Dashboard",
-            click: () => {
-                if (window) {
-                    window.show();
-
-                    if (process.platform === "win32") {
-                        window.setSkipTaskbar(false);
-                    } else {
-                        app.dock.show();
-                    }
-                }
-            },
-        },
-        {
-            label: "Enable on Startup",
-            type: "checkbox",
-            checked: app.getLoginItemSettings().openAtLogin,
-            click: () => {
-                app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin });
-            },
-        },
-        { type: "separator" },
-        {
-            label: "Quit HOOBS Desktop",
-            click: () => {
-                app.exit(0);
-            },
-        },
-    ]));
-
-    tray.on("double-click", () => {
-        if (window) {
+    app.on("activate", () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        } else if (window) {
             window.show();
-
-            if (process.platform === "win32") {
-                window.setSkipTaskbar(false);
-            } else {
-                app.dock.show();
-            }
+            window.focus();
         }
     });
 
-    createWindow();
-    context({});
-});
+    app.on("second-instance", () => {
+        if (window) {
+            window.show();
+            window.focus();
+        }
+    });
 
-if (isDevelopment) {
-    app.setAppUserModelId(process.execPath);
+    let tray: Tray | undefined;
 
-    if (process.platform === "win32") {
-        process.on("message", (data) => {
-            if (data === "graceful-exit") {
-                app.exit(0);
+    app.on("ready", async () => {
+        if (isDevelopment && !process.env.IS_TEST) {
+            try {
+                await installExtension(VUEJS_DEVTOOLS);
+            } catch (e) {
+                console.error("Vue Devtools failed to install:", e.toString());
+            }
+        }
+
+        tray = new Tray(process.platform === "win32" ? electron.helpers.image("Tray.ico") : electron.helpers.image("TrayTemplate.png"));
+        tray.setToolTip("HOOBS");
+
+        tray.setContextMenu(Menu.buildFromTemplate([
+            {
+                label: "Dashboard",
+                click: () => {
+                    if (window) {
+                        window.show();
+                        window.focus();
+
+                        if (process.platform === "win32") {
+                            window.setSkipTaskbar(false);
+                        } else {
+                            app.dock.show();
+                        }
+                    }
+                },
+            },
+            {
+                label: "Enable on Startup",
+                type: "checkbox",
+                checked: app.getLoginItemSettings().openAtLogin,
+                click: () => {
+                    app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin });
+                },
+            },
+            { type: "separator" },
+            {
+                label: "Quit HOOBS Desktop",
+                click: () => {
+                    app.exit(0);
+                },
+            },
+        ]));
+
+        tray.on("double-click", () => {
+            if (window) {
+                window.show();
+                window.focus();
+
+                if (process.platform === "win32") {
+                    window.setSkipTaskbar(false);
+                } else {
+                    app.dock.show();
+                }
             }
         });
-    } else {
-        process.on("SIGTERM", () => {
-            app.exit(0);
-        });
+
+        createWindow();
+        context({});
+    });
+
+    if (isDevelopment) {
+        if (process.platform === "win32") {
+            process.on("message", (data) => {
+                if (data === "graceful-exit") {
+                    app.exit(0);
+                }
+            });
+        } else {
+            process.on("SIGTERM", () => {
+                app.exit(0);
+            });
+        }
     }
 }

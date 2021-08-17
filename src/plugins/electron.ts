@@ -16,11 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.                          *
  **************************************************************************************************/
 
-import { remote, shell } from "electron";
+import {
+    remote,
+    shell,
+    NativeImage,
+    nativeImage,
+} from "electron";
+
 import Vue, { VueConstructor } from "vue";
 import Request from "@hoobs/sdk/lib/request";
 import OS from "os";
-import { join } from "path";
+import path from "path";
 import { existsSync, writeFileSync, unlinkSync } from "fs";
 
 const pjson = require("../../package.json");
@@ -32,7 +38,19 @@ const platforms: { [key: string]: string } = {
 
 const helpers = {
     notify(title: string, body: string): void {
-        new remote.Notification({ title, body }).show();
+        new remote.Notification({
+            icon: process.platform === "win32" ? this.image("Tray.ico") : this.image("TrayTemplate.png"),
+            title,
+            body,
+        }).show();
+    },
+
+    image(asset: string): NativeImage {
+        const image = nativeImage.createFromPath(path.resolve(__static, asset));
+
+        image.setTemplateImage(true);
+
+        return image;
     },
 
     get maximized(): boolean {
@@ -114,7 +132,7 @@ const helpers = {
                     responseType: "blob",
                 }).then((response) => {
                     response.data.arrayBuffer().then((buffer: Buffer) => {
-                        const file = join(OS.tmpdir(), filename);
+                        const file = path.join(OS.tmpdir(), filename);
 
                         if (existsSync(file)) unlinkSync(file);
 

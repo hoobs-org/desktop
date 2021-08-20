@@ -65,12 +65,16 @@ const helpers = {
         const window = remote.getCurrentWindow();
 
         if (window) {
-            window.hide();
+            if (remote.app.getLoginItemSettings().openAtLogin) {
+                window.hide();
 
-            if (process.platform === "win32") {
-                window.setSkipTaskbar(true);
+                if (process.platform === "win32") {
+                    window.setSkipTaskbar(true);
+                } else {
+                    remote.app.dock.hide();
+                }
             } else {
-                remote.app.dock.hide();
+                remote.app.exit(0);
             }
         }
     },
@@ -83,12 +87,16 @@ const helpers = {
         const window = remote.getCurrentWindow();
 
         if (window) {
-            window.hide();
+            if (remote.app.getLoginItemSettings().openAtLogin) {
+                window.hide();
 
-            if (process.platform === "win32") {
-                window.setSkipTaskbar(true);
+                if (process.platform === "win32") {
+                    window.setSkipTaskbar(true);
+                } else {
+                    remote.app.dock.hide();
+                }
             } else {
-                remote.app.dock.hide();
+                window.minimize();
             }
         }
     },

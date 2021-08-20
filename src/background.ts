@@ -135,7 +135,9 @@ if (!gotLock) {
     });
 
     app.on("second-instance", () => {
-        if (window) {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        } else if (window) {
             window.show();
             window.focus();
         }

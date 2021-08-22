@@ -45,6 +45,8 @@ import graphing from "./plugins/graphing";
 import themes from "./plugins/themes";
 import drag from "./plugins/drag";
 
+import { decompressJson } from "./services/json";
+
 import actions from "./services/actions";
 import dialogs from "./services/dialogs";
 import router from "./services/router";
@@ -62,11 +64,17 @@ hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", toke
 scanner.on("device", (data) => store.commit("IO:DEVICE", data));
 scanner.on("clear", () => store.commit("IO:DEVICE:CLEAR"));
 
-io.on("log", (data) => store.commit("IO:LOG", data));
-io.on("monitor", (data) => store.commit("IO:MONITOR", data));
-io.on("notification", (payload) => electron.helpers.notify(payload.data.title, payload.data.description));
-io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
-io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
+io.on("log", (data) => store.commit("IO:LOG", decompressJson(data)));
+io.on("monitor", (data) => store.commit("IO:MONITOR", decompressJson(data)));
+
+io.on("notification", (data) => {
+    const payload = decompressJson(data);
+
+    if (payload.data) electron.helpers.notify(payload.data.title, payload.data.description);
+});
+
+io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", decompressJson(data)));
+io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", decompressJson(data)));
 
 io.on("connect", () => actions.emit("io", "connected"));
 io.on("reconnect", () => actions.emit("io", "connected"));

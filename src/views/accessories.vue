@@ -295,16 +295,16 @@
                                     this.accessories[i].control = types(this.accessories[i]);
                                 }
 
-                                this.features.off = (
+                                this.features.off = this.current.id !== "default" && (
                                     this.types.indexOf("light") >= 0
                                     || this.types.indexOf("switch") >= 0
                                     || this.types.indexOf("television") >= 0
                                     || this.types.indexOf("fan") >= 0
                                 ) && this.characteristics.indexOf("off") >= 0;
 
-                                this.features.light = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
-                                this.features.brightness = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
-                                this.features.hue = this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
+                                this.features.light = this.current.id !== "default" && this.types.indexOf("light") >= 0 && this.characteristics.indexOf("on") >= 0;
+                                this.features.brightness = this.current.id !== "default" && this.types.indexOf("light") >= 0 && this.characteristics.indexOf("brightness") >= 0;
+                                this.features.hue = this.current.id !== "default" && this.types.indexOf("light") >= 0 && this.characteristics.indexOf("hue") >= 0;
                             }).finally(() => {
                                 this.loading = false;
                                 this.intermediate = false;

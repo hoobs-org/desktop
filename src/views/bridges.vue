@@ -131,7 +131,6 @@
     import Validators from "../services/validators";
     import { mac } from "../services/formatters";
 
-    const SOCKET_RECONNECT_DELAY = 500;
     const RESTART_LOADING_SAFETY = 1 * 60 * 1000;
 
     export default {
@@ -335,10 +334,8 @@
                             await this.$hoobs.bridges.add(this.display, this.port, this.pin, this.username, this.advertiser);
                         }
 
-                        setTimeout(async () => {
-                            this.bridges = await this.$hoobs.bridges.list();
-                            this.$router.push({ path: `/bridges/${this.bridges.find((item) => item.id === Sanitize(this.display)).id}` });
-                        }, SOCKET_RECONNECT_DELAY);
+                        this.bridges = await this.$hoobs.bridges.list();
+                        this.$router.push({ path: `/bridges/${this.bridges.find((item) => item.id === Sanitize(this.display)).id}` });
                     } else if (this.subject) {
                         this.loading = true;
 
@@ -350,11 +347,9 @@
                             await this.subject.ports(this.start, this.end);
                         }
 
-                        setTimeout(async () => {
-                            if (restart) await this.subject.restart();
+                        if (restart) await this.subject.restart();
 
-                            this.load(this.id);
-                        }, SOCKET_RECONNECT_DELAY);
+                        this.load(this.id);
                     }
                 } else {
                     this.$alert(this.$t(validation.error));
@@ -372,9 +367,7 @@
 
                         await this.subject.remove();
 
-                        setTimeout(async () => {
-                            this.$router.push({ path: "/bridges" });
-                        }, SOCKET_RECONNECT_DELAY);
+                        this.$router.push({ path: "/bridges" });
                     });
                 }
             },

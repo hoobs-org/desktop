@@ -45,8 +45,6 @@
     import Sanitize from "@hoobs/sdk/lib/sanitize";
     import Validators from "../../services/validators";
 
-    const SOCKET_RECONNECT_DELAY = 500;
-
     export default {
         name: "rooms",
 
@@ -76,11 +74,10 @@
                 if (validation.valid) {
                     await this.$hoobs.rooms.add(this.display);
 
-                    setTimeout(async () => {
-                        this.rooms = await this.$hoobs.rooms.list();
-                        this.loading = false;
-                        this.select(this.rooms.find((item) => item.id === Sanitize(this.display)).id);
-                    }, SOCKET_RECONNECT_DELAY);
+                    this.rooms = await this.$hoobs.rooms.list();
+                    this.loading = false;
+
+                    this.select(this.rooms.find((item) => item.id === Sanitize(this.display)).id);
                 } else {
                     this.loading = false;
                     this.$alert(this.$t(validation.error));

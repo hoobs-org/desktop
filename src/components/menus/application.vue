@@ -31,7 +31,7 @@
         <div v-if="auth" class="seperator"></div>
         <div v-if="user.permissions.controller" v-on:click="$dialog.open('settings')" class="item">{{ $t("hub_settings") }}</div>
         <div v-on:click="$dialog.open('personalize')" class="item">{{ $t("personalize") }}</div>
-        <div v-if="user.permissions.terminal" v-on:click="terminal()" class="item">{{ $t("terminal") }}</div>
+        <div v-if="terminal && user.permissions.terminal" v-on:click="open()" class="item">{{ $t("terminal") }}</div>
         <div v-on:click="exit()" class="item">{{ $t("devices") }}</div>
         <div v-if="auth" class="seperator"></div>
         <div v-if="auth" v-on:click="logout()" class="item">{{ $t("logout") }}</div>
@@ -48,6 +48,10 @@
             user() {
                 return this.$store.state.user;
             },
+
+            terminal() {
+                return this.$store.state.terminal;
+            },
         },
 
         data() {
@@ -58,6 +62,7 @@
 
         async mounted() {
             this.auth = await this.$hoobs.auth.status() === "enabled";
+            this.$store.commit("TERMINAL:STATE", (await this.$hoobs.status() || {}).terminal);
         },
 
         methods: {
@@ -67,7 +72,7 @@
                 shell.openExternal("https://support.hoobs.org/docs");
             },
 
-            terminal() {
+            open() {
                 this.$menu.close();
 
                 if (this.$route.name !== "terminal") this.$router.push({ path: "/terminal" });

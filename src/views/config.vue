@@ -64,6 +64,10 @@
                     <div class="row">
                         <integer-field :title="$t('update_interval')" :description="$t('update_interval_description')" :min="2" :max="300" v-model="working.polling_seconds" v-on:input="updated" />
                     </div>
+                    <div v-if="status.product === 'box' || status.product === 'card'" class="section extra" style="margin-bottom: 7px;">{{ $t("terminal") }}</div>
+                    <div v-if="status.product === 'box' || status.product === 'card'" class="row actions" style="margin-bottom: 20px;">
+                        <div v-on:click="reset" class="button">{{ $t("password_reset") }}</div>
+                    </div>
                     <div class="section">{{ $t("interface") }}</div>
                     <div class="row">
                         <text-field :title="$t('cors_orgin')" :description="$t('cors_orgin_description')" v-model="working.origin" v-on:input="updated" />
@@ -154,6 +158,7 @@
 
         data() {
             return {
+                status: {},
                 version: 0,
                 theme: "dark",
                 foreground: "999999",
@@ -175,7 +180,7 @@
             };
         },
 
-        mounted() {
+        async mounted() {
             this.$action.off("config", "update");
             this.$action.off("personalize", "update");
             this.$action.on("config", "update", () => this.change(this.bridge));
@@ -184,6 +189,7 @@
                 if (this.identifier === "advanced") this.change(this.bridge);
             });
 
+            this.status = (await this.$hoobs.status()) || {};
             this.load(this.name && this.name !== "" ? `${this.scope}/${this.name}` : this.scope);
         },
 
@@ -343,6 +349,16 @@
 
                         break;
                 }
+            },
+
+            reset() {
+                this.$confirm(this.$t("ok"), this.$t("password_reset_warning"), () => {
+                    this.loading = true;
+
+                    this.$hoobs.auth.terminal.reset().finally(() => {
+                        this.loading = false;
+                    });
+                });
             },
 
             exit(bridge) {

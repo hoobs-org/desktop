@@ -149,7 +149,8 @@
 
         ::-webkit-scrollbar {
             background-color: transparent;
-            width: 8px;
+            width: 7px;
+            height: 7px;
         }
 
         ::-webkit-scrollbar-track {
@@ -163,6 +164,10 @@
 
         ::-webkit-scrollbar-button {
             display:none;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background-color: transparent;
         }
 
         .chrome {

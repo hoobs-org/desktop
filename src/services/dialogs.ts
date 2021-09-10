@@ -21,6 +21,7 @@ import ConfirmDialog from "@/components/dialogs/confirm.vue";
 import AboutDialog from "@/components/dialogs/about.vue";
 import UpdatesDialog from "@/components/dialogs/updates.vue";
 import SettingsDialog from "@/components/dialogs/settings.vue";
+import NetworksDialog from "@/components/dialogs/network.vue";
 import PersonalizeDialog from "@/components/dialogs/personalize.vue";
 import DashboardDialog from "@/components/dialogs/dashboard.vue";
 import BridgesDialog from "@/components/dialogs/bridges.vue";
@@ -51,6 +52,10 @@ export default new Dialogs([
     {
         name: "settings",
         component: SettingsDialog,
+    },
+    {
+        name: "network",
+        component: NetworksDialog,
     },
     {
         name: "personalize",

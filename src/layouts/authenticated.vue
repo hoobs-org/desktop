@@ -64,7 +64,14 @@
                 this.io.connect(this.current.ip, this.current.port);
                 this.$action.emit("log", "history");
 
-                this.$store.commit("AUTH:STATE", (await this.$hoobs.auth.status()));
+                const status = { ...(await this.$hoobs.status() || {}), auth: await this.$hoobs.auth.status() };
+
+                this.$store.commit("AUTH:STATE", status.auth);
+                this.$store.commit("VERSION:STATE", status);
+                this.$store.commit("MDNS:STATE", status.mdns);
+                this.$store.commit("BROADCAST:STATE", status.broadcast);
+                this.$store.commit("PRODUCT:STATE", status.product);
+                this.$store.commit("TERMINAL:STATE", status.terminal);
 
                 this.$action.on("io", "connected", () => {
                     setTimeout(async () => {

@@ -59,9 +59,18 @@ export default new Vuex.Store({
             permissions: {},
         },
         auth: false,
+        version: {
+            hoobsd: "0.0.0",
+            homebridge: "0.0.0",
+            node: "0.0.0",
+            updated: true,
+        },
         snapshots: {},
         streaming: {},
         navigation: false,
+        mdns: false,
+        broadcast: "",
+        product: "",
         terminal: false,
         accessory: null,
         room: null,
@@ -207,16 +216,37 @@ export default new Vuex.Store({
             }
         },
 
+        "VERSION:STATE": (state: { [key: string]: any }, payload: any) => {
+            state.version = {
+                hoobsd: payload.version,
+                homebridge: payload.homebridge_version,
+                node: payload.node_version,
+                updated: payload.upgraded && payload.cli_upgraded && payload.node_upgraded,
+            };
+        },
+
+        "MDNS:STATE": (state: { [key: string]: any }, payload: any) => {
+            state.mdns = payload;
+        },
+
+        "BROADCAST:STATE": (state: { [key: string]: any }, payload: any) => {
+            state.broadcast = payload;
+        },
+
+        "PRODUCT:STATE": (state: { [key: string]: any }, payload: any) => {
+            state.product = payload;
+        },
+
+        "TERMINAL:STATE": (state: { [key: string]: any }, payload: any) => {
+            state.terminal = payload;
+        },
+
         "THEME:SET": (state: { [key: string]: any }, theme: number) => {
             state.theme = theme;
         },
 
         "ACCESSORY:STREAMING": (state: { [key: string]: any }, payload: any) => {
             state.streaming[payload.id] = payload.data;
-        },
-
-        "TERMINAL:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.terminal = payload;
         },
     },
 

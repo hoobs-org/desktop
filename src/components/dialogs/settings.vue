@@ -123,9 +123,21 @@
                 return this.$store.state.user;
             },
 
+            mdns() {
+                return this.$store.state.mdns;
+            },
+
+            broadcast() {
+                return this.$store.state.broadcast;
+            },
+
+            product() {
+                return this.$store.state.product;
+            },
+
             hostname: {
                 get() {
-                    return this.broadcast || "";
+                    return this.url;
                 },
 
                 set(value) {
@@ -136,7 +148,7 @@
                     formatted = formatted.replace(/ /g, "-");
                     formatted = formatted.split(".")[0]; // eslint-disable-line prefer-destructuring
 
-                    this.broadcast = formatted;
+                    this.url = formatted;
                 },
             },
         },
@@ -150,10 +162,8 @@
                     location: false,
                     cancel: true,
                 },
-                mdns: false,
+                url: "",
                 logger: null,
-                product: "",
-                broadcast: "",
                 location: {},
                 units: "celsius",
                 interval: 5,
@@ -165,11 +175,8 @@
 
         async mounted() {
             const config = await this.$hoobs.config.get();
-            const status = await this.$hoobs.status();
 
-            this.mdns = status.mdns;
-            this.product = status.product;
-            this.broadcast = status.broadcast;
+            this.url = `${this.broadcast}`;
             this.interval = (config.api || {}).polling_seconds || 5;
             this.units = (config.weather || {}).units || "celsius";
             this.location = (config.weather || {}).location;
@@ -390,10 +397,9 @@
                 this.message = `${this.$t("saving_changes")}...`;
 
                 const config = await this.$hoobs.config.get();
-                const status = await this.$hoobs.status();
                 const weather = {};
 
-                if ((status.product === "box" || status.product === "card") && this.broadcast !== "" && this.broadcast !== status.broadcast) {
+                if ((this.product === "box" || this.product === "card") && this.url !== "" && this.url !== this.broadcast) {
                     await this.$hoobs.hostname.update(this.broadcast);
                 }
 

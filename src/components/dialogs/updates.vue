@@ -137,6 +137,11 @@
                 this.loading = false;
                 this.updating = false;
 
+                const status = { ...(await this.$hoobs.status() || {}), auth: await this.$hoobs.auth.status() };
+
+                this.$store.commit("VERSION:STATE", status);
+                this.$store.commit("TERMINAL:STATE", status.terminal);
+
                 this.$action.emit("dashboard", "update");
             },
 

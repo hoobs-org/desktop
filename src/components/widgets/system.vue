@@ -87,6 +87,22 @@
                 return this.$store.state.cpu;
             },
 
+            version() {
+                return this.$store.state.version.hoobsd;
+            },
+
+            node() {
+                return this.$store.state.version.node;
+            },
+
+            homebridge() {
+                return this.$store.state.version.homebridge;
+            },
+
+            updated() {
+                return this.$store.state.version.updated;
+            },
+
             heap() {
                 const bytes = this.$store.state.heap || 0;
                 const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -113,38 +129,15 @@
 
         data() {
             return {
-                node: "",
-                version: "",
-                homebridge: "",
-                updated: true,
                 loading: true,
                 system: {},
             };
         },
 
         mounted() {
-            const waits = [];
-
-            waits.push(new Promise((resolve) => {
-                this.$hoobs.status().then((status) => {
-                    this.version = status.version;
-                    this.homebridge = status.homebridge_version;
-                    this.node = status.node_version;
-                    this.updated = status.upgraded && status.cli_upgraded && status.node_upgraded;
-                }).finally(() => {
-                    resolve();
-                });
-            }));
-
-            waits.push(new Promise((resolve) => {
-                this.$hoobs.system().then((response) => {
-                    this.system = response.system;
-                }).finally(() => {
-                    resolve();
-                });
-            }));
-
-            Promise.all(waits).then(() => {
+            this.$hoobs.system().then((response) => {
+                this.system = response.system;
+            }).finally(() => {
                 this.loading = false;
             });
         },

@@ -28,9 +28,11 @@
         <div v-if="auth" class="seperator"></div>
         <div v-on:click="$dialog.open('about')" class="item">{{ $t("about") }}</div>
         <div v-on:click="help()" class="item">{{ $t("help") }}</div>
-        <div v-if="auth" class="seperator"></div>
+        <div class="seperator"></div>
+        <div v-if="(product === 'box' || product === 'card') && user.permissions.controller" v-on:click="$dialog.open('network')" class="item">{{ $t("network") }}</div>
         <div v-if="user.permissions.controller" v-on:click="$dialog.open('settings')" class="item">{{ $t("hub_settings") }}</div>
         <div v-on:click="$dialog.open('personalize')" class="item">{{ $t("personalize") }}</div>
+        <div class="seperator"></div>
         <div v-if="terminal && user.permissions.terminal" v-on:click="open()" class="item">{{ $t("terminal") }}</div>
         <div v-on:click="exit()" class="item">{{ $t("devices") }}</div>
         <div v-if="auth" class="seperator"></div>
@@ -49,20 +51,24 @@
                 return this.$store.state.user;
             },
 
+            auth() {
+                return this.$store.state.auth;
+            },
+
             terminal() {
                 return this.$store.state.terminal;
             },
-        },
 
-        data() {
-            return {
-                auth: false,
-            };
+            product() {
+                return this.$store.state.product;
+            },
         },
 
         async mounted() {
-            this.auth = await this.$hoobs.auth.status() === "enabled";
-            this.$store.commit("TERMINAL:STATE", (await this.$hoobs.status() || {}).terminal);
+            const status = await this.$hoobs.status() || {};
+
+            this.$store.commit("PRODUCT:STATE", status.product);
+            this.$store.commit("TERMINAL:STATE", status.terminal);
         },
 
         methods: {

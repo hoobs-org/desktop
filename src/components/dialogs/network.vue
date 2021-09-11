@@ -38,21 +38,23 @@
                         </div>
                     </div>
                     <div class="row section" style="margin: 0;">{{ $t("networks") }}</div>
-                    <div class="networks">
+                    <div v-if="!scanning" class="networks">
                         <div v-for="(network, index) in networks" :key="`network:${index}`" class="item">
                             <div class="name">{{ network.ssid }}</div>
                             <signal :quality="network.quality" :secure="network.security.mode && network.security.mode !== '' && network.security.mode !== 'none'" />
                             <chevron class="chevron" />
                         </div>
                     </div>
+                    <div v-else class="status">
+                        <div class="loading">
+                            <spinner />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div v-else class="status">
                 <div class="loading">
-                    <spinner :value="message" />
-                </div>
-                <div class="messages" style="height: 70%;">
-                    <message v-for="(message, index) in messages" :key="`message:${index}`" :value="message" :compact="true" />
+                    <spinner />
                 </div>
             </div>
             <div v-if="!loading" class="actions modal">
@@ -81,8 +83,6 @@
                 hotspot: {},
                 wireless: false,
                 networks: [],
-                messages: [],
-                message: "",
             };
         },
 
@@ -178,7 +178,7 @@
         }
 
         .status {
-            flex: 1;
+            height: 40%;
             display: flex;
             flex-direction: column;
             overflow: hidden;

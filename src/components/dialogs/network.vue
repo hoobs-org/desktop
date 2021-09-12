@@ -141,8 +141,12 @@
             },
 
             async scan() {
-                if (this.wireless) this.networks = (await this.$hoobs.networks()).filter((item) => item.ssid !== this.connection.ssid);
+                let networks = [];
 
+                if (this.wireless) networks = await this.$hoobs.networks();
+                if (this.connection) networks = networks.filter((item) => item.ssid !== this.connection.ssid);
+
+                this.networks = networks;
                 this.scanning = false;
             },
 

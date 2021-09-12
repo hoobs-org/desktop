@@ -20,7 +20,7 @@
     <modal :title="$t('network')" :draggable="true" width="780px" height="820px">
         <div id="network">
             <div v-if="!loading" class="content">
-                <div class="form">
+                <div v-if="!selected" class="form">
                     <div class="stack">
                         <div v-if="connected" class="item">
                             <div class="name">{{ $t("status") }}</div>
@@ -32,23 +32,34 @@
                                 <checkbox v-model="wireless" />
                             </div>
                         </div>
-                        <div v-if="connection" class="item">
+                        <div v-if="wireless && connection" class="item">
                             <div class="name">{{ connection.ssid }}</div>
                             <signal style="margin-right: 5px;" :quality="connection.quality" :secure="connection.security.mode && connection.security.mode !== '' && connection.security.mode !== 'none'" />
                         </div>
                     </div>
-                    <div class="row section" style="margin: 0;">{{ $t("networks") }}</div>
-                    <div v-if="!scanning" class="networks">
-                        <div v-for="(network, index) in networks" :key="`network:${index}`" class="item">
+                    <div v-if="wireless" class="row section" style="margin: 0;">{{ $t("networks") }}</div>
+                    <div v-if="!scanning && wireless" class="networks">
+                        <div v-for="(network, index) in networks" :key="`network:${index}`" v-on:click="select(network)" class="item">
                             <div class="name">{{ network.ssid }}</div>
                             <signal :quality="network.quality" :secure="network.security.mode && network.security.mode !== '' && network.security.mode !== 'none'" />
                             <chevron class="chevron" />
                         </div>
                     </div>
-                    <div v-else class="status">
+                    <div v-else-if="wireless" class="status">
                         <div class="loading">
                             <spinner />
                         </div>
+                    </div>
+                </div>
+                <div v-else class="form">
+                    <div class="row input-field security">
+                        <div class="password">
+                            <password-field :description="message" :placeholder="$t('password')" v-model="password" />
+                        </div>
+                    </div>
+                    <div class="row connect">
+                        <div v-on:click="cancel" class="button">{{ $t("cancel") }}</div>
+                        <div v-on:click="connect(selected)" class="button primary">{{ $t("connect") }}</div>
                     </div>
                 </div>
             </div>
@@ -77,29 +88,109 @@
             return {
                 loading: true,
                 scanning: true,
+                intermediate: true,
                 connected: false,
                 connection: null,
+                connections: [],
                 devices: [],
                 hotspot: {},
                 wireless: false,
                 networks: [],
+                selected: null,
+                password: "",
             };
         },
 
+        computed: {
+            message() {
+                return `${this.$t("wifi_password_message")} "${this.selected.ssid}"`;
+            },
+        },
+
+        watch: {
+            async wireless() {
+                if (!this.intermediate) await this.confirm();
+
+                this.intermediate = false;
+            },
+        },
+
         async mounted() {
-            const status = (await this.$hoobs.network.status()) || {};
+            this.loading = true;
+            this.scanning = true;
 
-            this.loading = false;
+            await this.load();
+            await this.scan();
+        },
 
-            this.connected = status.connected;
-            [this.connection] = status.connections;
-            this.devices = status.devices;
-            this.hotspot = status.hotspot;
-            this.wireless = status.wireless;
+        methods: {
+            async load() {
+                this.selected = null;
 
-            if (this.wireless) this.networks = (await this.$hoobs.networks()).filter((item) => item.ssid !== this.connection.ssid);
+                const status = (await this.$hoobs.network.status()) || {};
 
-            this.scanning = false;
+                this.connected = status.connected;
+                [this.connection] = status.connections.filter((item) => item.ssid);
+                this.connections = status.connections;
+                this.devices = status.devices;
+                this.hotspot = status.hotspot;
+                this.wireless = status.wireless;
+
+                this.loading = false;
+                this.intermediate = false;
+            },
+
+            async scan() {
+                if (this.wireless) this.networks = (await this.$hoobs.networks()).filter((item) => item.ssid !== this.connection.ssid);
+
+                this.scanning = false;
+            },
+
+            async confirm() {
+                if (!this.wireless && this.connections.filter((item) => !item.ssid).length === 0) {
+                    this.$confirm(this.$t("ok"), this.$t("wifi_disable_warning"), async () => {
+                        await this.$hoobs.wireless.disable();
+                        await this.load();
+                    }, () => {
+                        this.intermediate = true;
+                        this.wireless = true;
+                    });
+                } else if (!this.wireless) {
+                    await this.$hoobs.wireless.disable();
+                    await this.load();
+                } else {
+                    await this.$hoobs.wireless.enable();
+                    await this.load();
+                    await this.scan();
+                }
+            },
+
+            select(network) {
+                this.password = "";
+
+                if (network.security.mode && network.security.mode !== "" && network.security.mode !== "none") {
+                    this.selected = { ...network };
+                } else {
+                    this.connect(network);
+                }
+            },
+
+            async connect(network) {
+                this.loading = true;
+                this.scanning = true;
+
+                const iface = ((this.devices || []).find((device) => device.type === "wifi") || {}).iface || null;
+
+                await this.$hoobs.wireless.connect(iface, network.ssid, this.password);
+
+                await this.load();
+                await this.scan();
+            },
+
+            async cancel() {
+                await this.load();
+                await this.scan();
+            },
         },
     };
 </script>
@@ -136,6 +227,25 @@
                             flex: 1;
                             opacity: 0.7
                         }
+                    }
+                }
+
+                .security {
+                    padding: 14px;
+                    margin: 0 0 10px 0;
+                    background: var(--widget-background);
+
+                    .password {
+                        flex: 1;
+                        padding: 10px 0 0 10px;
+                    }
+                }
+
+                .connect {
+                    justify-content: flex-end;
+
+                    .button {
+                        margin: 0 0 0 10px;
                     }
                 }
 

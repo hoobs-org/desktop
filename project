@@ -1,0 +1,32 @@
+#!/bin/bash
+
+version() {
+    echo `node -e 'console.log(require("./package.json").version)'`
+}
+
+case $1 in
+    version )
+        shift
+
+        version $@
+        ;;
+
+    lint )
+        make lint
+        ;;
+
+    debug )
+        ./node_modules/.bin/vue-cli-service electron:serve
+        ;;
+
+    build )
+        shift
+
+        security unlock-keychain $@ login.keychain
+        make desktop
+        ;;
+
+    clean )
+        make clean
+        ;;
+esac

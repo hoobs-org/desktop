@@ -7,8 +7,6 @@
         "name": "Michael J Kellsy"
     },
     "scripts": {
-        "lint": "vue-cli-service lint",
-        "build": "bin/build desktop --lint",
         "debug": "vue-cli-service electron:serve",
         "postinstall": "electron-builder install-app-deps",
         "postuninstall": "electron-builder install-app-deps"

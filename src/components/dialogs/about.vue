@@ -22,7 +22,7 @@
             <div class="content">
                 <div class="form">
                     <div class="row section">{{ $t("software") }}</div>
-                    <div class="row" style="margin-bottom: 7px;">{{ $t("version") }}: {{ version }}</div>
+                    <div class="row" style="margin-bottom: 7px;" v-html="version"></div>
                     <div class="row">
                         <div v-on:click="upgrades()" class="button">{{ $t("check_updates") }}</div>
                     </div>
@@ -60,7 +60,12 @@
         },
 
         async mounted() {
-            this.version = await this.$hoobs.version();
+            this.version = (await this.$hoobs.version()) || "";
+
+            if (this.version.startsWith("4.0")) this.version = `${this.version} <span style="opacity: 0.4; margin: 0 0 0 4px;">Sierra</span>`;
+            if (this.version.startsWith("4.1")) this.version = `${this.version} <span style="opacity: 0.4; margin: 0 0 0 4px;">Blackwing</span>`;
+
+            this.version = `${this.$t("version")}: ${this.version}`;
         },
 
         methods: {

@@ -72,6 +72,18 @@ async function createWindow() {
     });
 
     template.push({
+        label: "Edit",
+        submenu: [
+            { label: "Undo", accelerator: "CmdOrCtrl+Z", role: "undo" },
+            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", role: "redo" },
+            { type: "separator" },
+            { label: "Cut", accelerator: "CmdOrCtrl+X", role: "cut" },
+            { label: "Copy", accelerator: "CmdOrCtrl+C", role: "copy" },
+            { label: "Paste", accelerator: "CmdOrCtrl+V", role: "paste" },
+        ],
+    });
+
+    template.push({
         role: "help",
         submenu: [
             {
@@ -149,8 +161,8 @@ if (!gotLock) {
         if (isDevelopment && !process.env.IS_TEST) {
             try {
                 await installExtension(VUEJS_DEVTOOLS);
-            } catch (e) {
-                console.error("Vue Devtools failed to install:", e.toString());
+            } catch (_error) {
+                console.error("developer tools failed to install");
             }
         }
 

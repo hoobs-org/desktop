@@ -17,7 +17,7 @@
  -------------------------------------------------------------------------------------------------->
 
 <template>
-    <div id="control" :class="dashboard ? 'dashboard' : 'normal'">
+    <div id="control" :version="version" :class="dashboard ? 'dashboard' : 'normal'">
         <div class="item">
             <div class="background">
                 <div v-if="!live || !source" class="panel" :style="style">
@@ -83,6 +83,7 @@
 
         data() {
             return {
+                version: 0,
                 snapshot: null,
                 subject: null,
                 timelapse: null,
@@ -116,6 +117,8 @@
         async mounted() {
             this.subject = await this.$hoobs.accessory(this.accessory.bridge, this.accessory.accessory_identifier);
             this.snapshot = this.$store.state.snapshots[this.accessory.accessory_identifier];
+
+            this.version += 1;
 
             this.updater();
         },
@@ -157,6 +160,8 @@
                             id: this.subject.accessory_identifier,
                             data: snapshot,
                         });
+
+                        this.version += 1;
 
                         if (!this.timers.timelapse) this.lapse();
                     }

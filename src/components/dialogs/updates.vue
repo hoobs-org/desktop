@@ -26,6 +26,11 @@
                         {{ $t("version_desktop") }}: {{ desktop.version }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
+                    <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
+                    <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
+                        {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
+                        <span class="value">{{ $t("available") }}</span>
+                    </div>
                     <div v-if="!loading && stack" class="row section">{{ $t("software") }}</div>
                     <div v-if="!loading && !status.upgraded" class="row">
                         {{ $t("version_server") }}: {{ status.current }}
@@ -46,11 +51,6 @@
                     <div v-if="!loading && status.upgradable.length > 0" class="row section">{{ $t("system") }}</div>
                     <div v-for="(application, index) in status.upgradable" :key="`application:${index}`" class="row">
                         {{ $hoobs.repository.title(application.package) }}: {{ application.available }}
-                        <span class="value">{{ $t("available") }}</span>
-                    </div>
-                    <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
-                    <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
-                        {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
                     <div v-if="!loading && updated" class="row updated">
@@ -124,13 +124,13 @@
 
                 this.desktop = (((await Request.get(`https://support.hoobs.org/api/releases/desktop/${this.status.repo === "edge" || this.status.repo === "bleeding" ? "beta" : "latest"}`)).data) || {}).results;
                 this.plugins = ((await this.$hoobs.plugins()) || []).filter((item) => !Semver.compare(item.version, item.latest, ">="));
-                this.status.upgraded = this.status.upgraded || [];
+                this.status.upgradable = this.status.upgradable || [];
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;
 
                 this.client = !Semver.compare(this.$version, this.desktop.version || this.$version, ">=");
                 this.stack = !(this.status.upgraded && this.status.cli_upgraded && this.status.node_upgraded && this.status.gui_upgraded);
-                this.updated = !(this.client || this.stack || this.plugins.length > 0);
+                this.updated = !(this.client || this.stack || this.plugins.length > 0 || this.status.upgradable.length > 0);
 
                 this.loading = false;
                 this.updating = false;

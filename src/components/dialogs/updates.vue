@@ -26,10 +26,7 @@
                         {{ $t("version_desktop") }}: {{ desktop.version }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading &&client" class="row" style="margin-top: 7px;">
-                        <div v-on:click="download()" class="button">{{ $t("download") }}</div>
-                    </div>
-                    <div v-if="!loading && stack" class="row section">{{ $t("server") }}</div>
+                    <div v-if="!loading && stack" class="row section">{{ $t("software") }}</div>
                     <div v-if="!loading && !status.upgraded" class="row">
                         {{ $t("version_server") }}: {{ status.current }}
                         <span class="value">{{ $t("available") }}</span>
@@ -46,16 +43,15 @@
                         {{ $t("version_node") }}: {{ status.node_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && stack" class="row" style="margin-top: 7px;">
-                        <div v-on:click="upgrade()" class="button">{{ $t("update_now") }}</div>
+                    <div v-if="!loading && status.upgradable.length > 0" class="row section">{{ $t("system") }}</div>
+                    <div v-for="(application, index) in status.upgradable" :key="`application:${index}`" class="row">
+                        {{ $hoobs.repository.title(application.package) }}: {{ application.available }}
+                        <span class="value">{{ $t("available") }}</span>
                     </div>
                     <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
                     <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
                         {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
                         <span class="value">{{ $t("available") }}</span>
-                    </div>
-                    <div v-if="!loading && plugins.length > 0" class="row" style="margin-top: 7px;">
-                        <div v-on:click="update()" class="button">{{ $t("update_plugins") }}</div>
                     </div>
                     <div v-if="!loading && updated" class="row updated">
                         <icon name="update" class="icon" />
@@ -75,7 +71,8 @@
                 </div>
             </div>
             <div class="actions modal">
-                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("ok") }}</div>
+                <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("cancel") }}</div>
+                <div v-if="!loading && (plugins.length > 0 || client || stack || status.upgradable.length > 0)" v-on:click="upgrade()" class="button primary">{{ $t("update_now") }}</div>
             </div>
         </div>
     </modal>
@@ -127,6 +124,7 @@
 
                 this.desktop = (((await Request.get(`https://support.hoobs.org/api/releases/desktop/${this.status.repo === "edge" || this.status.repo === "bleeding" ? "beta" : "latest"}`)).data) || {}).results;
                 this.plugins = ((await this.$hoobs.plugins()) || []).filter((item) => !Semver.compare(item.version, item.latest, ">="));
+                this.status.upgraded = this.status.upgraded || [];
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;
 
@@ -143,27 +141,6 @@
                 this.$store.commit("TERMINAL:STATE", status.terminal);
 
                 this.$action.emit("dashboard", "update");
-            },
-
-            async download() {
-                this.updating = true;
-
-                const url = this.desktop[`download_${this.$os}`];
-                const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
-
-                if (file) {
-                    const error = await this.$electron.open(file);
-
-                    if (error && error !== "") {
-                        this.$alert(error);
-                    } else {
-                        this.$electron.quit();
-                    }
-                } else {
-                    this.$alert("Unable to download update.");
-                }
-
-                this.updating = false;
             },
 
             async upgrade() {
@@ -210,29 +187,6 @@
                     }
                 });
 
-                await (await this.$hoobs.system()).upgrade();
-
-                this.$action.on("io", "disconnected", () => {
-                    this.$action.emit("io", "reload");
-
-                    setTimeout(() => {
-                        this.$dialog.close("updates");
-                    }, REDIRECT_DELAY);
-                });
-            },
-
-            update() {
-                this.updating = true;
-                this.logging = true;
-                this.messages = [];
-
-                this.$store.subscribe(async (mutation) => {
-                    if (mutation.type === "IO:LOG" && this.logging && (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "")) {
-                        this.messages.push(mutation.payload);
-                        this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
-                    }
-                });
-
                 const waits = [];
 
                 for (let i = 0; i < this.plugins.length; i += 1) {
@@ -247,9 +201,32 @@
                     }));
                 }
 
-                Promise.all(waits).then(() => {
-                    this.logging = false;
-                    this.load();
+                await Promise.all(waits);
+                await (await this.$hoobs.system()).upgrade();
+
+                this.$action.on("io", "disconnected", () => {
+                    this.$action.emit("io", "reload");
+
+                    setTimeout(() => {
+                        if (this.client) {
+                            const url = this.desktop[`download_${this.$os}`];
+                            const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
+
+                            if (file) {
+                                const error = await this.$electron.open(file);
+
+                                if (error && error !== "") {
+                                    this.$alert(error);
+                                } else {
+                                    this.$electron.quit();
+                                }
+                            } else {
+                                this.$alert("Unable to download update.");
+                            }
+                        }
+
+                        this.$dialog.close("updates");
+                    }, REDIRECT_DELAY);
                 });
             },
         },
@@ -262,6 +239,11 @@
         display: flex;
         flex-direction: column;
         margin: 0 0 0 10px;
+
+        .form {
+            overflow: auto;
+            max-height: 380px;
+        }
 
         .value {
             font-weight: bold;

@@ -72,7 +72,7 @@
             </div>
             <div class="actions modal">
                 <div v-if="!updating" v-on:click="$dialog.close('updates')" class="button">{{ $t("cancel") }}</div>
-                <div v-if="!loading && (plugins.length > 0 || client || stack || status.upgradable.length > 0)" v-on:click="upgrade()" class="button primary">{{ $t("update_now") }}</div>
+                <div v-if="!loading && (plugins.length > 0 || client || stack || status.upgradable.length > 0)" v-on:click="upgrade()" class="button primary">{{ $t("update") }}</div>
             </div>
         </div>
     </modal>

@@ -202,32 +202,52 @@
                 }
 
                 await Promise.all(waits);
-                await (await this.$hoobs.system()).upgrade();
 
-                this.$action.on("io", "disconnected", () => {
-                    this.$action.emit("io", "reload");
+                if (this.stack || this.status.upgradable.length > 0) {
+                    await (await this.$hoobs.system()).upgrade();
 
-                    setTimeout(() => {
-                        if (this.client) {
-                            const url = this.desktop[`download_${this.$os}`];
-                            const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
+                    this.$action.on("io", "disconnected", () => {
+                        this.$action.emit("io", "reload");
 
-                            if (file) {
-                                const error = await this.$electron.open(file);
+                        setTimeout(() => {
+                            if (this.client) {
+                                const url = this.desktop[`download_${this.$os}`];
+                                const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
-                                if (error && error !== "") {
-                                    this.$alert(error);
+                                if (file) {
+                                    const error = await this.$electron.open(file);
+
+                                    if (error && error !== "") {
+                                        this.$alert(error);
+                                    } else {
+                                        this.$electron.quit();
+                                    }
                                 } else {
-                                    this.$electron.quit();
+                                    this.$alert("Unable to download update.");
                                 }
                             } else {
-                                this.$alert("Unable to download update.");
+                                this.$dialog.close("updates");
                             }
-                        }
+                        }, REDIRECT_DELAY);
+                    });
+                } else if (this.client) {
+                    const url = this.desktop[`download_${this.$os}`];
+                    const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
-                        this.$dialog.close("updates");
-                    }, REDIRECT_DELAY);
-                });
+                    if (file) {
+                        const error = await this.$electron.open(file);
+
+                        if (error && error !== "") {
+                            this.$alert(error);
+                        } else {
+                            this.$electron.quit();
+                        }
+                    } else {
+                        this.$alert("Unable to download update.");
+                    }
+                } else {
+                    this.$dialog.close("updates");
+                }
             },
         },
     };

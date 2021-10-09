@@ -209,7 +209,7 @@
                     this.$action.on("io", "disconnected", () => {
                         this.$action.emit("io", "reload");
 
-                        setTimeout(() => {
+                        setTimeout(async () => {
                             if (this.client) {
                                 const url = this.desktop[`download_${this.$os}`];
                                 const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);

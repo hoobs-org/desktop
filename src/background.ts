@@ -115,7 +115,52 @@ async function createWindow() {
             enableRemoteModule: true,
             contextIsolation: false,
             webSecurity: false,
+            allowRunningInsecureContent: true,
         },
+    });
+
+    protocol.registerBufferProtocol("login.callback.url", (request, callback) => {
+        const query = (request.url.split("?").pop() || "").split("&");
+        const headers: { [key: string ]: any } = { "content-type": "text/html" };
+
+        for (let i = 0; i < query.length; i += 1) {
+            const key = query[i].split("=")[0];
+            const value = query[i].split("=")[1];
+
+            headers[key] = value;
+        }
+
+        callback({
+            statusCode: 200,
+            headers,
+            mimeType: "text/html",
+            data: Buffer.from(""),
+        });
+    });
+
+    window.webContents.session.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, (details, callback) => {
+        const location = (((details || {}).responseHeaders || {}).Location || ((details || {}).responseHeaders || {}).location) || [];
+        const href = [...location].pop() || "";
+
+        if (href.indexOf(".") > 0) {
+            const command = href.split("://").pop() || "";
+
+            if (details && details.responseHeaders) {
+                delete details.responseHeaders.Location; // eslint-disable-line no-param-reassign
+                delete details.responseHeaders.location; // eslint-disable-line no-param-reassign
+            }
+
+            if (details && details.responseHeaders) details.responseHeaders.Location = [`login.callback.url://${command}`]; // eslint-disable-line no-param-reassign
+        }
+
+        if (details && details.responseHeaders) {
+            delete details.responseHeaders["X-Frame-Options"]; // eslint-disable-line no-param-reassign
+            delete details.responseHeaders["x-frame-options"]; // eslint-disable-line no-param-reassign
+            delete details.responseHeaders["Content-Security-Policy"]; // eslint-disable-line no-param-reassign
+            delete details.responseHeaders["content-security-policy"]; // eslint-disable-line no-param-reassign
+        }
+
+        callback({ cancel: false, responseHeaders: details.responseHeaders });
     });
 
     window.setTitle("HOOBS");

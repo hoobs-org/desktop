@@ -22,7 +22,7 @@
             <icon v-on:click="refresh()" name="refresh" class="icon" />
         </context>
         <div class="terminal">
-            <iframe ref="terminal" frameborder="0" />
+            <iframe v-if="terminal" ref="terminal" frameborder="0" />
         </div>
     </div>
 </template>
@@ -38,6 +38,10 @@
         computed: {
             user() {
                 return this.$store.state.user;
+            },
+
+            terminal() {
+                return this.$store.state.terminal;
             },
 
             current() {
@@ -63,18 +67,18 @@
         },
 
         async mounted() {
-            this.connect();
+            if (this.user.permissions.terminal) this.connect();
         },
 
         methods: {
             connect() {
                 setTimeout(() => {
-                    this.$refs.terminal.src = `http://${this.current.ip}:9090`;
+                    if (this.terminal && this.$refs.terminal) this.$refs.terminal.src = `http://${this.current.ip}:${this.terminal}`;
                 }, 10);
             },
 
             refresh() {
-                if (this.$refs.terminal) this.$refs.terminal.src = `http://${this.current.ip}:9090`;
+                if (this.terminal && this.$refs.terminal) this.$refs.terminal.src = `http://${this.current.ip}:${this.terminal}`;
             },
         },
     };

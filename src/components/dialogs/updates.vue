@@ -27,9 +27,11 @@
                         <span class="value">{{ $t("available") }}</span>
                     </div>
                     <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
-                    <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
-                        {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
-                        <span class="value">{{ $t("available") }}</span>
+                    <div v-if="!loading && plugins.length > 0">
+                        <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
+                            {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
+                            <span class="value">{{ $t("available") }}</span>
+                        </div>
                     </div>
                     <div v-if="!loading && stack" class="row section">{{ $t("software") }}</div>
                     <div v-if="!loading && !status.upgraded" class="row">
@@ -49,9 +51,11 @@
                         <span class="value">{{ $t("available") }}</span>
                     </div>
                     <div v-if="!loading && status.upgradable.length > 0" class="row section">{{ $t("system") }}</div>
-                    <div v-for="(application, index) in status.upgradable" :key="`application:${index}`" class="row">
-                        {{ $hoobs.repository.title(application.package) }}: {{ application.available }}
-                        <span class="value">{{ $t("available") }}</span>
+                    <div v-if="!loading && status.upgradable.length > 0">
+                        <div v-for="(application, index) in status.upgradable" :key="`application:${index}`" class="row">
+                            {{ $hoobs.repository.title(application.package) }}: {{ application.available }}
+                            <span class="value">{{ $t("available") }}</span>
+                        </div>
                     </div>
                     <div v-if="!loading && updated" class="row updated">
                         <icon name="update" class="icon" />

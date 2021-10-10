@@ -19,6 +19,10 @@
 <template>
     <div :key="version" id="dashboard" :class="backdrop ? 'backdrop' : ''">
         <context>
+            <router-link to="/bridges" class="button">
+                <icon name="qrcode" class="icon" />
+                {{ $t("bridges") }}
+            </router-link>
             <div v-on:click.stop="$dialog.open('dashboard')" class="button">
                 <icon name="widgets" class="icon" />
                 {{ $t("widgets") }}

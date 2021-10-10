@@ -64,7 +64,7 @@
                 <span v-if="expanded" class="title">{{ $t("users") }}</span>
             </router-link>
             <router-link v-if="user.permissions.bridges" :class="$route.name === 'bridges' ? 'route active' : 'route'" to="/bridges">
-                <icon name="layers" class="icon" />
+                <icon name="qrcode" class="icon" />
                 <span v-if="expanded" class="title">{{ $t("bridges") }}</span>
             </router-link>
             <router-link v-if="user.permissions.plugins" :class="$route.name === 'plugins' || $route.name === 'plugin' ? 'route active' : 'route'" to="/plugins">

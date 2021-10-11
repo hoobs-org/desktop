@@ -27,7 +27,7 @@ case $1 in
         fi
 
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            security unlock-keychain $@ login.keychain
+            security unlock-keychain $@ login.keychain > /dev/null 2>&1
             make desktop
         else
             mkdir -p builds
@@ -36,15 +36,8 @@ case $1 in
                 . ../.env
             fi
 
-            mkdir -p ~/.ssh > /dev/null 2>&1
-            touch ~/.ssh/known_hosts > /dev/null 2>&1
-
-            ssh-keygen -R $DARWIN_HOST > /dev/null 2>&1
-            ssh-keyscan $DARWIN_HOST >> ~/.ssh/known_hosts > /dev/null 2>&1
-            rm -f ~/.ssh/known_hosts.old > /dev/null 2>&1
-
-            sshpass -p '$DARWIN_PASSWD' -e ssh $DARWIN_USER@$DARWIN_HOST cd $PROJECT_PATH/desktop && ./project build -p '$DARWIN_PASSWD'
-            sshpass -p '$DARWIN_PASSWD' -e scp $DARWIN_USER@$DARWIN_HOST:$PROJECT_PATH/desktop/builds/hoobs-desktop-v$VERSION.* ./builds/
+            sshpass -p '$DARWIN_PASSWD' ssh -o 'StrictHostKeyChecking no' $DARWIN_USER@$DARWIN_HOST "source /etc/profile; (cd $PROJECT_PATH/desktop && ./project build -p '$DARWIN_PASSWD')"
+            sshpass -p '$DARWIN_PASSWD' scp -o 'StrictHostKeyChecking no' $DARWIN_USER@$DARWIN_HOST:$PROJECT_PATH/desktop/builds/hoobs-desktop-v$VERSION.* ./builds/
         fi
 
         ;;

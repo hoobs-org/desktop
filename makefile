@@ -9,7 +9,7 @@ desktop: clean paths locals lint
 paths:
 	mkdir -p builds
 	mkdir -p dist
-	mkdir -p lang/locals
+	mkdir -p src/lang/locals
 
 locals:
 	cp ../lang/builds/* src/lang/locals/

@@ -23,7 +23,7 @@ case $1 in
         shift
 
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            security unlock-keychain $@ login.keychain
+            security unlock-keychain $@ login.keychain > /dev/null
             make desktop
         fi
 

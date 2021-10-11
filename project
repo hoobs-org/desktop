@@ -36,6 +36,8 @@ case $1 in
                 . ../.env
             fi
 
+            touch ~/.ssh/known_hosts
+
             ssh-keygen -R $DARWIN_HOST
             ssh-keyscan $DARWIN_HOST >> ~/.ssh/known_hosts
 

@@ -4,6 +4,16 @@ version() {
     echo `node -e 'console.log(require("./package.json").version)'`
 }
 
+debug() {
+    mkdir -p src/lang/locals
+
+    cp ../lang/builds/* src/lang/locals/
+    cp ../lang/countries.json src/lang/
+    cp ../lang/emojis.json src/lang/
+
+    ./node_modules/.bin/vue-cli-service electron:serve
+}
+
 case $1 in
     version )
         shift
@@ -16,7 +26,7 @@ case $1 in
         ;;
 
     debug )
-        ./node_modules/.bin/vue-cli-service electron:serve
+        debug
         ;;
 
     build )

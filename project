@@ -27,7 +27,7 @@ case $1 in
         fi
 
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            security unlock-keychain $@ login.keychain > /dev/null 2>&1
+            security unlock-keychain $@ login.keychain > /dev/null
             make desktop
         else
             mkdir -p builds

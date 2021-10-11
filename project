@@ -23,7 +23,8 @@ case $1 in
         shift
 
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            (cd ../ && ./project pull)
+            (cd ../ && ./project pull) > /dev/null 2>&1
+            (cd ../ && ./project build localization)
             security unlock-keychain $@ login.keychain
             make desktop
         fi

@@ -32,7 +32,7 @@ case $1 in
     build )
         shift
 
-        if [[ "$OSTYPE" == "darwin"* ]]; 
+        if [[ "$OSTYPE" == "darwin"* ]]; then
             printf "\033[0;36mXcode certificates\033[0m\n"
             security unlock-keychain $@ login.keychain
 

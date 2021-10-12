@@ -70,6 +70,8 @@ Program.command("edge")
             download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
             beta: true,
         });
+
+        process.exit();
     });
 
 Program.command("stable")
@@ -96,6 +98,8 @@ Program.command("stable")
             download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
             beta: false,
         });
+
+        process.exit();
     });
 
 Program.parse(process.argv);

@@ -43,6 +43,9 @@ function createRelease(title, notes, beta) {
     }
 }
 
+Program.version(pjson.version, "-v, --version", "output the current version");
+Program.allowUnknownOption();
+
 Program.command("edge")
     .description("publish hoobs desktop")
     .action(async () => {
@@ -94,3 +97,5 @@ Program.command("stable")
             beta: false,
         });
     });
+
+Program.parse(process.argv);

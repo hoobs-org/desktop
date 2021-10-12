@@ -32,13 +32,23 @@ case $1 in
     build )
         shift
 
-        if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; 
+            printf "\033[0;36mXcode certificates\033[0m\n"
             security unlock-keychain $@ login.keychain
+
             (cd ../ && ./project pull) > /dev/null 2>&1
             (cd ../ && ./project build localization)
+
+            printf "\033[0;36mBuild desktop\033[0m\n"
             make desktop
         fi
 
+        ;;
+
+    publish )
+        shift
+
+        ./publish $@
         ;;
 
     clean )

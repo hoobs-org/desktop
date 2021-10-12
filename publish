@@ -1,0 +1,96 @@
+#!/usr/bin/env node
+
+/**************************************************************************************************
+ * hoobs-desktop                                                                                  *
+ * Copyright (C) 2021 HOOBS                                                                       *
+ *                                                                                                *
+ * This program is free software: you can redistribute it and/or modify                           *
+ * it under the terms of the GNU General Public License as published by                           *
+ * the Free Software Foundation, either version 3 of the License, or                              *
+ * (at your option) any later version.                                                            *
+ *                                                                                                *
+ * This program is distributed in the hope that it will be useful,                                *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of                                 *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                  *
+ * GNU General Public License for more details.                                                   *
+ *                                                                                                *
+ * You should have received a copy of the GNU General Public License                              *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.                          *
+ **************************************************************************************************/
+
+const Program = require("commander");
+const { join } = require("path");
+const { readFileSync } = require("fs");
+const { execSync } = require("child_process");
+const { MongoClient } = require("mongodb");
+const credentials = require("../security/credentials.json");
+
+const pjson = JSON.parse(readFileSync(join(__dirname, "package.json")).toString());
+
+function execLocal(command, options) {
+    try {
+        return execSync(command, options || { cwd: __dirname, stdio: "inherit" }).toString().trim();
+    } catch (_error) {
+        return "";
+    }
+}
+
+function createRelease(title, notes, beta) {
+    if (beta) {
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}.*`)} -p -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+    } else {
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}.*`)} -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+    }
+}
+
+Program.command("edge")
+    .description("publish hoobs desktop")
+    .action(async () => {
+        const client = new MongoClient(credentials.db, { useUnifiedTopology: true });
+
+        await client.connect();
+
+        const database = client.db("support");
+        const releases = database.collection("releases");
+
+        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Big fixes", true);
+
+        await releases.updateMany({ application: "desktop", latest: true, beta: true }, { $set: { latest: false } });
+        await releases.deleteMany({ application: "desktop", version: pjson.version, beta: true });
+
+        await releases.insertOne({
+            application: "desktop",
+            version: pjson.version,
+            published: new Date(),
+            latest: true,
+            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.exe`,
+            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
+            beta: true,
+        });
+    });
+
+Program.command("stable")
+    .description("publish hoobs desktop")
+    .action(async () => {
+        const client = new MongoClient(credentials.db, { useUnifiedTopology: true });
+
+        await client.connect();
+
+        const database = client.db("support");
+        const releases = database.collection("releases");
+
+        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Big fixes", false);
+
+        await releases.updateMany({ application: "desktop", latest: true, beta: false }, { $set: { latest: false } });
+        await releases.deleteMany({ application: "desktop", version: pjson.version, beta: false });
+
+        await releases.insertOne({
+            application: "desktop",
+            version: pjson.version,
+            published: new Date(),
+            latest: true,
+            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.exe`,
+            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
+            beta: false,
+        });
+    });

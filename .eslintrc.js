@@ -13,6 +13,11 @@ module.exports = {
         parser: "@typescript-eslint/parser",
         ecmaVersion: 2020,
     },
+    ignorePatterns: [
+        "publish",
+        "babel.config.js",
+        "vue.config.js",
+    ],
     rules: {
         quotes: [
             "error",

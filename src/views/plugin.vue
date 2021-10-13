@@ -292,13 +292,15 @@
                             }));
                         }
 
-                        if (success) {
-                            this.$dialog.close("bridges");
-                            this.load(this.identifier);
-                        } else {
-                            this.$dialog.close("bridges");
-                            this.$alert(this.$t("plugin_install_failed"));
-                        }
+                        Promise.all(waits).then(() => {
+                            if (success) {
+                                this.$dialog.close("bridges");
+                                this.load(this.identifier);
+                            } else {
+                                this.$dialog.close("bridges");
+                                this.$alert(this.$t("plugin_install_failed"));
+                            }
+                        });
                     },
                 });
             },

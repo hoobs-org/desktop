@@ -1,7 +1,19 @@
 #!/bin/bash
 
 version() {
-    echo `node -e 'console.log(require("./package.json").version)'`
+    case $1 in
+        edge )
+            echo "$(./publish released edge)"
+            ;;
+
+        stable )
+            echo "$(./publish released stable)"
+            ;;
+
+        * )
+            echo `node -e 'console.log(require("./package.json").version)'`
+            ;;
+    esac
 }
 
 debug() {

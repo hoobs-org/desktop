@@ -17,11 +17,11 @@
  **************************************************************************************************/
 
 import Request from "@hoobs/sdk/lib/request";
+import CancelToken from "@hoobs/sdk/lib/cancel-token";
 import EventEmitter from "events";
 import Scan from "evilscan";
 
 import { getMAC } from "node-arp";
-import { CancelToken } from "cancel-token";
 import { networkInterfaces } from "os";
 import { cidrSubnet } from "ip";
 import Vue, { VueConstructor } from "vue";
@@ -182,7 +182,7 @@ export default class Scanner extends EventEmitter {
         return new Promise((resolve) => {
             let data: Active | undefined;
 
-            const source = CancelToken.source();
+            const source = CancelToken();
 
             setTimeout(() => {
                 source.cancel();
@@ -193,7 +193,7 @@ export default class Scanner extends EventEmitter {
                 url: `http://${ip}:${port}/api`,
                 timeout: this.timeout,
                 cancelToken: source.token,
-            }).then(async (response) => {
+            }).then(async (response: any) => {
                 if (response && response.data && response.data.application === "hoobsd" && response.data.version) {
                     data = {
                         ip,

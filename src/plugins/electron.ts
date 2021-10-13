@@ -142,7 +142,7 @@ const helpers = {
                     url,
                     method: "GET",
                     responseType: "blob",
-                }).then((response) => {
+                }).then((response: any) => {
                     response.data.arrayBuffer().then((buffer: Buffer) => {
                         const file = path.join(OS.tmpdir(), filename);
 

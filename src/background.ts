@@ -141,8 +141,9 @@ async function createWindow() {
     window.webContents.session.webRequest.onHeadersReceived({ urls: ["*://*/*"] }, (details, callback) => {
         const location = (((details || {}).responseHeaders || {}).Location || ((details || {}).responseHeaders || {}).location) || [];
         const href = [...location].pop() || "";
+        const prefix = href.split("://")[0] || "";
 
-        if (href.indexOf(".") > 0) {
+        if (href.indexOf("://") >= 0 && prefix.indexOf(".") > 0) {
             const command = href.split("://").pop() || "";
 
             if (details && details.responseHeaders) {

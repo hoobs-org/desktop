@@ -123,7 +123,7 @@
             async load() {
                 this.loading = true;
 
-                this.status = await this.$hoobs.status();
+                this.status = await (await this.$hoobs.system()).updates();
                 this.version = await this.$hoobs.version();
 
                 this.desktop = (((await Request.get(`https://support.hoobs.org/api/releases/desktop/${this.status.repo === "edge" || this.status.repo === "bleeding" ? "beta" : "latest"}`)).data) || {}).results;

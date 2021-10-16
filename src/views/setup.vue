@@ -98,6 +98,8 @@
                     await this.$hoobs.users.add(this.username.toLowerCase(), this.password, this.name, true);
 
                     if (await this.$hoobs.auth.login(this.username.toLowerCase(), this.password)) {
+                        await (await this.$hoobs.system()).updates();
+
                         this.$router.push({ path: "/" });
                     } else {
                         this.loading = false;
@@ -112,6 +114,7 @@
 
                 await this.$hoobs.auth.disable();
                 await this.wait(this.$hoobs.auth.status, (value) => value === "disabled");
+                await (await this.$hoobs.system()).updates();
 
                 this.$router.push({ path: "/" });
             },

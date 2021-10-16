@@ -91,6 +91,22 @@
                     this.reload = true;
                 });
 
+                this.$action.on("app", "update", (payload) => {
+                    const file = await this.$electron.download(payload.url, `hoobs-desktop-v${payload.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
+
+                    if (file) {
+                        const error = await this.$electron.open(file);
+
+                        if (error && error !== "") {
+                            this.$alert(error);
+                        } else {
+                            this.$electron.quit();
+                        }
+                    } else {
+                        this.$alert("Unable to download update.");
+                    }
+                });
+
                 this.$dialog.on("open", () => {
                     this.dialogs += 1;
                 });

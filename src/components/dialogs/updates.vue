@@ -20,49 +20,46 @@
     <modal :title="$t('updates')" :draggable="true" width="740px" height="547px">
         <div id="updates">
             <div class="content">
-                <div v-if="!updating" class="form">
-                    <div v-if="!loading && client" class="row section">{{ $t("desktop") }}</div>
-                    <div v-if="!loading && client" class="row">
+                <div v-if="!loading && !updating" class="form">
+                    <div v-if="client" class="row section">{{ $t("desktop") }}</div>
+                    <div v-if="client" class="row">
                         {{ $t("version_desktop") }}: {{ desktop.version }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
-                    <div v-if="!loading && plugins.length > 0">
+                    <div v-if="plugins.length > 0" class="row section">{{ $t("plugins") }}</div>
+                    <div v-if="plugins.length > 0">
                         <div v-for="(plugin, index) in plugins" :key="`plugin:${index}`" class="row">
                             {{ $hoobs.repository.title(plugin.name) }}: {{ plugin.latest }}
                             <span class="value">{{ $t("available") }}</span>
                         </div>
                     </div>
-                    <div v-if="!loading && stack" class="row section">{{ $t("software") }}</div>
-                    <div v-if="!loading && !status.upgraded" class="row">
+                    <div v-if="stack" class="row section">{{ $t("software") }}</div>
+                    <div v-if="!status.upgraded" class="row">
                         {{ $t("version_server") }}: {{ status.current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && !status.gui_upgraded" class="row">
+                    <div v-if="!status.gui_upgraded" class="row">
                         {{ $t("version_gui") }}: {{ status.gui_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && !status.cli_upgraded" class="row">
+                    <div v-if="!status.cli_upgraded" class="row">
                         {{ $t("version_cli") }}: {{ status.cli_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && !status.node_upgraded" class="row">
+                    <div v-if="!status.node_upgraded" class="row">
                         {{ $t("version_node") }}: {{ status.node_current }}
                         <span class="value">{{ $t("available") }}</span>
                     </div>
-                    <div v-if="!loading && status.upgradable.length > 0" class="row section">{{ $t("system") }}</div>
-                    <div v-if="!loading && status.upgradable.length > 0">
+                    <div v-if="status.upgradable.length > 0" class="row section">{{ $t("system") }}</div>
+                    <div v-if="status.upgradable.length > 0">
                         <div v-for="(application, index) in status.upgradable" :key="`application:${index}`" class="row">
                             {{ $hoobs.repository.title(application.package) }}: {{ application.available }}
                             <span class="value">{{ $t("available") }}</span>
                         </div>
                     </div>
-                    <div v-if="!loading && updated" class="row updated">
+                    <div v-if="updated" class="row updated">
                         <icon name="update" class="icon" />
                         <div class="text">{{ $t("updated") }}</div>
-                    </div>
-                    <div v-if="loading" class="row loading">
-                        <spinner />
                     </div>
                 </div>
                 <div v-else class="status">
@@ -89,8 +86,6 @@
     import MessageComponent from "@/components/elements/message.vue";
 
     import { cloneJson } from "../../services/json";
-
-    const REDIRECT_DELAY = 1000;
 
     export default {
         name: "updates",
@@ -210,45 +205,16 @@
                 if (this.stack || this.status.upgradable.length > 0) {
                     await (await this.$hoobs.system()).upgrade();
 
-                    this.$action.on("io", "disconnected", () => {
-                        this.$action.emit("io", "reload");
-
-                        setTimeout(async () => {
-                            if (this.client) {
-                                const url = this.desktop[`download_${this.$os}`];
-                                const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
-
-                                if (file) {
-                                    const error = await this.$electron.open(file);
-
-                                    if (error && error !== "") {
-                                        this.$alert(error);
-                                    } else {
-                                        this.$electron.quit();
-                                    }
-                                } else {
-                                    this.$alert("Unable to download update.");
-                                }
-                            } else {
-                                this.$dialog.close("updates");
-                            }
-                        }, REDIRECT_DELAY);
-                    });
-                } else if (this.client) {
-                    const url = this.desktop[`download_${this.$os}`];
-                    const file = await this.$electron.download(url, `hoobs-desktop-v${this.desktop.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
-
-                    if (file) {
-                        const error = await this.$electron.open(file);
-
-                        if (error && error !== "") {
-                            this.$alert(error);
-                        } else {
-                            this.$electron.quit();
-                        }
+                    if (this.client) {
+                        this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
                     } else {
-                        this.$alert("Unable to download update.");
+                        this.$action.on("io", "disconnected", () => {
+                            this.$action.emit("io", "reload");
+                            this.$dialog.close("updates");
+                        });
                     }
+                } else if (this.client) {
+                    this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
                 } else {
                     this.$dialog.close("updates");
                 }

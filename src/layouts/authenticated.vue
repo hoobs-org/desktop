@@ -91,7 +91,7 @@
                     this.reload = true;
                 });
 
-                this.$action.on("app", "update", (payload) => {
+                this.$action.on("app", "update", async (payload) => {
                     const file = await this.$electron.download(payload.url, `hoobs-desktop-v${payload.version}.${this.$os === "mac" ? "dmg" : "exe"}`);
 
                     if (file) {

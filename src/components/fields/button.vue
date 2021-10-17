@@ -17,7 +17,7 @@
  -------------------------------------------------------------------------------------------------->
 
 <template>
-    <div v-if="running" id="field">
+    <div id="field">
         <span v-if="schema.description && schema.description !== ''" class="description" v-html="schema.description"></span>
         <div v-if="schema.title && schema.populated_title" class="action">
             <div v-if="value" class="button" v-on:click="clear">{{ schema.populated_title }}</div>
@@ -60,6 +60,12 @@
             },
 
             open() {
+                if (!this.running) {
+                    this.$alert(this.$t("bridge_wait"));
+
+                    return;
+                }
+
                 const url = `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`;
                 const domain = (this.$hoobs.config.host.get().split("/")[2]).split(":");
 

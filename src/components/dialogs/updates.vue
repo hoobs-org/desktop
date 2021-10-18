@@ -81,6 +81,7 @@
 
 <script>
     import Semver from "compare-versions";
+    import { shell } from "electron";
     import Request from "@hoobs/sdk/lib/request";
 
     import MessageComponent from "@/components/elements/message.vue";
@@ -92,6 +93,12 @@
 
         components: {
             "message": MessageComponent,
+        },
+
+        computed: {
+            platform() {
+                return this.$store.state.platform;
+            },
         },
 
         data() {
@@ -127,9 +134,17 @@
 
                 if (!this.status.gui_version) this.status.gui_upgraded = true;
 
-                this.client = !Semver.compare(this.$version, this.desktop.version || this.$version, ">=");
-                this.stack = !(this.status.upgraded && this.status.cli_upgraded && this.status.node_upgraded && this.status.gui_upgraded);
-                this.updated = !(this.client || this.stack || this.plugins.length > 0 || this.status.upgradable.length > 0);
+                if (this.platform === "linux" || this.platform === "docker") {
+                    this.client = !Semver.compare(this.$version, this.desktop.version || this.$version, ">=");
+                    this.stack = !(this.status.upgraded && this.status.cli_upgraded && this.status.node_upgraded && this.status.gui_upgraded);
+                    this.updated = !(this.client || this.stack || this.plugins.length > 0 || this.status.upgradable.length > 0);
+                } else {
+                    const download = (((await Request.get("https://support.hoobs.org/api/releases/hoobsd/latest")).data) || {}).results;
+
+                    this.client = !Semver.compare(this.$version, this.desktop.version || this.$version, ">=");
+                    this.stack = !Semver.compare(this.status.version, download.version || this.status.version, ">=");
+                    this.updated = !(this.client || this.stack || this.plugins.length > 0);
+                }
 
                 this.loading = false;
                 this.updating = false;
@@ -203,16 +218,28 @@
 
                 await Promise.all(waits);
 
-                if (this.stack || this.status.upgradable.length > 0) {
-                    await (await this.$hoobs.system()).upgrade();
+                if (this.platform === "linux" || this.platform === "docker") {
+                    if (this.stack || this.status.upgradable.length > 0) {
+                        await (await this.$hoobs.system()).upgrade();
+
+                        if (this.client) {
+                            this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
+                        } else {
+                            this.$action.on("io", "disconnected", () => {
+                                this.$action.emit("io", "reload");
+                                this.$dialog.close("updates");
+                            });
+                        }
+                    } else if (this.client) {
+                        this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
+                    } else {
+                        this.$dialog.close("updates");
+                    }
+                } else if (this.stack) {
+                    shell.openExternal("https://support.hoobs.org/downloads/hoobsd");
 
                     if (this.client) {
                         this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
-                    } else {
-                        this.$action.on("io", "disconnected", () => {
-                            this.$action.emit("io", "reload");
-                            this.$dialog.close("updates");
-                        });
                     }
                 } else if (this.client) {
                     this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });

@@ -75,8 +75,8 @@
                     </div>
                     <div v-if="user.permissions.reboot" class="row section" style="margin-bottom: 7px;">{{ $t("system") }}</div>
                     <div v-if="user.permissions.reboot" class="row">
-                        <div v-on:click="reboot()" class="button">{{ $t("reboot") }}</div>
-                        <div v-on:click="shutdown()" class="button">{{ $t("shutdown") }}</div>
+                        <div v-if="platform !== 'docker'" v-on:click="reboot()" class="button">{{ $t("reboot") }}</div>
+                        <div v-if="platform !== 'docker'" v-on:click="shutdown()" class="button">{{ $t("shutdown") }}</div>
                         <div v-on:click="reset()" class="button">{{ $t("factory_reset") }}</div>
                     </div>
                 </div>
@@ -133,6 +133,10 @@
 
             product() {
                 return this.$store.state.product;
+            },
+
+            platform() {
+                return this.$store.state.platform;
             },
 
             hostname: {

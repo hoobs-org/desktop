@@ -138,6 +138,7 @@
 
                 this.$store.commit("VERSION:STATE", status);
                 this.$store.commit("TERMINAL:STATE", status.terminal);
+                this.$store.commit("PLATFORM:STATE", status.platform);
 
                 this.$action.emit("dashboard", "update");
             },

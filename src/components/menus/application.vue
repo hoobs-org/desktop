@@ -29,7 +29,7 @@
         <div v-on:click="$dialog.open('about')" class="item">{{ $t("about") }}</div>
         <div v-on:click="help()" class="item">{{ $t("help") }}</div>
         <div class="seperator"></div>
-        <div v-if="(product === 'box' || product === 'card') && user.permissions.controller" v-on:click="$dialog.open('network')" class="item">{{ $t("network") }}</div>
+        <div v-if="(product === 'box' || product === 'card') && platform === 'linux' && user.permissions.controller" v-on:click="$dialog.open('network')" class="item">{{ $t("network") }}</div>
         <div v-if="user.permissions.controller" v-on:click="$dialog.open('settings')" class="item">{{ $t("hub_settings") }}</div>
         <div v-on:click="$dialog.open('personalize')" class="item">{{ $t("personalize") }}</div>
         <div class="seperator"></div>
@@ -59,6 +59,10 @@
                 return this.$store.state.terminal;
             },
 
+            platform() {
+                return this.$store.state.platform;
+            },
+
             product() {
                 return this.$store.state.product;
             },
@@ -69,6 +73,7 @@
 
             this.$store.commit("PRODUCT:STATE", status.product);
             this.$store.commit("TERMINAL:STATE", status.terminal);
+            this.$store.commit("PLATFORM:STATE", status.platform);
         },
 
         methods: {

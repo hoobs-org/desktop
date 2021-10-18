@@ -72,6 +72,7 @@
                 this.$store.commit("BROADCAST:STATE", status.broadcast);
                 this.$store.commit("PRODUCT:STATE", status.product);
                 this.$store.commit("TERMINAL:STATE", status.terminal);
+                this.$store.commit("PLATFORM:STATE", status.platform);
 
                 this.$action.on("io", "connected", () => {
                     setTimeout(async () => {

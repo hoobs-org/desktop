@@ -123,6 +123,10 @@
             updated() {
                 return this.installed.filter((item) => !item.updated).length === 0;
             },
+
+            platform() {
+                return this.$store.state.platform;
+            },
         },
 
         watch: {
@@ -293,13 +297,15 @@
                         }
 
                         Promise.all(waits).then(() => {
-                            if (success) {
-                                this.$dialog.close("bridges");
-                                this.load(this.identifier);
-                            } else {
-                                this.$dialog.close("bridges");
-                                this.$alert(this.$t("plugin_install_failed"));
-                            }
+                            setTimeout(() => {
+                                if (success) {
+                                    this.$dialog.close("bridges");
+                                    this.load(this.identifier);
+                                } else {
+                                    this.$dialog.close("bridges");
+                                    this.$alert(this.$t("plugin_install_failed"));
+                                }
+                            }, this.platform === "darwin" ? 3 * 1000 : 0);
                         });
                     },
                 });
@@ -336,21 +342,23 @@
                             }
 
                             Promise.all(waits).then(() => {
-                                if (success && this.plugin.deleted) {
-                                    this.$dialog.close("bridges");
+                                setTimeout(() => {
+                                    if (success && this.plugin.deleted) {
+                                        this.$dialog.close("bridges");
 
-                                    if (bridge) {
-                                        this.$router.push({ path: `/plugins/${bridge.id}` });
+                                        if (bridge) {
+                                            this.$router.push({ path: `/plugins/${bridge.id}` });
+                                        } else {
+                                            this.$router.push({ path: "/plugins" });
+                                        }
+                                    } else if (success) {
+                                        this.$dialog.close("bridges");
+                                        this.load(this.identifier);
                                     } else {
-                                        this.$router.push({ path: "/plugins" });
+                                        this.$dialog.close("bridges");
+                                        this.$alert(this.$t("plugin_uninstall_failed"));
                                     }
-                                } else if (success) {
-                                    this.$dialog.close("bridges");
-                                    this.load(this.identifier);
-                                } else {
-                                    this.$dialog.close("bridges");
-                                    this.$alert(this.$t("plugin_uninstall_failed"));
-                                }
+                                }, this.platform === "darwin" ? 3 * 1000 : 0);
                             });
                         });
                     },
@@ -372,7 +380,9 @@
                     }));
                 }
 
-                Promise.all(waits).then(() => this.load(this.identifier));
+                Promise.all(waits).then(() => {
+                    setTimeout(() => this.load(this.identifier), this.platform === "darwin" ? 3 * 1000 : 0);
+                });
             },
 
             locate(ref) {

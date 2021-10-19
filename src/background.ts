@@ -147,18 +147,22 @@ async function createWindow() {
             const command = href.split("://").pop() || "";
 
             if (details && details.responseHeaders) {
-                delete details.responseHeaders.Location; // eslint-disable-line no-param-reassign
-                delete details.responseHeaders.location; // eslint-disable-line no-param-reassign
+                delete details.responseHeaders.Location;
+                delete details.responseHeaders.location;
             }
 
-            if (details && details.responseHeaders) details.responseHeaders.Location = [`login.callback.url://${command}`]; // eslint-disable-line no-param-reassign
+            if (details && details.responseHeaders) details.responseHeaders.Location = [`login.callback.url://${command}`];
         }
 
         if (details && details.responseHeaders) {
-            delete details.responseHeaders["X-Frame-Options"]; // eslint-disable-line no-param-reassign
-            delete details.responseHeaders["x-frame-options"]; // eslint-disable-line no-param-reassign
-            delete details.responseHeaders["Content-Security-Policy"]; // eslint-disable-line no-param-reassign
-            delete details.responseHeaders["content-security-policy"]; // eslint-disable-line no-param-reassign
+            delete details.responseHeaders["X-Frame-Options"];
+            delete details.responseHeaders["x-frame-options"];
+            delete details.responseHeaders["Content-Security-Policy"];
+            delete details.responseHeaders["content-security-policy"];
+            delete details.responseHeaders["Strict-Transport-Security"];
+            delete details.responseHeaders["strict-transport-security"];
+            delete details.responseHeaders["X-XSS-Protection"];
+            delete details.responseHeaders["x-xss-protection"];
         }
 
         callback({ cancel: false, responseHeaders: details.responseHeaders });

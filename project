@@ -46,7 +46,7 @@ case $1 in
 
         if [[ "$OSTYPE" == "darwin"* ]]; then
             printf "\033[0;36mXcode certificates\033[0m\n"
-            security unlock-keychain $@ login.keychain
+            security unlock-keychain login.keychain
 
             (cd ../ && ./project pull) > /dev/null 2>&1
             (cd ../ && ./project build localization)

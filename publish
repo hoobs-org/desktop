@@ -56,6 +56,10 @@ Program.command("released <branch>")
         process.exit();
     });
 
+Program.command("bleeding")
+    .description("publish hoobs desktop")
+    .action(() => process.exit());
+
 Program.command("edge")
     .description("publish hoobs desktop")
     .action(async () => {

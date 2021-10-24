@@ -41,10 +41,7 @@
                 <div class="inner" v-on:click="mode">
                     <icon v-if="state === 1" name="fire" class="icon heat" />
                     <icon v-else-if="state === 2" name="snowflake" class="icon cool" />
-                    <div v-else-if="state === 3" class="cliped">
-                        <icon class="snowflake" name="icon top cool" />
-                        <icon class="fire" name="icon bottom heat" />
-                    </div>
+                    <icon v-else-if="state === 3" name="sun-snowflake" class="icon" />
                     <span v-else class="off">{{ $t("off") }}</span>
                 </div>
             </div>

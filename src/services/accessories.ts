@@ -80,6 +80,7 @@ export function types(accessory: { [key: string]: any }): string | undefined {
             if (sensors.indexOf("leak_detected") >= 0) return "sensor-accessory";
             if (sensors.indexOf("current_temperature") >= 0) return "sensor-accessory";
             if (sensors.indexOf("current_relative_humidity") >= 0) return "sensor-accessory";
+            if (sensors.indexOf("smoke_detected") >= 0) return "sensor-accessory";
             if (sensors.indexOf("carbon_dioxide_detected") >= 0) return "sensor-accessory";
             if (sensors.indexOf("carbon_monoxide_detected") >= 0) return "sensor-accessory";
             if (sensors.indexOf("contact_sensor_state") >= 0) return "sensor-accessory";

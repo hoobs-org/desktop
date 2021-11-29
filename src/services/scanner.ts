@@ -45,7 +45,7 @@ interface Active {
     mac?: string;
 }
 
-export default class Scanner extends EventEmitter {
+class Scanner extends EventEmitter {
     declare stopped: boolean;
 
     declare total: number;
@@ -118,10 +118,7 @@ export default class Scanner extends EventEmitter {
                         }
                     });
 
-                    scan.on("done", () => {
-                        resolve();
-                    });
-
+                    scan.on("done", () => resolve());
                     scan.run();
                 }));
             }
@@ -184,9 +181,7 @@ export default class Scanner extends EventEmitter {
 
             const source = CancelToken();
 
-            setTimeout(() => {
-                source.cancel();
-            }, timeout || this.timeout);
+            setTimeout(() => source.cancel(), timeout || this.timeout);
 
             Request({
                 method: "get",
@@ -231,3 +226,5 @@ export default class Scanner extends EventEmitter {
         });
     }
 }
+
+export default new Scanner();

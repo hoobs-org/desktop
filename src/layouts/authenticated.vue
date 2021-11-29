@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import { decompressJson } from "../services/json";
     import NavigationComponent from "@/components/navigation.vue";
 
     const SOCKET_RECONNECT_DELAY = 0.5 * 1000;
@@ -61,7 +62,18 @@
 
         async created() {
             if (this.current) {
+                this.io.on("connect", () => this.$action.emit("io", "connected"));
+                this.io.on("reconnect", () => this.$action.emit("io", "connected"));
+                this.io.on("disconnect", () => this.$action.emit("io", "disconnected"));
+
+                this.io.on("log", (data) => this.$action.emit("io", "log", decompressJson(data)));
+                this.io.on("monitor", (data) => this.$action.emit("io", "monitor", decompressJson(data)));
+                this.io.on("notification", (data) => this.$action.emit("io", "notification", decompressJson(data)));
+                this.io.on("accessory_change", (data) => this.$action.emit("io", "accessory_change", decompressJson(data)));
+                this.io.on("room_change", (data) => this.$action.emit("io", "room_change", decompressJson(data)));
+
                 this.io.connect(this.current.ip, this.current.port);
+
                 this.$action.emit("log", "history");
 
                 const status = { ...(await this.$hoobs.status() || {}), auth: await this.$hoobs.auth.status() };

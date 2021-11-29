@@ -135,6 +135,9 @@
         },
 
         created() {
+            this.$scanner.on("device", (data) => this.$store.commit("IO:DEVICE", data));
+            this.$scanner.on("clear", () => this.$store.commit("IO:DEVICE:CLEAR"));
+
             this.$scanner.on("start", () => {
                 this.scanning = true;
             });
@@ -167,10 +170,7 @@
             this.url = this.$route.query.url || "/";
             this.scan = this.$route.query.scan === "true";
 
-            if (!this.current) {
-                this.$scanner.start(this.$store.state.devices, 80);
-            }
-
+            if (!this.current) this.$scanner.start(this.$store.state.devices, 80);
             if (this.url.startsWith("/login")) this.url = "/";
             if (!this.scan && this.devices.length === 1) this.select(this.devices[0]);
         },

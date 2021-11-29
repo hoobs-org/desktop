@@ -37,15 +37,13 @@ import PortComponent from "@/components/fields/port.vue";
 import SpinnerComponent from "@/components/elements/spinner.vue";
 
 import App from "./app.vue";
-import Scanner from "./services/scanner";
 
+import scanner from "./services/scanner";
 import electron from "./plugins/electron";
 import converter from "./plugins/markdown";
 import graphing from "./plugins/graphing";
 import themes from "./plugins/themes";
 import drag from "./plugins/drag";
-
-import { decompressJson } from "./services/json";
 
 import actions from "./services/actions";
 import dialogs from "./services/dialogs";
@@ -54,39 +52,24 @@ import menus from "./services/menus";
 import store from "./services/store";
 import lang from "./lang";
 
-const scanner = new Scanner();
 const io = hoobs.sdk.io();
 const markdown = converter();
 
 hoobs.sdk.config.token.get(() => store.state.session);
 hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", token); });
 
-scanner.on("device", (data) => store.commit("IO:DEVICE", data));
-scanner.on("clear", () => store.commit("IO:DEVICE:CLEAR"));
+actions.on("io", "log", (data) => store.commit("IO:LOG", data));
+actions.on("io", "monitor", (data) => store.commit("IO:MONITOR", data));
 
-io.on("log", (data) => store.commit("IO:LOG", decompressJson(data)));
-io.on("monitor", (data) => store.commit("IO:MONITOR", decompressJson(data)));
-
-io.on("notification", (data) => {
-    const payload = decompressJson(data);
-
+actions.on("io", "notification", (payload) => {
     if (payload.data) electron.helpers.notify(payload.data.title, payload.data.description);
 });
 
-io.on("accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", decompressJson(data)));
-io.on("room_change", (data) => store.commit("IO:ROOM:CHANGE", decompressJson(data)));
+actions.on("io", "accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
+actions.on("io", "room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
 
-io.on("connect", () => actions.emit("io", "connected"));
-io.on("reconnect", () => actions.emit("io", "connected"));
-io.on("disconnect", () => actions.emit("io", "disconnected"));
-
-actions.on("log", "history", () => {
-    hoobs.sdk.log().then((messages) => store.commit("LOG:HISTORY", messages));
-});
-
-actions.on("window", "open", (url) => {
-    shell.openExternal(url);
-});
+actions.on("log", "history", () => hoobs.sdk.log().then((messages) => store.commit("LOG:HISTORY", messages)));
+actions.on("window", "open", (url) => shell.openExternal(url));
 
 const { current }: any = store.state;
 

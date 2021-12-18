@@ -23,16 +23,7 @@ import PluginsMenu from "@/components/menus/plugins.vue";
 import Menus from "../plugins/menus";
 
 export default new Menus([
-    {
-        name: "application",
-        component: ApplicationMenu,
-    },
-    {
-        name: "bridges",
-        component: BridgesMenu,
-    },
-    {
-        name: "plugins",
-        component: PluginsMenu,
-    },
+    { name: "application", component: ApplicationMenu },
+    { name: "bridges", component: BridgesMenu },
+    { name: "plugins", component: PluginsMenu },
 ]);

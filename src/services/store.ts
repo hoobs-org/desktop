@@ -55,9 +55,7 @@ export default new Vuex.Store({
         heap: 0,
         temp: null,
         session: "",
-        user: {
-            permissions: {},
-        },
+        user: { permissions: {} },
         auth: false,
         version: {
             hoobsd: "0.0.0",
@@ -174,9 +172,7 @@ export default new Vuex.Store({
                     permissions: user.permissions || {},
                 };
             } else {
-                state.user = {
-                    permissions: {},
-                };
+                state.user = { permissions: {} };
             }
         },
 

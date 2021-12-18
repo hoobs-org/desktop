@@ -49,36 +49,22 @@
         name: "integer-field",
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
+            id: { type: String, default: undefined },
             name: String,
             field: [String, Number],
             title: String,
             description: String,
-            placeholder: {
-                type: [String, Number],
-                default: "",
-            },
+            placeholder: { type: [String, Number], default: "" },
             value: Number,
             default: Number,
             min: Number,
             max: Number,
-            required: {
-                type: Boolean,
-                default: false,
-            },
-            autofocus: {
-                type: Boolean,
-                default: false,
-            },
+            required: { type: Boolean, default: false },
+            autofocus: { type: Boolean, default: false },
         },
 
         data() {
-            return {
-                uuid: "",
-            };
+            return { uuid: "" };
         },
 
         mounted() {

@@ -27,11 +27,7 @@
 <script>
     export default {
         name: "color",
-
-        props: {
-            value: String,
-            color: String,
-        },
+        props: { value: String, color: String },
 
         methods: {
             select() {

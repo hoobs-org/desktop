@@ -128,10 +128,7 @@
         },
 
         data() {
-            return {
-                loading: true,
-                system: {},
-            };
+            return { loading: true, system: {} };
         },
 
         mounted() {

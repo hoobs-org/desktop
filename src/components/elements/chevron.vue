@@ -25,9 +25,7 @@
 </template>
 
 <script>
-    export default {
-        name: "chevron",
-    };
+    export default { name: "chevron" };
 </script>
 
 <style lang="scss" scoped>

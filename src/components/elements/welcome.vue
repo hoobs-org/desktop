@@ -44,13 +44,7 @@
 </template>
 
 <script>
-    export default {
-        name: "welcome",
-
-        props: {
-            message: String,
-        },
-    };
+    export default { name: "welcome", props: { message: String } };
 </script>
 
 <style lang="scss" scoped>

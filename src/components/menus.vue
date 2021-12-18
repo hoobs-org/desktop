@@ -27,9 +27,7 @@
         name: "menu-view",
 
         data() {
-            return {
-                menu: null,
-            };
+            return { menu: null };
         },
 
         async created() {

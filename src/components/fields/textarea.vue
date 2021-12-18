@@ -46,39 +46,21 @@
         name: "textarea-field",
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
+            id: { type: String, default: undefined },
             name: String,
             field: [String, Number],
             title: String,
             description: String,
-            height: {
-                type: String,
-                default: "140px",
-            },
-            placeholder: {
-                type: String,
-                default: "",
-            },
+            height: { type: String, default: "140px" },
+            placeholder: { type: String, default: "" },
             value: String,
             default: String,
-            required: {
-                type: Boolean,
-                default: false,
-            },
-            autofocus: {
-                type: Boolean,
-                default: false,
-            },
+            required: { type: Boolean, default: false },
+            autofocus: { type: Boolean, default: false },
         },
 
         data() {
-            return {
-                uuid: "",
-                working: "",
-            };
+            return { uuid: "", working: "" };
         },
 
         mounted() {

@@ -31,10 +31,7 @@ import { existsSync, writeFileSync, unlinkSync } from "fs";
 
 const pjson = require("../../package.json");
 
-const platforms: { [key: string]: string } = {
-    win32: "win",
-    darwin: "mac",
-};
+const platforms: { [key: string]: string } = { win32: "win", darwin: "mac" };
 
 const helpers = {
     notify(title: string, body: string): void {
@@ -150,12 +147,8 @@ const helpers = {
 
                         writeFileSync(file, Buffer.from(buffer));
                         resolve(file);
-                    }).catch(() => {
-                        resolve(undefined);
-                    });
-                }).catch(() => {
-                    resolve(undefined);
-                });
+                    }).catch(() => resolve(undefined));
+                }).catch(() => resolve(undefined));
             } else {
                 resolve(undefined);
             }

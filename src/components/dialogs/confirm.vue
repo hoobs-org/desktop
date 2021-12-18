@@ -29,10 +29,7 @@
 <script>
     export default {
         name: "confirm",
-
-        props: {
-            options: Object,
-        },
+        props: { options: Object },
 
         methods: {
             cancel() {

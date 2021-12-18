@@ -31,10 +31,7 @@
 
     export default {
         name: "log-widget",
-
-        components: {
-            "message": MessageComponent,
-        },
+        components: { "message": MessageComponent },
 
         computed: {
             messages() {

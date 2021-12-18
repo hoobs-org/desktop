@@ -85,14 +85,12 @@ async function createWindow() {
 
     template.push({
         role: "help",
-        submenu: [
-            {
-                label: "Learn More",
-                click: async () => {
-                    await shell.openExternal("https://support.hoobs.org/docs");
-                },
+        submenu: [{
+            label: "Learn More",
+            click: async () => {
+                await shell.openExternal("https://support.hoobs.org/docs");
             },
-        ],
+        }],
     });
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -239,17 +237,10 @@ if (!gotLock) {
                 label: "Enable on Startup",
                 type: "checkbox",
                 checked: app.getLoginItemSettings().openAtLogin,
-                click: () => {
-                    app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin });
-                },
+                click: () => app.setLoginItemSettings({ openAtLogin: !app.getLoginItemSettings().openAtLogin }),
             },
             { type: "separator" },
-            {
-                label: "Quit HOOBS Desktop",
-                click: () => {
-                    app.exit(0);
-                },
-            },
+            { label: "Quit HOOBS Desktop", click: () => app.exit(0) },
         ]));
 
         tray.on("double-click", () => {
@@ -272,14 +263,10 @@ if (!gotLock) {
     if (isDevelopment) {
         if (process.platform === "win32") {
             process.on("message", (data) => {
-                if (data === "graceful-exit") {
-                    app.exit(0);
-                }
+                if (data === "graceful-exit") app.exit(0);
             });
         } else {
-            process.on("SIGTERM", () => {
-                app.exit(0);
-            });
+            process.on("SIGTERM", () => app.exit(0));
         }
     }
 }

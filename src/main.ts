@@ -40,8 +40,8 @@ import App from "./app.vue";
 
 import scanner from "./services/scanner";
 import electron from "./plugins/electron";
-import converter from "./plugins/markdown";
 import graphing from "./plugins/graphing";
+import markdown from "./plugins/markdown";
 import themes from "./plugins/themes";
 import drag from "./plugins/drag";
 
@@ -53,7 +53,6 @@ import store from "./services/store";
 import lang from "./lang";
 
 const io = hoobs.sdk.io();
-const markdown = converter();
 
 hoobs.sdk.config.token.get(() => store.state.session);
 hoobs.sdk.config.token.set((token: string) => { store.commit("SESSION:SET", token); });
@@ -97,8 +96,8 @@ Vue.use(scanner);
 Vue.use(dialogs);
 Vue.use(actions);
 Vue.use(electron);
-Vue.use(markdown);
 Vue.use(graphing);
+Vue.use(markdown);
 
 Vue.use(themes, { hoobs, store });
 

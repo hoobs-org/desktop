@@ -85,15 +85,8 @@
 
     export default {
         name: "plugins",
-
-        props: {
-            id: String,
-        },
-
-        components: {
-            "list": ListComponent,
-            "plugin": PluginComponent,
-        },
+        props: { id: String },
+        components: { "list": ListComponent, "plugin": PluginComponent },
 
         computed: {
             user() {
@@ -138,11 +131,7 @@
                 return 0;
             });
 
-            this.bridges.unshift({
-                id: "library",
-                display: this.$t("library"),
-            });
-
+            this.bridges.unshift({ id: "library", display: this.$t("library") });
             this.load(this.id);
         },
 

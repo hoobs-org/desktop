@@ -18,11 +18,7 @@
 
 <template>
     <draggable v-if="sort" id="list" :class="selected && selected !== '' ? 'list open' : 'list'" handle=".drag" ghost-class="ghost" v-model="working" v-on:end="save">
-        <div
-            v-for="(item, index) in working"
-            :key="`entry:${index}`"
-            :class="`${item[value]}` === (selected || initial) ? 'item open' : 'item'"
-        >
+        <div v-for="(item, index) in working" :key="`entry:${index}`" :class="`${item[value]}` === (selected || initial) ? 'item open' : 'item'">
             <icon name="drag-horizontal" class="icon drag" />
             {{ item[display] }}
         </div>
@@ -42,10 +38,7 @@
 
     export default {
         name: "list",
-
-        components: {
-            "draggable": DraggableComponent,
-        },
+        components: { "draggable": DraggableComponent },
 
         props: {
             values: Array,
@@ -59,9 +52,7 @@
         },
 
         data() {
-            return {
-                working: [],
-            };
+            return { working: [] };
         },
 
         watch: {

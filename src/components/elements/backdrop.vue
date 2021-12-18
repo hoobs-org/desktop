@@ -23,11 +23,7 @@
 <script>
     export default {
         name: "backdrop",
-
-        props: {
-            image: String,
-            value: String,
-        },
+        props: { image: String, value: String },
 
         methods: {
             select() {

@@ -58,10 +58,7 @@
         },
 
         data() {
-            return {
-                label: "",
-                items: (this.value !== undefined) ? Object.keys(this.value).map((item) => ({ key: item, value: this.value[item] })) : [],
-            };
+            return { label: "", items: (this.value !== undefined) ? Object.keys(this.value).map((item) => ({ key: item, value: this.value[item] })) : [] };
         },
 
         mounted() {

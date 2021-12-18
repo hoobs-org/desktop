@@ -101,9 +101,7 @@
             toggle() {
                 this.$store.commit("NAVIGATION:STATE", !this.$store.state.navigation);
 
-                const event = document.createEvent("HTMLEvents");
-
-                event.initEvent("resize", true, true);
+                const event = new Event("resize", { bubbles: true, cancelable: true });
 
                 window.dispatchEvent(event);
             },

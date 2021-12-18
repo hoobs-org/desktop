@@ -33,56 +33,17 @@ import CacheDialog from "@/components/dialogs/cache.vue";
 import Dialogs from "../plugins/dialogs";
 
 export default new Dialogs([
-    {
-        name: "alert",
-        component: AlertDialog,
-    },
-    {
-        name: "confirm",
-        component: ConfirmDialog,
-    },
-    {
-        name: "about",
-        component: AboutDialog,
-    },
-    {
-        name: "updates",
-        component: UpdatesDialog,
-    },
-    {
-        name: "settings",
-        component: SettingsDialog,
-    },
-    {
-        name: "network",
-        component: NetworksDialog,
-    },
-    {
-        name: "personalize",
-        component: PersonalizeDialog,
-    },
-    {
-        name: "dashboard",
-        component: DashboardDialog,
-    },
-    {
-        name: "bridges",
-        component: BridgesDialog,
-    },
-    {
-        name: "plugin",
-        component: PluginDialog,
-    },
-    {
-        name: "accessory",
-        component: AccessoryDialog,
-    },
-    {
-        name: "hidden",
-        component: HiddenDialog,
-    },
-    {
-        name: "cache",
-        component: CacheDialog,
-    },
+    { name: "alert", component: AlertDialog },
+    { name: "confirm", component: ConfirmDialog },
+    { name: "about", component: AboutDialog },
+    { name: "updates", component: UpdatesDialog },
+    { name: "settings", component: SettingsDialog },
+    { name: "network", component: NetworksDialog },
+    { name: "personalize", component: PersonalizeDialog },
+    { name: "dashboard", component: DashboardDialog },
+    { name: "bridges", component: BridgesDialog },
+    { name: "plugin", component: PluginDialog },
+    { name: "accessory", component: AccessoryDialog },
+    { name: "hidden", component: HiddenDialog },
+    { name: "cache", component: CacheDialog },
 ]);

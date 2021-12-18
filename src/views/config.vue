@@ -103,11 +103,7 @@
 
     export default {
         name: "config",
-
-        props: {
-            name: String,
-            scope: String,
-        },
+        props: { name: String, scope: String },
 
         components: {
             "list": ListComponent,
@@ -498,10 +494,7 @@
                                 break;
 
                             default:
-                                this.schema = {
-                                    type: "object",
-                                    properties: this.plugin.schema.config.properties || this.plugin.schema.config,
-                                };
+                                this.schema = { type: "object", properties: this.plugin.schema.config.properties || this.plugin.schema.config };
 
                                 break;
                         }

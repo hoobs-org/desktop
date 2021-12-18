@@ -62,17 +62,13 @@
             waits.push(new Promise((resolve) => {
                 this.$hoobs.config.get().then((config) => {
                     this.location = (config.weather || {}).location;
-                }).finally(() => {
-                    resolve();
-                });
+                }).finally(() => resolve());
             }));
 
             waits.push(new Promise((resolve) => {
                 this.$hoobs.weather.current().then((current) => {
                     this.current = current;
-                }).finally(() => {
-                    resolve();
-                });
+                }).finally(() => resolve());
             }));
 
             Promise.all(waits).then(() => {

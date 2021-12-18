@@ -27,9 +27,7 @@
         name: "dialog-view",
 
         data() {
-            return {
-                dialogs: [],
-            };
+            return { dialogs: [] };
         },
 
         async created() {

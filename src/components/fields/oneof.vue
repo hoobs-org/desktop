@@ -37,10 +37,7 @@
         },
 
         data() {
-            return {
-                uuid: "",
-                working: null,
-            };
+            return { uuid: "", working: null };
         },
 
         mounted() {

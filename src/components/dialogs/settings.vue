@@ -285,9 +285,7 @@
                     this.$action.on("io", "disconnected", () => {
                         this.$action.emit("io", "reload");
 
-                        setTimeout(() => {
-                            this.$dialog.close("settings");
-                        }, REDIRECT_DELAY);
+                        setTimeout(() => this.$dialog.close("settings"), REDIRECT_DELAY);
                     });
                 });
             },
@@ -328,9 +326,7 @@
 
                     await (await this.$hoobs.system()).shutdown();
 
-                    this.$action.on("io", "disconnected", () => {
-                        this.$dialog.close("settings");
-                    });
+                    this.$action.on("io", "disconnected", () => this.$dialog.close("settings"));
                 });
             },
 
@@ -389,9 +385,7 @@
                     this.$action.on("io", "disconnected", () => {
                         this.$action.emit("io", "reload");
 
-                        setTimeout(() => {
-                            this.$dialog.close("settings");
-                        }, REDIRECT_DELAY);
+                        setTimeout(() => this.$dialog.close("settings"), REDIRECT_DELAY);
                     });
                 });
             },
@@ -403,10 +397,7 @@
                 const config = await this.$hoobs.config.get();
                 const weather = {};
 
-                if ((this.product === "box" || this.product === "card") && this.url !== "" && this.url !== this.broadcast) {
-                    await this.$hoobs.hostname.update(this.broadcast);
-                }
-
+                if ((this.product === "box" || this.product === "card") && this.url !== "" && this.url !== this.broadcast) await this.$hoobs.hostname.update(this.broadcast);
                 if (this.location && this.location.id && this.location.id > 0) weather.location = this.location;
                 if (!config.api) config.api = {};
 

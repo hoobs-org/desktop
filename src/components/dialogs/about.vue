@@ -54,9 +54,7 @@
         name: "about",
 
         data() {
-            return {
-                version: "",
-            };
+            return { version: "" };
         },
 
         async mounted() {

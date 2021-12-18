@@ -49,10 +49,7 @@
 
     export default {
         name: "restore",
-
-        components: {
-            "message": MessageComponent,
-        },
+        components: { "message": MessageComponent },
 
         data() {
             return {
@@ -66,9 +63,7 @@
 
         async mounted() {
             this.loading = true;
-
             this.files = await this.$hoobs.backup.catalog(5);
-
             this.loading = false;
         },
 
@@ -129,9 +124,7 @@
                     this.$action.on("io", "disconnected", () => {
                         this.$action.emit("io", "reload");
 
-                        setTimeout(() => {
-                            this.$dialog.close("settings");
-                        }, REDIRECT_DELAY);
+                        setTimeout(() => this.$dialog.close("settings"), REDIRECT_DELAY);
                     });
                 }
             },
@@ -186,9 +179,7 @@
                     this.$action.on("io", "disconnected", () => {
                         this.$action.emit("io", "reload");
 
-                        setTimeout(() => {
-                            this.$dialog.close("settings");
-                        }, REDIRECT_DELAY);
+                        setTimeout(() => this.$dialog.close("settings"), REDIRECT_DELAY);
                     });
                 }
             },

@@ -27,10 +27,7 @@
         name: "activity-widget",
 
         data() {
-            return {
-                key: 1,
-                colors: [],
-            };
+            return { key: 1, colors: [] };
         },
 
         created() {

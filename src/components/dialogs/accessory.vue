@@ -91,21 +91,12 @@
 
     export default {
         name: "settings",
-
-        components: {
-            "icons": IconsComponent,
-            "rooms": RoomsComponent,
-        },
-
-        props: {
-            options: Object,
-        },
+        components: { "icons": IconsComponent, "rooms": RoomsComponent },
+        props: { options: Object },
 
         computed: {
             widget() {
-                if (this.accessory && this.items.find((item) => item.i === this.accessory.accessory_identifier)) {
-                    return true;
-                }
+                if (this.accessory && this.items.find((item) => item.i === this.accessory.accessory_identifier)) return true;
 
                 return false;
             },
@@ -122,25 +113,15 @@
                 streaming: false,
                 room: "",
                 title: "",
-                icon: {
-                    selected: null,
-                    default: null,
-                },
+                icon: { selected: null, default: null },
                 safety: 0,
-                features: {
-                    icon: false,
-                },
-                show: {
-                    icons: false,
-                    rooms: false,
-                },
+                features: { icon: false },
+                show: { icons: false, rooms: false },
             };
         },
 
         created() {
-            this.$action.on("dashboard", "update", () => {
-                this.load();
-            });
+            this.$action.on("dashboard", "update", () => this.load());
         },
 
         async mounted() {
@@ -156,10 +137,7 @@
             },
 
             streaming() {
-                this.$store.commit("ACCESSORY:STREAMING", {
-                    id: this.accessory.accessory_identifier,
-                    data: this.streaming,
-                });
+                this.$store.commit("ACCESSORY:STREAMING", { id: this.accessory.accessory_identifier, data: this.streaming });
             },
         },
 
@@ -171,9 +149,7 @@
                 const config = await this.$hoobs.config.get();
                 const accessory = await this.$hoobs.accessory(this.options.bridge, this.options.id);
 
-                config.dashboard = config.dashboard || {
-                    items: [...initial],
-                };
+                config.dashboard = config.dashboard || { items: [...initial] };
 
                 this.accessory = accessory;
                 this.plugin = this.accessory.plugin;

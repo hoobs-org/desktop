@@ -90,10 +90,7 @@
 
     export default {
         name: "updates",
-
-        components: {
-            "message": MessageComponent,
-        },
+        components: { "message": MessageComponent },
 
         computed: {
             platform() {
@@ -209,9 +206,7 @@
 
                     waits.push(new Promise((resolve) => {
                         this.$hoobs.bridge(plugin.bridge).then((bridge) => {
-                            bridge.plugins.upgrade(plugin.identifier).then(() => {
-                                resolve();
-                            });
+                            bridge.plugins.upgrade(plugin.identifier).then(() => resolve());
                         });
                     }));
                 }
@@ -238,9 +233,7 @@
                 } else if (this.stack) {
                     shell.openExternal("https://support.hoobs.org/downloads/hoobsd");
 
-                    if (this.client) {
-                        this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
-                    }
+                    if (this.client) this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
                 } else if (this.client) {
                     this.$action.emit("app", "update", { url: this.desktop[`download_${this.$os}`], version: this.desktop.version });
                 } else {

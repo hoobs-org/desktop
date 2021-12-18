@@ -63,11 +63,7 @@
 
     export default {
         name: "sprinkler-accessory",
-
-        props: {
-            disabled: Boolean,
-            accessory: Object,
-        },
+        props: { disabled: Boolean, accessory: Object },
 
         computed: {
             charge() {
@@ -144,10 +140,7 @@
                 min: 0,
                 max: 3600,
                 battery: 0,
-                features: {
-                    timer: false,
-                    battery: false,
-                },
+                features: { timer: false, battery: false },
                 local: false,
                 subject: null,
                 display: "",
@@ -199,10 +192,7 @@
 
         methods: {
             settings() {
-                this.$dialog.open("accessory", {
-                    bridge: this.subject.bridge,
-                    id: this.subject.accessory_identifier,
-                });
+                this.$dialog.open("accessory", { bridge: this.subject.bridge, id: this.subject.accessory_identifier });
             },
 
             map(x, inMin, inMax, outMin, outMax) {

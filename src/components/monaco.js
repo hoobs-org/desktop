@@ -26,9 +26,7 @@ export default {
         background: { type: String, default: "141414" },
     },
 
-    model: {
-        event: "change",
-    },
+    model: { event: "change" },
 
     watch: {
         value(value) {

@@ -17,10 +17,7 @@
  **************************************************************************************************/
 
 export function units(value: number): { [key: string]: number | string } {
-    const results = {
-        value: Math.round((value / 1073741824) * 100) / 100,
-        units: "GB",
-    };
+    const results = { value: Math.round((value / 1073741824) * 100) / 100, units: "GB" };
 
     while (results.value < 1 && results.units !== "KB") {
         results.value = Math.round((results.value * 1024) * 100) / 100;

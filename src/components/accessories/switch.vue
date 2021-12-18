@@ -51,11 +51,7 @@
 
     export default {
         name: "switch-accessory",
-
-        props: {
-            disabled: Boolean,
-            accessory: Object,
-        },
+        props: { disabled: Boolean, accessory: Object },
 
         computed: {
             charge() {
@@ -78,9 +74,7 @@
             return {
                 on: false,
                 battery: 0,
-                features: {
-                    battery: false,
-                },
+                features: { battery: false },
                 local: false,
                 subject: null,
                 display: "",
@@ -116,10 +110,7 @@
 
         methods: {
             settings() {
-                this.$dialog.open("accessory", {
-                    bridge: this.subject.bridge,
-                    id: this.subject.accessory_identifier,
-                });
+                this.$dialog.open("accessory", { bridge: this.subject.bridge, id: this.subject.accessory_identifier });
             },
 
             async toggle() {

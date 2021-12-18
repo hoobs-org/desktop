@@ -20,9 +20,7 @@ export default class Dates {
     static weekday(value: Date): string {
         const day = value.getDay();
 
-        if (!Number.isInteger(day)) {
-            return "";
-        }
+        if (!Number.isInteger(day)) return "";
 
         switch (day % 7) {
             case 1:

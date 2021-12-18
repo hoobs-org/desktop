@@ -49,14 +49,7 @@
 <script>
     export default {
         name: "rating",
-
-        props: {
-            value: Number,
-            size: {
-                type: Number,
-                default: 17,
-            },
-        },
+        props: { value: Number, size: { type: Number, default: 17 } },
     };
 </script>
 

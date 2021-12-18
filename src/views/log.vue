@@ -45,10 +45,7 @@
 
     export default {
         name: "log",
-
-        components: {
-            "message": MessageComponent,
-        },
+        components: { "message": MessageComponent },
 
         computed: {
             messages() {
@@ -143,24 +140,13 @@
             },
 
             menu(name) {
-                this.$menu.open(name, {
-                    opener: this.$refs[name],
-                    values: this[name],
-                });
+                this.$menu.open(name, { opener: this.$refs[name], values: this[name] });
             },
 
             filter(message) {
-                if (!this.debug && message.level === "debug") {
-                    return false;
-                }
-
-                if (!((this.bridges.find((item) => item.value === (message.bridge || "hub")) || {}).selected)) {
-                    return false;
-                }
-
-                if (!((this.plugins.find((item) => item.value === (message.plugin || "null")) || {}).selected)) {
-                    return false;
-                }
+                if (!this.debug && message.level === "debug") return false;
+                if (!((this.bridges.find((item) => item.value === (message.bridge || "hub")) || {}).selected)) return false;
+                if (!((this.plugins.find((item) => item.value === (message.plugin || "null")) || {}).selected)) return false;
 
                 return true;
             },

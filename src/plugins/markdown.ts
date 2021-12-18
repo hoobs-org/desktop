@@ -17,35 +17,14 @@
  **************************************************************************************************/
 
 import Vue, { VueConstructor } from "vue";
-import Showdown, { Converter } from "showdown";
-import Highlight from "showdown-highlight";
-import Emoji from "./emoji";
 
-class Markdown {
-    declare converter: Converter;
-
-    constructor() {
-        Showdown.setFlavor("github");
-
-        this.converter = new Showdown.Converter({
-            extensions: [
-                Emoji,
-                Highlight({ pre: true }),
-            ],
-            tables: true,
-            simplifiedAutoLink: true,
-            excludeTrailingPunctuationFromURLs: true,
-        });
-    }
-
+export default {
     install(vue: VueConstructor<Vue>): void {
         vue.mixin({
             methods: {
                 $markdown: (value: string): string => {
-                    let html = (value || "").replace(/```[a-zA-Z ]*\n/gi, (match) => `${match.trim().toLowerCase()}\n`);
+                    let html = (value || "");
                     let href = "";
-
-                    html = this.converter.makeHtml(html);
 
                     const links = html.match(/<\s*a[^>]*>/igm) || [];
 
@@ -67,9 +46,5 @@ class Markdown {
                 },
             },
         });
-    }
-}
-
-export default function markdown(): Markdown {
-    return new Markdown();
-}
+    },
+};

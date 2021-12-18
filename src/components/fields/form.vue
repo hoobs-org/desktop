@@ -49,10 +49,7 @@
 
     export default {
         name: "form-field",
-
-        components: {
-            "schema": SchemaComponent,
-        },
+        components: { "schema": SchemaComponent },
 
         props: {
             field: [String, Number],

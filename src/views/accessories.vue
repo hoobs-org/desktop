@@ -119,11 +119,7 @@
 
     export default {
         name: "accessories",
-
-        props: {
-            id: String,
-            room: String,
-        },
+        props: { id: String, room: String },
 
         components: {
             "list": ListComponent,
@@ -150,10 +146,7 @@
                 version: 0,
                 loading: true,
                 current: null,
-                locked: {
-                    rooms: true,
-                    accessories: true,
-                },
+                locked: { rooms: true, accessories: true },
                 intermediate: true,
                 characteristics: [],
                 accessories: [],
@@ -202,12 +195,8 @@
                     if ((i + 1) !== rooms[i].sequence) {
                         updates.push(new Promise((resolve) => {
                             this.$hoobs.room(rooms[i].id).then((room) => {
-                                room.set("sequence", (i + 1)).finally(() => {
-                                    resolve();
-                                });
-                            }).catch(() => {
-                                resolve();
-                            });
+                                room.set("sequence", (i + 1)).finally(() => resolve());
+                            }).catch(() => resolve());
                         }));
                     }
                 }
@@ -234,12 +223,8 @@
                     if ((i + 1) !== this.accessories[i].sequence) {
                         updates.push(new Promise((resolve) => {
                             this.$hoobs.accessory(this.accessories[i].bridge, this.accessories[i].accessory_identifier).then((accessory) => {
-                                accessory.set("sequence", (i + 1)).finally(() => {
-                                    resolve();
-                                });
-                            }).catch(() => {
-                                resolve();
-                            });
+                                accessory.set("sequence", (i + 1)).finally(() => resolve());
+                            }).catch(() => resolve());
                         }));
                     }
                 }
@@ -331,9 +316,7 @@
                             for (let i = 0; i < this.rooms.length; i += 1) {
                                 if (!this.rooms[i].name || this.rooms[i].name === "") this.rooms[i].name = this.$t(this.rooms[i].id);
                             }
-                        }).finally(() => {
-                            resolve();
-                        });
+                        }).finally(() => resolve());
                     }
                 });
             },

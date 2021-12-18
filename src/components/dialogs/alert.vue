@@ -26,11 +26,5 @@
 </template>
 
 <script>
-    export default {
-        name: "alert",
-
-        props: {
-            options: Object,
-        },
-    };
+    export default { name: "alert", props: { options: Object } };
 </script>

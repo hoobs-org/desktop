@@ -36,10 +36,7 @@
         name: "select-field",
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
+            id: { type: String, default: undefined },
             name: String,
             field: [String, Number],
             title: String,
@@ -48,16 +45,11 @@
             default: [String, Number, Boolean, Object, Date],
             type: String,
             options: Array,
-            required: {
-                type: Boolean,
-                default: false,
-            },
+            required: { type: Boolean, default: false },
         },
 
         data() {
-            return {
-                uuid: "",
-            };
+            return { uuid: "" };
         },
 
         mounted() {
@@ -105,9 +97,7 @@
                     case "number":
                         value = parseFloat(this.$refs[this.uuid].value);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
-                        }
+                        if (Number.isNaN(value)) value = null;
 
                         this.$emit("input", value);
                         break;
@@ -116,9 +106,7 @@
                     case "integer":
                         value = parseInt(this.$refs[this.uuid].value, 10);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
-                        }
+                        if (Number.isNaN(value)) value = null;
 
                         this.$emit("input", value);
                         break;
@@ -144,9 +132,7 @@
                     case "number":
                         value = parseFloat(this.$refs[this.uuid].value);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
-                        }
+                        if (Number.isNaN(value)) value = null;
 
                         this.$emit("change", value);
                         break;
@@ -155,9 +141,7 @@
                     case "integer":
                         value = parseInt(this.$refs[this.uuid].value, 10);
 
-                        if (Number.isNaN(value)) {
-                            value = null;
-                        }
+                        if (Number.isNaN(value)) value = null;
 
                         this.$emit("change", value);
                         break;

@@ -14,7 +14,6 @@ paths:
 locals:
 	cp ../lang/builds/* src/lang/locals/
 	cp ../lang/countries.json src/lang/
-	cp ../lang/emojis.json src/lang/
 
 lint:
 	./node_modules/.bin/vue-cli-service lint

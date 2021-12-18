@@ -104,9 +104,7 @@ export function end(): void {
 }
 
 export function contain(): void {
-    const event = document.createEvent("HTMLEvents");
-
-    event.initEvent("mouseup", true, true);
+    const event = new Event("mouseup", { bubbles: true, cancelable: true });
 
     document.dispatchEvent(event);
 }
@@ -150,9 +148,7 @@ export default {
             const classes = options.eventClass;
 
             Object.keys(classes).forEach((key) => {
-                if (classes[key]) {
-                    window.data.class[key] = classes[key];
-                }
+                if (classes[key]) window.data.class[key] = classes[key];
             });
         }
 

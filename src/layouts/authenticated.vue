@@ -41,10 +41,7 @@
 
     export default {
         name: "authenticated",
-
-        components: {
-            "navigation": NavigationComponent,
-        },
+        components: { "navigation": NavigationComponent },
 
         computed: {
             current() {

@@ -35,18 +35,9 @@
 
         props: {
             title: String,
-            width: {
-                type: String,
-                default: "auto",
-            },
-            height: {
-                type: String,
-                default: "auto",
-            },
-            draggable: {
-                type: Boolean,
-                default: false,
-            },
+            width: { type: String, default: "auto" },
+            height: { type: String, default: "auto" },
+            draggable: { type: Boolean, default: false },
         },
     };
 </script>

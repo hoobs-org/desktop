@@ -31,11 +31,7 @@
 <script>
     export default {
         name: "unavailable-accessory",
-
-        props: {
-            disabled: Boolean,
-            item: Object,
-        },
+        props: { disabled: Boolean, item: Object },
 
         methods: {
             async remove() {

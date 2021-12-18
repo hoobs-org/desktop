@@ -50,11 +50,7 @@
 
     export default {
         name: "app",
-
-        components: {
-            "public": PublicLayout,
-            "authenticated": AuthenticatedLayout,
-        },
+        components: { "public": PublicLayout, "authenticated": AuthenticatedLayout },
 
         computed: {
             theme() {
@@ -63,18 +59,14 @@
         },
 
         data() {
-            return {
-                maximized: false,
-            };
+            return { maximized: false };
         },
 
         async created() {
             this.$theme.load();
             this.maximized = this.$electron.maximized;
 
-            window.addEventListener("resize", () => {
-                this.$action.emit("window", "resize");
-            }, true);
+            window.addEventListener("resize", () => this.$action.emit("window", "resize"), true);
         },
 
         methods: {

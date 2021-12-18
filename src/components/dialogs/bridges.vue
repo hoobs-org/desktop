@@ -82,14 +82,8 @@
 
     export default {
         name: "bridges",
-
-        components: {
-            "message": MessageComponent,
-        },
-
-        props: {
-            options: Object,
-        },
+        components: { "message": MessageComponent },
+        props: { options: Object },
 
         data() {
             return {
@@ -104,13 +98,10 @@
                 advertiser: "bonjour",
                 current: null,
                 messages: [],
-                advertisers: [{
-                    value: "bonjour",
-                    text: this.$t("bridge_bonjour"),
-                }, {
-                    value: "ciao",
-                    text: this.$t("bridge_ciao"),
-                }],
+                advertisers: [
+                    { value: "bonjour", text: this.$t("bridge_bonjour") },
+                    { value: "ciao", text: this.$t("bridge_ciao") },
+                ],
             };
         },
 

@@ -62,9 +62,7 @@
         async mounted() {
             const config = await this.$hoobs.config.get();
 
-            config.dashboard = config.dashboard || {
-                items: [...initial],
-            };
+            config.dashboard = config.dashboard || { items: [...initial] };
 
             this.items = config.dashboard.items;
             this.backdrop = config.dashboard.backdrop || false;
@@ -72,9 +70,7 @@
             for (let i = 0; i < this.items.length; i += 1) {
                 const index = this.available.findIndex((item) => item.name === this.items[i].component);
 
-                if (index >= 0) {
-                    this.available[index].selected = true;
-                }
+                if (index >= 0) this.available[index].selected = true;
             }
 
             this.loading = false;
@@ -97,10 +93,7 @@
                     }
                 }
 
-                config.dashboard = {
-                    items,
-                    backdrop: this.backdrop,
-                };
+                config.dashboard = { items, backdrop: this.backdrop };
 
                 await this.$hoobs.config.update(config);
 

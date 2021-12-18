@@ -49,11 +49,7 @@
 
     export default {
         name: "unknown-accessory",
-
-        props: {
-            disabled: Boolean,
-            accessory: Object,
-        },
+        props: { disabled: Boolean, accessory: Object },
 
         computed: {
             charge() {
@@ -75,9 +71,7 @@
         data() {
             return {
                 battery: 0,
-                features: {
-                    battery: false,
-                },
+                features: { battery: false },
                 local: false,
                 subject: null,
                 display: "",

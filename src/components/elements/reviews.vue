@@ -42,10 +42,7 @@
 
     export default {
         name: "reviews",
-
-        components: {
-            "review": ReviewComponent,
-        },
+        components: { "review": ReviewComponent },
 
         props: {
             id: String,

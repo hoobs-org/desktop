@@ -104,11 +104,7 @@
 
     export default {
         name: "personalize",
-
-        components: {
-            "color": ColorComponent,
-            "backdrop": BackdropComponent,
-        },
+        components: { "color": ColorComponent, "backdrop": BackdropComponent },
 
         data() {
             return {

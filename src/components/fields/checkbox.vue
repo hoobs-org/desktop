@@ -35,26 +35,13 @@
 
     export default {
         name: "checkbox",
-
-        model: {
-            prop: "model",
-            event: "change",
-        },
+        model: { prop: "model", event: "change" },
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
-            model: {
-                type: Boolean,
-                default: false,
-            },
+            id: { type: String, default: undefined },
+            model: { type: Boolean, default: false },
             checked: Boolean,
-            value: {
-                type: Boolean,
-                default: false,
-            },
+            value: { type: Boolean, default: false },
             default: Boolean,
             name: String,
             field: [String, Number],
@@ -66,10 +53,7 @@
         },
 
         data() {
-            return {
-                uuid: "",
-                view: this.model,
-            };
+            return { uuid: "", view: this.model };
         },
 
         computed: {
@@ -78,10 +62,7 @@
             },
 
             classes() {
-                return {
-                    "disabled": this.disabled,
-                    "active": this.state,
-                };
+                return { "disabled": this.disabled, "active": this.state };
             },
         },
 

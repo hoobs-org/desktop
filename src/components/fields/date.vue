@@ -43,34 +43,20 @@
         name: "date-field",
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
+            id: { type: String, default: undefined },
             name: String,
             field: [String, Number],
             title: String,
             description: String,
-            placeholder: {
-                type: String,
-                default: "",
-            },
+            placeholder: { type: String, default: "" },
             value: String,
             default: String,
-            required: {
-                type: Boolean,
-                default: false,
-            },
-            autofocus: {
-                type: Boolean,
-                default: false,
-            },
+            required: { type: Boolean, default: false },
+            autofocus: { type: Boolean, default: false },
         },
 
         data() {
-            return {
-                uuid: "",
-            };
+            return { uuid: "" };
         },
 
         mounted() {

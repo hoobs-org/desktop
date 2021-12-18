@@ -96,14 +96,8 @@
 
     export default {
         name: "users",
-
-        props: {
-            id: String,
-        },
-
-        components: {
-            "list": ListComponent,
-        },
+        props: { id: String },
+        components: { "list": ListComponent },
 
         computed: {
             user() {

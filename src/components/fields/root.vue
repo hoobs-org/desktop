@@ -48,10 +48,7 @@
 
     export default {
         name: "root-field",
-
-        components: {
-            "schema": SchemaComponent,
-        },
+        components: { "schema": SchemaComponent },
 
         props: {
             field: String,
@@ -63,9 +60,7 @@
         },
 
         data() {
-            return {
-                items: (this.value !== undefined) ? this.value : [],
-            };
+            return { items: (this.value !== undefined) ? this.value : [] };
         },
 
         methods: {

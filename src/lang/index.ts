@@ -64,7 +64,4 @@ Vue.use(VueI18n);
 
 const locale = current();
 
-export default new VueI18n({
-    locale,
-    messages: load(locale),
-});
+export default new VueI18n({ locale, messages: load(locale) });

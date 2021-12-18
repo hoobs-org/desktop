@@ -33,26 +33,13 @@
 
     export default {
         name: "radio",
-
-        model: {
-            prop: "model",
-            event: "change",
-        },
+        model: { prop: "model", event: "change" },
 
         props: {
-            id: {
-                type: String,
-                default: undefined,
-            },
-            model: {
-                type: [String, Boolean, Number, Object],
-                default: undefined,
-            },
+            id: { type: String, default: undefined },
+            model: { type: [String, Boolean, Number, Object], default: undefined },
             checked: Boolean,
-            value: {
-                type: [String, Boolean, Number, Object],
-                default: undefined,
-            },
+            value: { type: [String, Boolean, Number, Object], default: undefined },
             name: String,
             field: [String, Number],
             title: String,
@@ -63,10 +50,7 @@
         },
 
         data() {
-            return {
-                uuid: "",
-                view: this.model,
-            };
+            return { uuid: "", view: this.model };
         },
 
         computed: {
@@ -75,10 +59,7 @@
             },
 
             classes() {
-                return {
-                    "disabled": this.disabled,
-                    "active": this.state,
-                };
+                return { "disabled": this.disabled, "active": this.state };
             },
         },
 

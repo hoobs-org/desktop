@@ -33,18 +33,8 @@
 
     export default {
         name: "accessory-widget",
-
-        components: {
-            ...accessories(),
-        },
-
-        props: {
-            item: {
-                type: Object,
-                required: true,
-            },
-            locked: Boolean,
-        },
+        components: { ...accessories() },
+        props: { item: { type: Object, required: true }, locked: Boolean },
 
         data() {
             return {

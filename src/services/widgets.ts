@@ -72,79 +72,167 @@ export const available = [{
 }];
 
 export const initial = [{
-    x: 0, y: 29, w: 6, h: 8, i: "bridges-widget", component: "bridges-widget",
+    x: 0,
+    y: 29,
+    w: 6,
+    h: 8,
+    i: "bridges-widget",
+    component: "bridges-widget",
 }, {
-    x: 0, y: 21, w: 6, h: 8, i: "memory-widget", component: "memory-widget",
+    x: 0,
+    y: 21,
+    w: 6,
+    h: 8,
+    i: "memory-widget",
+    component: "memory-widget",
 }, {
-    x: 0, y: 14, w: 6, h: 7, i: "cpu-widget", component: "cpu-widget",
+    x: 0,
+    y: 14,
+    w: 6,
+    h: 7,
+    i: "cpu-widget",
+    component: "cpu-widget",
 }, {
-    x: 0, y: 0, w: 80, h: 14, i: "activity-widget", component: "activity-widget",
+    x: 0,
+    y: 0,
+    w: 80,
+    h: 14,
+    i: "activity-widget",
+    component: "activity-widget",
 }, {
-    x: 6, y: 14, w: 27, h: 23, i: "weather-widget", component: "weather-widget",
+    x: 6,
+    y: 14,
+    w: 27,
+    h: 23,
+    i: "weather-widget",
+    component: "weather-widget",
 }, {
-    x: 61, y: 14, w: 19, h: 38, i: "system-widget", component: "system-widget",
+    x: 61,
+    y: 14,
+    w: 19,
+    h: 38,
+    i: "system-widget",
+    component: "system-widget",
 }];
 
 export function layout(name: string): { [key: string]: any } | undefined {
     switch (name) {
         case "camera-widget":
             return {
-                x: 0, y: 0, w: 23, h: 22, component: "camera-widget",
+                x: 0,
+                y: 0,
+                w: 23,
+                h: 22,
+                component: "camera-widget",
             };
 
         case "accessory-widget":
             return {
-                x: 0, y: 0, w: 8, h: 16, component: "accessory-widget",
+                x: 0,
+                y: 0,
+                w: 8,
+                h: 16,
+                component: "accessory-widget",
             };
 
         case "activity-widget":
             return {
-                x: 0, y: 0, w: 80, h: 36, i: "activity-widget", component: "activity-widget",
+                x: 0,
+                y: 0,
+                w: 80,
+                h: 36,
+                i: "activity-widget",
+                component: "activity-widget",
             };
 
         case "cpu-widget":
             return {
-                x: 0, y: 0, w: 6, h: 8, i: "cpu-widget", component: "cpu-widget",
+                x: 0,
+                y: 0,
+                w: 6,
+                h: 8,
+                i: "cpu-widget",
+                component: "cpu-widget",
             };
 
         case "temperature-widget":
             return {
-                x: 0, y: 0, w: 6, h: 8, i: "temperature-widget", component: "temperature-widget",
+                x: 0,
+                y: 0,
+                w: 6,
+                h: 8,
+                i: "temperature-widget",
+                component: "temperature-widget",
             };
 
         case "memory-widget":
             return {
-                x: 0, y: 0, w: 6, h: 8, i: "memory-widget", component: "memory-widget",
+                x: 0,
+                y: 0,
+                w: 6,
+                h: 8,
+                i: "memory-widget",
+                component: "memory-widget",
             };
 
         case "bridges-widget":
             return {
-                x: 0, y: 0, w: 6, h: 8, i: "bridges-widget", component: "bridges-widget",
+                x: 0,
+                y: 0,
+                w: 6,
+                h: 8,
+                i: "bridges-widget",
+                component: "bridges-widget",
             };
 
         case "log-widget":
             return {
-                x: 0, y: 0, w: 33, h: 42, i: "log-widget", component: "log-widget",
+                x: 0,
+                y: 0,
+                w: 33,
+                h: 42,
+                i: "log-widget",
+                component: "log-widget",
             };
 
         case "system-widget":
             return {
-                x: 0, y: 0, w: 27, h: 96, i: "system-widget", component: "system-widget",
+                x: 0,
+                y: 0,
+                w: 27,
+                h: 96,
+                i: "system-widget",
+                component: "system-widget",
             };
 
         case "weather-widget":
             return {
-                x: 0, y: 0, w: 27, h: 23, i: "weather-widget", component: "weather-widget",
+                x: 0,
+                y: 0,
+                w: 27,
+                h: 23,
+                i: "weather-widget",
+                component: "weather-widget",
             };
 
         case "forecast-widget":
             return {
-                x: 0, y: 0, w: 27, h: 24, i: "forecast-widget", component: "forecast-widget",
+                x: 0,
+                y: 0,
+                w: 27,
+                h: 24,
+                i: "forecast-widget",
+                component: "forecast-widget",
             };
 
         case "current-widget":
             return {
-                x: 0, y: 0, w: 13, h: 30, i: "current-widget", component: "current-widget",
+                x: 0,
+                y: 0,
+                w: 13,
+                h: 30,
+                i: "current-widget",
+                component: "current-widget",
             };
 
         default:

@@ -33,18 +33,8 @@
 
     export default {
         name: "camera-widget",
-
-        components: {
-            "camera-accessory": CameraAccessory,
-        },
-
-        props: {
-            item: {
-                type: Object,
-                required: true,
-            },
-            locked: Boolean,
-        },
+        components: { "camera-accessory": CameraAccessory },
+        props: { item: { type: Object, required: true }, locked: Boolean },
 
         data() {
             return {

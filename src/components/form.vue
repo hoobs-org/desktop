@@ -43,10 +43,7 @@
 
     export default {
         name: "schema-form",
-
-        components: {
-            "schema": SchemaComponent,
-        },
+        components: { "schema": SchemaComponent },
 
         props: {
             schema: Object,

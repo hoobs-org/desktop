@@ -143,15 +143,8 @@
 
     export default {
         name: "bridges",
-
-        props: {
-            id: String,
-        },
-
-        components: {
-            "qrcode": QRCodeComponent,
-            "list": ListComponent,
-        },
+        props: { id: String },
+        components: { "qrcode": QRCodeComponent, "list": ListComponent },
 
         computed: {
             user() {
@@ -195,13 +188,10 @@
                 end: null,
                 timer: null,
                 advertiser: "bonjour",
-                advertisers: [{
-                    value: "bonjour",
-                    text: this.$t("bridge_bonjour"),
-                }, {
-                    value: "ciao",
-                    text: this.$t("bridge_ciao"),
-                }],
+                advertisers: [
+                    { value: "bonjour", text: this.$t("bridge_bonjour") },
+                    { value: "ciao", text: this.$t("bridge_ciao") },
+                ],
             };
         },
 
@@ -231,9 +221,7 @@
 
         methods: {
             cache() {
-                this.$dialog.open("cache", {
-                    bridge: this.id,
-                });
+                this.$dialog.open("cache", { bridge: this.id });
             },
 
             async load(id) {
@@ -303,10 +291,7 @@
                     case "start":
                         await this.subject.start();
 
-                        this.timer = setTimeout(() => {
-                            this.loading = false;
-                        }, RESTART_LOADING_SAFETY);
-
+                        this.timer = setTimeout(() => { this.loading = false; }, RESTART_LOADING_SAFETY);
                         break;
 
                     case "stop":
@@ -318,10 +303,7 @@
                     case "restart":
                         await this.subject.restart();
 
-                        this.timer = setTimeout(() => {
-                            this.loading = false;
-                        }, RESTART_LOADING_SAFETY);
-
+                        this.timer = setTimeout(() => { this.loading = false; }, RESTART_LOADING_SAFETY);
                         break;
 
                     default:

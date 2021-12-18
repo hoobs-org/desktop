@@ -32,11 +32,7 @@
 <script>
     export default {
         name: "off-accessory",
-
-        props: {
-            id: String,
-            room: Object,
-        },
+        props: { id: String, room: Object },
 
         methods: {
             async off() {

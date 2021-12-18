@@ -68,11 +68,7 @@
 
     export default {
         name: "fan-accessory",
-
-        props: {
-            disabled: Boolean,
-            accessory: Object,
-        },
+        props: { disabled: Boolean, accessory: Object },
 
         computed: {
             charge() {
@@ -211,10 +207,7 @@
 
         methods: {
             settings() {
-                this.$dialog.open("accessory", {
-                    bridge: this.subject.bridge,
-                    id: this.subject.accessory_identifier,
-                });
+                this.$dialog.open("accessory", { bridge: this.subject.bridge, id: this.subject.accessory_identifier });
             },
 
             map(x, inMin, inMax, outMin, outMax) {

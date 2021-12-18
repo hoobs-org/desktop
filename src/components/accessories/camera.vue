@@ -51,10 +51,7 @@
 
     export default {
         name: "camera-accessory",
-
-        components: {
-            "player": Player,
-        },
+        components: { "player": Player },
 
         props: {
             disabled: Boolean,
@@ -155,12 +152,7 @@
 
                     if (snapshot) {
                         this.snapshot = snapshot;
-
-                        this.$store.commit("IO:SNAPSHOT:UPDATE", {
-                            id: this.subject.accessory_identifier,
-                            data: snapshot,
-                        });
-
+                        this.$store.commit("IO:SNAPSHOT:UPDATE", { id: this.subject.accessory_identifier, data: snapshot });
                         this.version += 1;
 
                         if (!this.timers.timelapse) this.lapse();

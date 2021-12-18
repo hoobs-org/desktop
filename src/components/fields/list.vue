@@ -53,10 +53,7 @@
 
     export default {
         name: "list-field",
-
-        components: {
-            "schema": SchemaComponent,
-        },
+        components: { "schema": SchemaComponent },
 
         props: {
             field: [String, Number],
@@ -68,10 +65,7 @@
         },
 
         data() {
-            return {
-                label: "",
-                items: (this.value !== undefined) ? this.value : [],
-            };
+            return { label: "", items: (this.value !== undefined) ? this.value : [] };
         },
 
         mounted() {

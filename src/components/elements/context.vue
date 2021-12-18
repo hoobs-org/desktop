@@ -33,11 +33,7 @@
 <script>
     export default {
         name: "context",
-
-        props: {
-            override: String,
-            login: Boolean,
-        },
+        props: { override: String, login: Boolean },
     };
 </script>
 

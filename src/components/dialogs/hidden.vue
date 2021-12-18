@@ -41,17 +41,12 @@
         name: "hidden",
 
         data() {
-            return {
-                loading: true,
-                accessories: [],
-            };
+            return { loading: true, accessories: [] };
         },
 
         created() {
             this.$store.subscribe(async (mutation) => {
-                if (mutation.type === "IO:ACCESSORY:CHANGE") {
-                    this.load();
-                }
+                if (mutation.type === "IO:ACCESSORY:CHANGE") this.load();
             });
         },
 

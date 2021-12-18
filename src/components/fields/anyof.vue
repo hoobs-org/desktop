@@ -39,9 +39,7 @@
         },
 
         data() {
-            return {
-                items: (this.value !== undefined) ? this.value : scaffold(this.schema),
-            };
+            return { items: (this.value !== undefined) ? this.value : scaffold(this.schema) };
         },
 
         methods: {

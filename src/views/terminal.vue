@@ -30,10 +30,7 @@
 <script>
     export default {
         name: "terminal",
-
-        props: {
-            route: String,
-        },
+        props: { route: String },
 
         computed: {
             user() {
@@ -59,10 +56,7 @@
                 screen: null,
                 initilize: true,
                 opening: true,
-                text: {
-                    width: 0,
-                    height: 0,
-                },
+                text: { width: 0, height: 0 },
             };
         },
 

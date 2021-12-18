@@ -52,10 +52,7 @@
 
     export default {
         name: "message",
-
-        props: {
-            value: Object,
-        },
+        props: { value: Object },
 
         methods: {
             format(value) {
@@ -71,9 +68,7 @@
                 scheme.scheme("analogic");
                 scheme.variation("hard");
 
-                if (double) {
-                    return this.analogic(scheme.colors()[7]);
-                }
+                if (double) return this.analogic(scheme.colors()[7]);
 
                 return `#${scheme.colors()[7]}`;
             },

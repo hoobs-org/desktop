@@ -103,19 +103,7 @@
 </template>
 
 <script>
-    export default {
-        name: "signal",
-
-        props: {
-            quality: {
-                type: Number,
-                required: true,
-            },
-            secure: {
-                type: Boolean,
-            },
-        },
-    };
+    export default { name: "signal", props: { quality: { type: Number, required: true }, secure: { type: Boolean } } };
 </script>
 
 <style lang="scss" scoped>

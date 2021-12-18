@@ -23,7 +23,7 @@
         </div>
         <div class="details">
             <span class="title">{{ $hoobs.repository.title(subject.name) }}</span>
-            <span class="description">{{ subject.description }}</span>
+            <span class="description" v-html="$markdown(subject.description)"></span>
             <rating :value="subject.rating" :size="15" />
         </div>
         <div v-if="subject.certified" class="certified">
@@ -40,20 +40,12 @@
 
     export default {
         name: "plugin",
-
-        props: {
-            subject: Object,
-        },
-
-        components: {
-            "rating": RatingComponent,
-        },
+        props: { subject: Object },
+        components: { "rating": RatingComponent },
 
         methods: {
             icon() {
-                if (this.subject.icon) {
-                    return this.subject.icon;
-                }
+                if (this.subject.icon) return this.subject.icon;
 
                 const hash = crypto.createHash("md5").update(this.subject.name).digest("hex");
 

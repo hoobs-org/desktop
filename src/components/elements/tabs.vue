@@ -32,14 +32,8 @@
         props: {
             value: String,
             values: Array,
-            field: {
-                type: String,
-                default: "value",
-            },
-            display: {
-                type: String,
-                default: "display",
-            },
+            field: { type: String, default: "value" },
+            display: { type: String, default: "display" },
         },
 
         methods: {

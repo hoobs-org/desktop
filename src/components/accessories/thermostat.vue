@@ -78,11 +78,7 @@
 
     export default {
         name: "thermostat-accessory",
-
-        props: {
-            disabled: Boolean,
-            accessory: Object,
-        },
+        props: { disabled: Boolean, accessory: Object },
 
         computed: {
             charge() {
@@ -189,14 +185,8 @@
 
         data() {
             return {
-                min: {
-                    temp: 10,
-                    state: 0,
-                },
-                max: {
-                    temp: 38,
-                    state: 1,
-                },
+                min: { temp: 10, state: 0 },
+                max: { temp: 38, state: 1 },
                 unit: "celsius",
                 state: 0,
                 target: 10,
@@ -206,10 +196,7 @@
                 adjusting: false,
                 timeout: null,
                 battery: 0,
-                features: {
-                    humidity: false,
-                    battery: false,
-                },
+                features: { humidity: false, battery: false },
                 local: false,
                 subject: null,
                 display: "",
@@ -271,10 +258,7 @@
 
         methods: {
             settings() {
-                this.$dialog.open("accessory", {
-                    bridge: this.subject.bridge,
-                    id: this.subject.accessory_identifier,
-                });
+                this.$dialog.open("accessory", { bridge: this.subject.bridge, id: this.subject.accessory_identifier });
             },
 
             map(x, inMin, inMax, outMin, outMax) {

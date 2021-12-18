@@ -45,10 +45,7 @@
 <script>
     export default {
         name: "cache",
-
-        props: {
-            options: Object,
-        },
+        props: { options: Object },
 
         data() {
             return {

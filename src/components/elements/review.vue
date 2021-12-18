@@ -44,14 +44,8 @@
 
     export default {
         name: "review",
-
-        components: {
-            "rating": RatingComponent,
-        },
-
-        props: {
-            value: Object,
-        },
+        components: { "rating": RatingComponent },
+        props: { value: Object },
     };
 </script>
 

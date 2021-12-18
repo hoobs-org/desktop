@@ -20,7 +20,7 @@
     <div v-if="!loading" id="reviews">
         <div class="list">
             <div class="write">
-                <a :href="`https://plugins.hoobs.org/plugin/${identifier}`" target="_blank">
+                <a :href="`https://plugins.hoobs.org/${identifier}`" target="_blank">
                     <icon name="message-draw" class="icon" />
                     {{ $t("write_review") }}
                 </a>

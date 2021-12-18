@@ -17,6 +17,7 @@
         "@hoobs/sdk": "^4.7.1",
         "@jaames/iro": "^5.4.0",
         "@mdi/js": "^6.5.95",
+        "best-effort-json-parser": "^0.1.1",
         "chart.js": "^2.9.4",
         "color-scheme": "^1.0.1",
         "colorthief": "^2.3.2",

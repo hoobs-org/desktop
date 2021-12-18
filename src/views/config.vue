@@ -36,7 +36,7 @@
             <div v-else-if="screen === 'manual'" class="screen tight">
                 <div class="section tight">{{ plugin.display }}</div>
                 <tabs :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
-                <monaco class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
+                <monaco class="editor" v-on:change="clean" :theme="theme" :foreground="foreground" :background="background" :value="code" />
                 <div class="row actions">
                     <div v-on:click="save" class="button primary">{{ $t("save") }}</div>
                     <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
@@ -45,7 +45,7 @@
             </div>
             <div v-else-if="screen === 'advanced'" class="screen tight">
                 <tabs v-if="bridges.length > 0" :values="bridges" v-on:change="exit" :value="bridge" field="id" display="display" class="tabs tight" />
-                <monaco v-if="bridges.length > 0" class="editor" v-on:change="parse" :theme="theme" :foreground="foreground" :background="background" :value="code" />
+                <monaco v-if="bridges.length > 0" class="editor" v-on:change="clean" :theme="theme" :foreground="foreground" :background="background" :value="code" />
                 <div class="row actions">
                     <div v-if="bridges.length > 0" v-on:click="save" class="button primary">{{ $t("save") }}</div>
                     <router-link to="/config" class="button">{{ $t("cancel") }}</router-link>
@@ -93,11 +93,13 @@
 </template>
 
 <script>
+    import { parse } from "best-effort-json-parser";
+    import Monaco from "../components/monaco";
+    import { cloneJson } from "../services/json";
+
     import TabsComponent from "@/components/elements/tabs.vue";
     import ListComponent from "@/components/elements/list.vue";
     import SchemaComponent from "@/components/form.vue";
-    import Monaco from "../components/monaco";
-    import { cloneJson } from "../services/json";
 
     const BRIDGE_RESTART_DELAY = 4000;
 
@@ -204,11 +206,11 @@
                 this.manual = !this.manual;
             },
 
-            parse(value) {
+            clean(value) {
                 let working;
 
                 try {
-                    working = JSON.parse(value);
+                    working = parse(value);
                 } catch (_error) {
                     working = undefined;
                 }

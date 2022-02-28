@@ -108,8 +108,9 @@
             <div v-else-if="bridges.length > 0" class="screen grid">
                 <div class="cards">
                     <router-link v-for="(bridge, index) in bridges" :key="`bridge:${index}`" :to="`/bridges/${bridge.id}`" class="card">
-                        <div v-if="details[bridge.id].setup_id">
-                            <qrcode :value="details[bridge.id].setup_id" :options="{ width: 160, color: { dark: theme.widget.text.default, light: '#00000000' }}" />
+                        <div class="qr">
+                            <qrcode v-if="details[bridge.id].setup_id" :value="details[bridge.id].setup_id" :options="{ width: 160, color: { dark: theme.widget.text.default, light: '#00000000' }}" />
+                            <icon v-else name="alert" class="icon"></icon>
                         </div>
                         <div class="details">
                             <span class="title">{{ bridge.display }}</span>
@@ -458,8 +459,19 @@
                         background: var(--widget-background);
                     }
 
-                    .details {
+                    .qr {
                         flex: 1;
+                        display: flex;
+                        justify-content: space-around;
+                        align-items: center;
+
+                        .icon {
+                            color: var(--widget-highlight);
+                            height: 30%;
+                        }
+                    }
+
+                    .details {
                         padding: 0 17px 17px 17px;
                         display: flex;
                         flex-direction: column;

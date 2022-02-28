@@ -71,7 +71,7 @@
                 }).finally(() => resolve());
             }));
 
-            Promise.all(waits).then(() => {
+            Promise.allSettled(waits).then(() => {
                 this.loading = false;
             });
         },

@@ -105,6 +105,15 @@
             };
         },
 
+        created() {
+            this.$action.on("io", "log", (data) => {
+                if (!data.bridge || data.bridge === "hub" || data.bridge === "") {
+                    this.messages.push(data);
+                    this.messages = this.messages.slice(Math.max(this.messages.length - 23, 0));
+                }
+            });
+        },
+
         async mounted() {
             this.loading = true;
             this.current = null;
@@ -159,13 +168,7 @@
         methods: {
             async install() {
                 this.loading = true;
-
-                this.$store.subscribe(async (mutation) => {
-                    if (mutation.type === "IO:LOG" && (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "")) {
-                        this.messages.push(mutation.payload);
-                        this.messages = this.messages.slice(Math.max(this.messages.length - 23, 0));
-                    }
-                });
+                this.messages = [];
 
                 if (this.current) {
                     this.options.select(this.current);
@@ -190,13 +193,7 @@
             uninstall() {
                 if (this.current) {
                     this.loading = true;
-
-                    this.$store.subscribe(async (mutation) => {
-                        if (mutation.type === "IO:LOG" && (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "")) {
-                            this.messages.push(mutation.payload);
-                            this.messages = this.messages.slice(Math.max(this.messages.length - 23, 0));
-                        }
-                    });
+                    this.messages = [];
 
                     this.options.select(this.current, this.remove);
                 }

@@ -63,13 +63,13 @@
                 this.io.on("reconnect", () => this.$action.emit("io", "connected"));
                 this.io.on("disconnect", () => this.$action.emit("io", "disconnected"));
 
+                this.io.connect(this.current.ip, this.current.port);
+
                 this.io.on("log", (data) => this.$action.emit("io", "log", decompressJson(data)));
                 this.io.on("monitor", (data) => this.$action.emit("io", "monitor", decompressJson(data)));
                 this.io.on("notification", (data) => this.$action.emit("io", "notification", decompressJson(data)));
                 this.io.on("accessory_change", (data) => this.$action.emit("io", "accessory_change", decompressJson(data)));
                 this.io.on("room_change", (data) => this.$action.emit("io", "room_change", decompressJson(data)));
-
-                this.io.connect(this.current.ip, this.current.port);
 
                 this.$action.emit("log", "history");
 

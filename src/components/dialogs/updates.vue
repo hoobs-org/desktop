@@ -114,6 +114,47 @@
             };
         },
 
+        created() {
+            this.$action.on("io", "log", (data) => {
+                if (this.logging) {
+                    if (!data.bridge || data.bridge === "hub" || data.bridge === "") {
+                        this.messages.push(data);
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
+                    }
+
+                    if ((data.message || "").toLowerCase().indexOf("service restart") >= 0) {
+                        this.logging = false;
+
+                        this.messages.push({
+                            level: "info",
+                            bridge: "hub",
+                            display: "hub",
+                            timestamp: new Date().getTime(),
+                            message: "restarting",
+                        }, {
+                            level: "info",
+                            bridge: "hub",
+                            display: "hub",
+                            timestamp: new Date().getTime(),
+                            message: ".",
+                        });
+
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
+
+                        setInterval(() => {
+                            if (this.messages[this.messages.length - 1].message === ".................................") {
+                                this.messages[this.messages.length - 1].message = ".";
+                            } else {
+                                this.messages[this.messages.length - 1].message += ".";
+                            }
+                        }, 500);
+
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
+                    }
+                }
+            });
+        },
+
         async mounted() {
             this.load();
         },
@@ -160,45 +201,6 @@
                 this.logging = true;
                 this.messages = [];
 
-                this.$store.subscribe(async (mutation) => {
-                    if (mutation.type === "IO:LOG" && this.logging) {
-                        if (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "") {
-                            this.messages.push(mutation.payload);
-                            this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
-                        }
-
-                        if ((mutation.payload.message || "").toLowerCase().indexOf("service restart") >= 0) {
-                            this.logging = false;
-
-                            this.messages.push({
-                                level: "info",
-                                bridge: "hub",
-                                display: "hub",
-                                timestamp: new Date().getTime(),
-                                message: "restarting",
-                            }, {
-                                level: "info",
-                                bridge: "hub",
-                                display: "hub",
-                                timestamp: new Date().getTime(),
-                                message: ".",
-                            });
-
-                            this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
-
-                            setInterval(() => {
-                                if (this.messages[this.messages.length - 1].message === ".................................") {
-                                    this.messages[this.messages.length - 1].message = ".";
-                                } else {
-                                    this.messages[this.messages.length - 1].message += ".";
-                                }
-                            }, 500);
-
-                            this.messages = this.messages.slice(Math.max(this.messages.length - 12, 0));
-                        }
-                    }
-                });
-
                 const waits = [];
 
                 for (let i = 0; i < this.plugins.length; i += 1) {
@@ -206,12 +208,12 @@
 
                     waits.push(new Promise((resolve) => {
                         this.$hoobs.bridge(plugin.bridge).then((bridge) => {
-                            bridge.plugins.upgrade(plugin.identifier).then(() => resolve());
-                        });
+                            bridge.plugins.upgrade(plugin.identifier).finally(() => resolve());
+                        }).catch(() => resolve());
                     }));
                 }
 
-                await Promise.all(waits);
+                await Promise.allSettled(waits);
 
                 if (this.platform === "linux" || this.platform === "docker") {
                     if (this.stack || this.status.upgradable.length > 0) {

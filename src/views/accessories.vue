@@ -201,7 +201,7 @@
                     }
                 }
 
-                await Promise.all(updates);
+                await Promise.allSettled(updates);
             },
 
             async lock() {
@@ -229,7 +229,7 @@
                     }
                 }
 
-                await Promise.all(updates);
+                await Promise.allSettled(updates);
             },
 
             load(id) {

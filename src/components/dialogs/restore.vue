@@ -61,6 +61,47 @@
             };
         },
 
+        created() {
+            this.$action.on("io", "log", (data) => {
+                if (this.logging) {
+                    if (!data.bridge || data.bridge === "hub" || data.bridge === "") {
+                        this.messages.push(data);
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
+                    }
+
+                    if ((data.message || "").toLowerCase().indexOf("service restart") >= 0) {
+                        this.logging = false;
+
+                        this.messages.push({
+                            level: "info",
+                            bridge: "hub",
+                            display: "hub",
+                            timestamp: new Date().getTime(),
+                            message: "restarting",
+                        }, {
+                            level: "info",
+                            bridge: "hub",
+                            display: "hub",
+                            timestamp: new Date().getTime(),
+                            message: ".",
+                        });
+
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
+
+                        setInterval(() => {
+                            if (this.messages[this.messages.length - 1].message === ".................................") {
+                                this.messages[this.messages.length - 1].message = ".";
+                            } else {
+                                this.messages[this.messages.length - 1].message += ".";
+                            }
+                        }, 500);
+
+                        this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
+                    }
+                }
+            });
+        },
+
         async mounted() {
             this.loading = true;
             this.files = await this.$hoobs.backup.catalog(5);
@@ -77,47 +118,10 @@
             async restore() {
                 if (this.filename !== "") {
                     this.$emit("restore");
+
                     this.logging = true;
                     this.loading = true;
-
-                    this.$store.subscribe(async (mutation) => {
-                        if (mutation.type === "IO:LOG" && this.logging) {
-                            if (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "") {
-                                this.messages.push(mutation.payload);
-                                this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-                            }
-
-                            if ((mutation.payload.message || "").toLowerCase().indexOf("service restart") >= 0) {
-                                this.logging = false;
-
-                                this.messages.push({
-                                    level: "info",
-                                    bridge: "hub",
-                                    display: "hub",
-                                    timestamp: new Date().getTime(),
-                                    message: "restarting",
-                                }, {
-                                    level: "info",
-                                    bridge: "hub",
-                                    display: "hub",
-                                    timestamp: new Date().getTime(),
-                                    message: ".",
-                                });
-
-                                this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-
-                                setInterval(() => {
-                                    if (this.messages[this.messages.length - 1].message === ".................................") {
-                                        this.messages[this.messages.length - 1].message = ".";
-                                    } else {
-                                        this.messages[this.messages.length - 1].message += ".";
-                                    }
-                                }, 500);
-
-                                this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-                            }
-                        }
-                    });
+                    this.messages = [];
 
                     await this.$hoobs.restore.file(this.filename);
 
@@ -132,47 +136,10 @@
             async upload() {
                 if (this.$refs.backup && this.$refs.backup.files[0]) {
                     this.$emit("restore");
+
                     this.logging = true;
                     this.loading = true;
-
-                    this.$store.subscribe(async (mutation) => {
-                        if (mutation.type === "IO:LOG" && this.logging) {
-                            if (!mutation.payload.bridge || mutation.payload.bridge === "hub" || mutation.payload.bridge === "") {
-                                this.messages.push(mutation.payload);
-                                this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-                            }
-
-                            if ((mutation.payload.message || "").toLowerCase().indexOf("service restart") >= 0) {
-                                this.logging = false;
-
-                                this.messages.push({
-                                    level: "info",
-                                    bridge: "hub",
-                                    display: "hub",
-                                    timestamp: new Date().getTime(),
-                                    message: "restarting",
-                                }, {
-                                    level: "info",
-                                    bridge: "hub",
-                                    display: "hub",
-                                    timestamp: new Date().getTime(),
-                                    message: ".",
-                                });
-
-                                this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-
-                                setInterval(() => {
-                                    if (this.messages[this.messages.length - 1].message === ".................................") {
-                                        this.messages[this.messages.length - 1].message = ".";
-                                    } else {
-                                        this.messages[this.messages.length - 1].message += ".";
-                                    }
-
-                                    this.messages = this.messages.slice(Math.max(this.messages.length - 25, 0));
-                                }, 500);
-                            }
-                        }
-                    });
+                    this.messages = [];
 
                     await this.$hoobs.restore.upload(this.$refs.backup.files[0]);
 

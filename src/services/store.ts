@@ -18,7 +18,7 @@
 
 import Vue from "vue";
 import Vuex from "vuex";
-import Persistence from "vuex-persist";
+import Persistence from "../plugins/persist";
 import { units, timespan } from "./formatters";
 import { cloneJson } from "./json";
 
@@ -93,9 +93,7 @@ export default new Vuex.Store({
             }
         },
 
-        "IO:DEVICE:SET": (state: { [key: string]: any }, payload: any) => {
-            state.current = payload;
-        },
+        "IO:DEVICE:SET": (state: { [key: string]: any }, payload: any) => { state.current = payload; },
 
         "IO:DEVICE:CLEAR": (state: { [key: string]: any }) => {
             state.current = null;
@@ -147,17 +145,9 @@ export default new Vuex.Store({
             state.heap = payload.data.heap;
         },
 
-        "IO:SNAPSHOT:UPDATE": (state: { [key: string]: any }, payload: any) => {
-            state.snapshots[payload.id] = payload.data;
-        },
-
-        "IO:ACCESSORY:CHANGE": (state: { [key: string]: any }, payload: any) => {
-            state.accessory = payload.data;
-        },
-
-        "IO:ROOM:CHANGE": (state: { [key: string]: any }, payload: any) => {
-            state.room = payload.data;
-        },
+        "IO:SNAPSHOT:UPDATE": (state: { [key: string]: any }, payload: any) => { state.snapshots[payload.id] = payload.data; },
+        "IO:ACCESSORY:CHANGE": (state: { [key: string]: any }, payload: any) => { state.accessory = payload.data; },
+        "IO:ROOM:CHANGE": (state: { [key: string]: any }, payload: any) => { state.room = payload.data; },
 
         "SESSION:SET": (state: { [key: string]: any }, token: string) => {
             state.session = token;
@@ -201,17 +191,8 @@ export default new Vuex.Store({
             state.log = state.log.slice(1).slice(-5000);
         },
 
-        "NAVIGATION:STATE": (state: { [key: string]: any }, value: boolean) => {
-            state.navigation = value;
-        },
-
-        "AUTH:STATE": (state: { [key: string]: any }, value: string) => {
-            if (value === "enabled") {
-                state.auth = true;
-            } else {
-                state.auth = false;
-            }
-        },
+        "NAVIGATION:STATE": (state: { [key: string]: any }, value: boolean) => { state.navigation = value; },
+        "AUTH:STATE": (state: { [key: string]: any }, value: string) => { state.auth = value === "enabled"; },
 
         "VERSION:STATE": (state: { [key: string]: any }, payload: any) => {
             state.version = {
@@ -222,50 +203,14 @@ export default new Vuex.Store({
             };
         },
 
-        "MDNS:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.mdns = payload;
-        },
-
-        "BROADCAST:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.broadcast = payload;
-        },
-
-        "PRODUCT:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.product = payload;
-        },
-
-        "TERMINAL:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.terminal = payload;
-        },
-
-        "PLATFORM:STATE": (state: { [key: string]: any }, payload: any) => {
-            state.platform = payload;
-        },
-
-        "THEME:SET": (state: { [key: string]: any }, theme: number) => {
-            state.theme = theme;
-        },
-
-        "ACCESSORY:STREAMING": (state: { [key: string]: any }, payload: any) => {
-            state.streaming[payload.id] = payload.data;
-        },
+        "MDNS:STATE": (state: { [key: string]: any }, payload: any) => { state.mdns = payload; },
+        "BROADCAST:STATE": (state: { [key: string]: any }, payload: any) => { state.broadcast = payload; },
+        "PRODUCT:STATE": (state: { [key: string]: any }, payload: any) => { state.product = payload; },
+        "TERMINAL:STATE": (state: { [key: string]: any }, payload: any) => { state.terminal = payload; },
+        "PLATFORM:STATE": (state: { [key: string]: any }, payload: any) => { state.platform = payload; },
+        "THEME:SET": (state: { [key: string]: any }, theme: number) => { state.theme = theme; },
+        "ACCESSORY:STREAMING": (state: { [key: string]: any }, payload: any) => { state.streaming[payload.id] = payload.data; },
     },
 
-    plugins: [new Persistence({
-        key: "hoobs:state",
-        storage: window.localStorage,
-        reducer: (state: { [key: string]: any }) => ({
-            current: state.current,
-            devices: state.devices,
-            bridges: state.bridges,
-            cpu: state.cpu,
-            memory: state.memory,
-            temp: state.temp,
-            session: state.session,
-            user: state.user,
-            snapshots: state.snapshots,
-            streaming: state.streaming,
-            navigation: state.navigation,
-        }),
-    }).plugin],
+    plugins: [Persistence("bridges", "cpu", "memory", "temp", "session", "user", "notifications", "snapshots", "streaming", "navigation")],
 });

@@ -17,7 +17,7 @@
  -------------------------------------------------------------------------------------------------->
 
 <template>
-    <div v-if="!loading" id="widget">
+    <div id="widget">
         <div ref="device" class="device">
             <component v-if="available" :is="control(accessory)" :accessory="accessory" :disabled="!locked" />
             <unavailable-accessory v-else :item="item" :disabled="!locked" />
@@ -39,7 +39,6 @@
         data() {
             return {
                 retries: 10,
-                loading: true,
                 accessory: null,
                 available: false,
             };
@@ -56,13 +55,11 @@
 
                     if (this.accessory.accessory_identifier) {
                         this.available = true;
-                        this.loading = false;
                     } else if (this.retries > 0) {
                         this.retries -= 1;
+                        this.available = false;
 
                         setTimeout(() => this.load(), LOAD_RETRY_DELAY);
-                    } else {
-                        this.loading = false;
                     }
                 });
             },

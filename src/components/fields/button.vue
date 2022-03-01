@@ -60,12 +60,6 @@
             },
 
             open() {
-                if (!this.running) {
-                    this.$alert(this.$t("bridge_wait"));
-
-                    return;
-                }
-
                 const url = `${this.$hoobs.config.host.get("ui")}/plugin/${encodeURIComponent(this.identifier)}/`;
                 const domain = (this.$hoobs.config.host.get().split("/")[2]).split(":");
 

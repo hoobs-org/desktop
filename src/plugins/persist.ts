@@ -23,12 +23,14 @@ export default function Persistence(...modules: string[]): any {
             if (modules.indexOf(module) !== -1) restore(module, store);
         };
 
-        modules.forEach((module) => restore(module, store));
+        for (let i = 0; i < modules.length; i += 1) {
+            restore(modules[i], store);
+        }
 
         store.subscribe((_mutation: any, state: { [key: string]: any }) => {
-            modules.forEach((module: string) => {
-                if (module in state && state[module]) window.localStorage.setItem(`hoobs:gui:${module}`, JSON.stringify(state[module]));
-            });
+            for (let i = 0; i < modules.length; i += 1) {
+                if (modules[i] in state && state[modules[i]] !== undefined) window.localStorage.setItem(`hoobs:gui:${module}`, JSON.stringify(state[modules[i]]));
+            }
         });
     };
 }

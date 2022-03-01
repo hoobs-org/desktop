@@ -162,13 +162,15 @@
         },
 
         created() {
-            this.$store.subscribe(async (mutation) => {
-                if (mutation.type === "IO:ACCESSORY:CHANGE" && mutation.payload.data.accessory.room === this.id) {
-                    this.subject = mutation.payload.data.accessory;
+            this.$action.on("io", "accessory_change", (payload) => {
+                if (payload.data.accessory.room === this.id) {
+                    this.subject = payload.data.accessory;
                     this.updater();
                 }
+            });
 
-                if (mutation.type === "IO:ROOM:CHANGE" && mutation.payload.data.action === "control" && mutation.payload.data.service === "off") {
+            this.$action.on("io", "room_change", (payload) => {
+                if (payload.data.action === "control" && payload.data.service === "off") {
                     setTimeout(async () => {
                         this.on = false;
                         this.accessories = this.room.accessories || [];

@@ -218,9 +218,9 @@
         },
 
         created() {
-            this.$store.subscribe(async (mutation) => {
-                if (mutation.type === "IO:ACCESSORY:CHANGE" && mutation.payload.data.accessory.accessory_identifier === this.subject.accessory_identifier) {
-                    this.subject = mutation.payload.data.accessory;
+            this.$action.on("io", "accessory_change", (payload) => {
+                if (payload.data.accessory.accessory_identifier === this.subject.accessory_identifier) {
+                    this.subject = payload.data.accessory;
                     this.updater();
                 }
             });

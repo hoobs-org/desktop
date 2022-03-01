@@ -211,9 +211,7 @@
         },
 
         created() {
-            this.$store.subscribe((mutation) => {
-                if (mutation.type === "THEME:SET") this.load(this.id);
-            });
+            this.$action.on("personalize", "update", () => this.load(this.id));
         },
 
         async mounted() {

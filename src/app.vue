@@ -64,6 +64,8 @@
 
         async created() {
             this.$theme.load();
+            this.$action.emit("personalize", "update");
+
             this.maximized = this.$electron.maximized;
 
             window.addEventListener("resize", () => this.$action.emit("window", "resize"), true);

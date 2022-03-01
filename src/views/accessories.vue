@@ -174,11 +174,11 @@
         },
 
         created() {
-            this.$store.subscribe(async (mutation) => {
-                if (mutation.type === "IO:ROOM:CHANGE" && this.id !== "add" && this.id !== "edit") {
-                    if (mutation.payload.data.action === "update" && mutation.payload.data.field === "sequence" && this.locked.rooms) this.loadRooms();
-                    if (mutation.payload.data.action === "update" && mutation.payload.data.field !== "sequence") this.load(this.id);
-                    if (mutation.payload.data.action === "add" || mutation.payload.data.action === "remove") this.rooms = await this.$hoobs.rooms.list();
+            this.$action.on("io", "room_change", async (payload) => {
+                if (this.id !== "add" && this.id !== "edit") {
+                    if (payload.data.action === "update" && payload.data.field === "sequence" && this.locked.rooms) this.loadRooms();
+                    if (payload.data.action === "update" && payload.data.field !== "sequence") this.load(this.id);
+                    if (payload.data.action === "add" || payload.data.action === "remove") this.rooms = await this.$hoobs.rooms.list();
                 }
             });
         },

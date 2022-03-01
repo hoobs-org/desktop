@@ -71,8 +71,6 @@ export default new Vuex.Store({
         product: "",
         terminal: false,
         platform: null,
-        accessory: null,
-        room: null,
         theme: null,
     },
 
@@ -124,30 +122,39 @@ export default new Vuex.Store({
 
             state.bridges = bridges;
             state.temp = (payload.data.temp.main || -1) > -1 ? payload.data.temp.main : null;
+            state.heap = payload.data.heap;
 
-            state.cpu.used = 100 - Math.round(payload.data.cpu.currentLoadIdle || 100);
-            state.cpu.available = Math.round(payload.data.cpu.currentLoadIdle || 100);
+            const cpu = {
+                used: 100 - Math.round(payload.data.cpu.currentLoadIdle || 100),
+                available: Math.round(payload.data.cpu.currentLoadIdle || 100),
+                history: state.cpu.history,
+            };
 
-            state.memory.load = Math.round((payload.data.memory.total || 0) > 0 ? ((payload.data.memory.active || 0) * 100) / (payload.data.memory.total || 0) : 0);
-            state.memory.total = units(payload.data.memory.total || 0);
-            state.memory.used = units(payload.data.memory.active || 0);
-
-            for (let i = 0; i < state.cpu.history.length - 1; i += 1) {
-                state.cpu.history[i] = state.cpu.history[i + 1];
-                state.cpu.history[i][0] = i;
-
-                state.memory.history[i] = state.memory.history[i + 1];
-                state.memory.history[i][0] = `${i}`;
+            for (let i = 0; i < 19; i += 1) {
+                cpu.history[i] = cpu.history[i + 1];
+                cpu.history[i][0] = i;
             }
 
-            state.cpu.history[state.cpu.history.length - 1] = [state.cpu.history.length - 1, state.cpu.used];
-            state.memory.history[state.memory.history.length - 1] = [state.memory.history.length - 1, state.memory.load];
-            state.heap = payload.data.heap;
+            cpu.history[19] = [19, cpu.used];
+            state.cpu = cpu;
+
+            const memory = {
+                load: Math.round((payload.data.memory.total || 0) > 0 ? ((payload.data.memory.active || 0) * 100) / (payload.data.memory.total || 0) : 0),
+                total: units(payload.data.memory.total || 0),
+                used: units(payload.data.memory.active || 0),
+                history: state.memory.history,
+            };
+
+            for (let i = 0; i < 19; i += 1) {
+                memory.history[i] = memory.history[i + 1];
+                memory.history[i][0] = `${i}`;
+            }
+
+            memory.history[19] = [19, memory.load];
+            state.memory = memory;
         },
 
         "IO:SNAPSHOT:UPDATE": (state: { [key: string]: any }, payload: any) => { state.snapshots[payload.id] = payload.data; },
-        "IO:ACCESSORY:CHANGE": (state: { [key: string]: any }, payload: any) => { state.accessory = payload.data; },
-        "IO:ROOM:CHANGE": (state: { [key: string]: any }, payload: any) => { state.room = payload.data; },
 
         "SESSION:SET": (state: { [key: string]: any }, token: string) => {
             state.session = token;

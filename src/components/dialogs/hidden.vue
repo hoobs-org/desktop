@@ -45,9 +45,7 @@
         },
 
         created() {
-            this.$store.subscribe(async (mutation) => {
-                if (mutation.type === "IO:ACCESSORY:CHANGE") this.load();
-            });
+            this.$action.on("io", "accessory_change", () => this.load());
         },
 
         async mounted() {

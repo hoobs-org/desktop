@@ -64,9 +64,6 @@ actions.on("io", "notification", (payload) => {
     if (payload.data) electron.helpers.notify(payload.data.title, payload.data.description);
 });
 
-actions.on("io", "accessory_change", (data) => store.commit("IO:ACCESSORY:CHANGE", data));
-actions.on("io", "room_change", (data) => store.commit("IO:ROOM:CHANGE", data));
-
 actions.on("log", "history", () => hoobs.sdk.log().then((messages) => store.commit("LOG:HISTORY", messages)));
 actions.on("window", "open", (url) => shell.openExternal(url));
 

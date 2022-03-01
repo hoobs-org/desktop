@@ -3,7 +3,7 @@ import { Store, Module, ModuleOptions } from "vuex";
 export default function Persistence(...modules: string[]): any {
     const restore = (module: string, store: any) => {
         const state = JSON.parse(JSON.stringify(store.state));
-        const value = window.localStorage.getItem(`hoobs:gui:${module}`);
+        const value = window.localStorage.getItem(`hoobs:desktop:${module}`);
         const stored = value ? JSON.parse(value) : undefined;
 
         if (stored) {
@@ -31,7 +31,7 @@ export default function Persistence(...modules: string[]): any {
             for (let i = 0; i < modules.length; i += 1) {
                 const module: string = modules[i];
 
-                if (module in state && state[module] !== undefined) window.localStorage.setItem(`hoobs:gui:${module}`, JSON.stringify(state[module]));
+                if (module in state && state[module] !== undefined) window.localStorage.setItem(`hoobs:desktop:${module}`, JSON.stringify(state[module]));
             }
         });
     };

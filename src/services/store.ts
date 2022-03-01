@@ -219,5 +219,5 @@ export default new Vuex.Store({
         "ACCESSORY:STREAMING": (state: { [key: string]: any }, payload: any) => { state.streaming[payload.id] = payload.data; },
     },
 
-    plugins: [Persistence("bridges", "cpu", "memory", "temp", "session", "user", "notifications", "snapshots", "streaming", "navigation")],
+    plugins: [Persistence("current", "devices", "bridges", "cpu", "memory", "temp", "session", "user", "notifications", "snapshots", "streaming", "navigation")],
 });

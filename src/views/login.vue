@@ -56,7 +56,7 @@
                         <div class="marque" :style="`width: ${skip}%`"></div>
                         <div class="marker" :style="`width: ${progress}%`"></div>
                     </div>
-                    <div class="scanner-message">{{ !marque ? `${progress}% ` : "" }}{{ message }}</div>
+                    <div class="scanner-message">{{ !marque ? `${progress}% ` : "" }}{{ message }} {{ active }}</div>
                 </div>
             </div>
             <div v-else-if="!loading && manual" class="devices">

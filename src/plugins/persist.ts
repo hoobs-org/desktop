@@ -29,7 +29,9 @@ export default function Persistence(...modules: string[]): any {
 
         store.subscribe((_mutation: any, state: { [key: string]: any }) => {
             for (let i = 0; i < modules.length; i += 1) {
-                if (modules[i] in state && state[modules[i]] !== undefined) window.localStorage.setItem(`hoobs:gui:${module}`, JSON.stringify(state[modules[i]]));
+                const module: string = modules[i];
+
+                if (module in state && state[module] !== undefined) window.localStorage.setItem(`hoobs:gui:${module}`, JSON.stringify(state[module]));
             }
         });
     };

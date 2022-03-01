@@ -82,6 +82,7 @@ class Scanner extends EventEmitter {
 
             const subnets = this.subnets();
             const scanners: Promise<void>[] = [];
+            const targets: Promise<void>[] = [];
             const canidates: Canidate[] = [];
             const active = [...devices];
 
@@ -129,21 +130,25 @@ class Scanner extends EventEmitter {
                 for (let i = 0; i < canidates.length; i += 1) {
                     if (this.stopped) break;
 
-                    this.detect(canidates[i].ip, canidates[i].port).then((data) => {
-                        this.emit("ip", canidates[i].ip);
+                    targets.push(new Promise((resolve) => {
+                        this.detect(canidates[i].ip, canidates[i].port).then((data) => {
+                            this.emit("ip", canidates[i].ip);
 
-                        if (data) this.emit("device", data);
+                            if (data) this.emit("device", data);
 
-                        this.count += 1;
-                        this.emit("progress", Math.round((this.count * 100) / this.total));
-                    });
+                            this.count += 1;
+                            this.emit("progress", Math.round((this.count * 100) / this.total));
+                        }).finally(() => resolve());
+                    }));
                 }
 
-                this.stopped = true;
+                Promise.allSettled(targets).then(() => {
+                    this.stopped = true;
 
-                this.emit("ip", "");
-                this.emit("message", "Scan Complete");
-                this.emit("stop");
+                    this.emit("ip", "");
+                    this.emit("message", "Scan Complete");
+                    this.emit("stop");
+                });
             });
         }
     }

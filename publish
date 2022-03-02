@@ -38,9 +38,9 @@ function execLocal(command, options) {
 
 function createRelease(title, notes, beta) {
     if (beta) {
-        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*`)} -p -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*.*`)} -p -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
     } else {
-        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*`)} -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*.*`)} -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
     }
 }
 

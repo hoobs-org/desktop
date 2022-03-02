@@ -38,9 +38,9 @@ function execLocal(command, options) {
 
 function createRelease(title, notes, beta) {
     if (beta) {
-        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}.*`)} -p -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*`)} -p -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
     } else {
-        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}.*`)} -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
+        execLocal(`gh release create v${pjson.version} ${join(__dirname, "builds", `hoobs-desktop-v${pjson.version}-*`)} -t '${title} ${pjson.version}' -n '${notes}'`, { cwd: __dirname, stdio: "inherit" });
     }
 }
 
@@ -80,8 +80,8 @@ Program.command("edge")
             version: pjson.version,
             published: new Date(),
             latest: true,
-            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.exe`,
-            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
+            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}-win.exe`,
+            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}-darwin.dmg`,
             beta: true,
         });
 
@@ -108,8 +108,8 @@ Program.command("stable")
             version: pjson.version,
             published: new Date(),
             latest: true,
-            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.exe`,
-            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}.dmg`,
+            download_win: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}-win.exe`,
+            download_mac: `https://github.com/hoobs-org/desktop/releases/download/v${pjson.version}/hoobs-desktop-v${pjson.version}-darwin.dmg`,
             beta: false,
         });
 

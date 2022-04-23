@@ -257,17 +257,23 @@
                     values: all ? [...this.available, ...this.installed] : this.available,
                     select: (data) => {
                         const waits = [];
+
                         let success = false;
+                        let bridge;
 
                         if (typeof data === "string") {
                             waits.push(new Promise((resolve) => {
-                                this.$hoobs.bridge(data).then((bridge) => {
+                                this.$hoobs.bridge(data).then((response) => {
+                                    bridge = response;
+                                }).finally(() => {
                                     if (bridge) {
                                         bridge.plugins.install(`${this.identifier}@${tag || "latest"}`).then((result) => {
                                             success = result;
-                                        });
+                                        }).finally(() => resolve());
+                                    } else {
+                                        resolve();
                                     }
-                                }).finally(() => resolve());
+                                });
                             }));
                         } else {
                             waits.push(new Promise((resolve) => {

@@ -108,7 +108,8 @@
         created() {
             this.$action.on("io", "log", (data) => {
                 if (!data.bridge || data.bridge === "hub" || data.bridge === "") {
-                    this.messages.push(data);
+                    if (this.messages.length === 0 || this.messages[this.messages.length - 1].message !== data.message) this.messages.push(data);
+
                     this.messages = this.messages.slice(Math.max(this.messages.length - 23, 0));
                 }
             });

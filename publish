@@ -70,7 +70,7 @@ Program.command("edge")
         const database = client.db("support");
         const releases = database.collection("releases");
 
-        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Big fixes", true);
+        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Bug fixes", true);
 
         await releases.updateMany({ application: "desktop", latest: true, beta: true }, { $set: { latest: false } });
         await releases.deleteMany({ application: "desktop", version: pjson.version, beta: true });
@@ -98,7 +98,7 @@ Program.command("stable")
         const database = client.db("support");
         const releases = database.collection("releases");
 
-        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Big fixes", false);
+        createRelease("HOOBS Desktop", "HOOBS Desktop Application.\n\n* Bug fixes", false);
 
         await releases.updateMany({ application: "desktop", latest: true, beta: false }, { $set: { latest: false } });
         await releases.deleteMany({ application: "desktop", version: pjson.version, beta: false });
